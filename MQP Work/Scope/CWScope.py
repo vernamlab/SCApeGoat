@@ -24,14 +24,19 @@ class CWScope:
         self.scope.offset = offset
         self.scope.basic_mode = trigger
 
-    def capture_traces(self, key, num_traces, pt, pt_rand=True):
+    def capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
         plaintexts = []
+        keys = []
         power_traces = []
 
+        # configure plaintext, key generation
+        ktp = cw.ktp.Basic()
+        ktp.fixed_key = fixed_key
+        ktp.fixed_pt = fixed_pt
+
         for i in range(num_traces):
-            # generate random plaintext if desired
-            if pt_rand:
-                pt = bytearray(''.join(random.choices(string.ascii_uppercase + string.digits, k=16)), 'ascii')
+
+            key, pt = ktp.next()
 
             # capture trace
             trace = cw.capture_trace(self.scope, self.target, pt, key)
@@ -39,9 +44,7 @@ class CWScope:
             # append arrays if trace successfully captured
             if trace:
                 plaintexts.append(pt)
+                keys.append(key)
                 power_traces.append(trace)
 
-        return plaintexts, power_traces
-
-    def capture_traces_segmented(self):
-        return None
+        return keys, plaintexts, power_traces
