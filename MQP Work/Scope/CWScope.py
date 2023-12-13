@@ -1,5 +1,5 @@
 import os
-
+import numpy as np
 import chipwhisperer as cw
 
 
@@ -22,9 +22,8 @@ class CWScope:
         cw.program_target(self.scope, cw.programmers.STM32FProgrammer, os.path.realpath(__file__) + compiled_algorithm_path)
 
     def capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
-        plaintexts = []
-        keys = []
-        power_traces = []
+        # init return values
+        power_traces = np.empty(num_traces)
 
         # configure plaintext, key generation
         ktp = cw.ktp.Basic()
@@ -32,7 +31,6 @@ class CWScope:
         ktp.fixed_pt = fixed_pt
 
         for i in range(num_traces):
-
             # get key, text pair, if fixed they will remain the same
             key, pt = ktp.next()
 
@@ -41,8 +39,6 @@ class CWScope:
 
             # append arrays if trace successfully captured
             if trace:
-                plaintexts.append(pt)
-                keys.append(key)
-                power_traces.append(trace)
+                power_traces[i] = trace
 
-        return keys, plaintexts, power_traces
+        return power_traces
