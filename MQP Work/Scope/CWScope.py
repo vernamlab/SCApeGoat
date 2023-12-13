@@ -1,13 +1,11 @@
 import os
-import random
-import string
 
 import chipwhisperer as cw
 
 
 class CWScope:
 
-    def __init__(self, hexfile_path):
+    def __init__(self, compiled_algorithm_path, gain=25, num_samples=5000, offset=0):
         # setup scope
         self.scope = cw.scope()
         self.scope.default_setup()
@@ -15,14 +13,13 @@ class CWScope:
         # configure target
         self.target = cw.target(self.scope)
 
-        # upload encryption algorithm firmware to the board
-        cw.program_target(self.scope, cw.programmers.STM32FProgrammer, os.path.realpath(__file__) + hexfile_path)
-
-    def configure_scope(self, gain=25, num_samples=5000, offset=0, trigger="rising_edge"):
+        # configure scope parameters
         self.scope.gain.db = gain
         self.scope.adc.samples = num_samples
         self.scope.offset = offset
-        self.scope.basic_mode = trigger
+
+        # upload encryption algorithm firmware to the board
+        cw.program_target(self.scope, cw.programmers.STM32FProgrammer, os.path.realpath(__file__) + compiled_algorithm_path)
 
     def capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
         plaintexts = []
@@ -36,6 +33,7 @@ class CWScope:
 
         for i in range(num_traces):
 
+            # get key, text pair, if fixed they will remain the same
             key, pt = ktp.next()
 
             # capture trace
