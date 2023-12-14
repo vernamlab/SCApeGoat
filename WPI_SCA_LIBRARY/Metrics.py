@@ -10,21 +10,17 @@ import math
 def signal_to_noise_ratio(labels):
     # statistical mean and variances of each set
     set_means = []
-    set_variances = []
+    signal_traces = []
+    l_n = []
 
     for trace_set in labels.values():
-        set_means.append(np.mean(trace_set, axis=0))  # take the mean along the column
-        set_variances.append(np.var(trace_set, axis=0))  # take the variance along the column
+        set_means.append(np.mean(trace_set, axis=0))  # take the mean along the column #good
+        for trace in trace_set:
+            l_n.append(trace - set_means[-1])
+        signal_traces.append(set_means[-1])
 
-    # calculate overall mean and variance
-    overall_mean = np.mean(set_means, axis=0)
-    overall_variance = np.var(set_variances, axis=0)
-
-    # perform SNR calculation
-    l_d = np.zeros(len(set_means[0]))
-    for mean in set_means:
-        l_d = np.add(l_d, np.square(np.subtract(mean, overall_mean)))
-    l_n = overall_variance
+    l_n = np.var(l_n, axis=0)
+    l_d = np.var(signal_traces, axis=0)
 
     snr = np.divide(l_d, l_n)
 
