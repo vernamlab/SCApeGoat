@@ -1,11 +1,14 @@
+import sys
+
 import chipwhisperer as cw
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 
 class CWScope:
 
-    def __init__(self, firmware_path, gain=25, num_samples=5000, offset=0):
+    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0):
         # setup scope
         self.scope = cw.scope()
         self.scope.default_setup()
@@ -19,9 +22,9 @@ class CWScope:
         self.scope.offset = offset
 
         # upload encryption algorithm firmware to the board
-        cw.program_target(self.scope, cw.programmers.STM32FProgrammer, firmware_path)
+        cw.program_target(self.scope, cw.programmers.STM32FProgrammer, str(os.path.abspath(firmware_name)))
 
-    def capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
+    def standard_capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
         # init return values
         power_traces = []
 
@@ -42,9 +45,3 @@ class CWScope:
                 power_traces.append(trace)
 
         return power_traces
-
-
-scope = CWScope("/JupyterNotebooks/Scope/firmware/simpleserial-aes-CWLITEARM.hex")
-traces = scope.capture_traces(10)
-plt.plot(traces[0].wave)
-plt.show()
