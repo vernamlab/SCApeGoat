@@ -110,15 +110,19 @@ class ExperimentClass:
         traces = tracesClass.readData(range(size))
         labels = labelsClass.readData(range(size))
 
+        # find unique labels
         labelsUnique = np.unique(labels)
+
         # initialize the dictionary
         sortedLabels = {}
         for i in labelsUnique:
             sortedLabels[i] = []
 
+        # add traces to labels
         for index, label in enumerate(labels):
             sortedLabels[label[0]].append(traces[index])
-        return sortedLabels, labelsUnique
+
+        return sortedLabels
 
     def addMetadata(self, metadataName, metadataContents):
         self.metadata[metadataName] = metadataContents
