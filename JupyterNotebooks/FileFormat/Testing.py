@@ -1,5 +1,4 @@
-from testTime import HDF5FileClass
-import testTime
+from WPI_SCA_LIBRARY.FileFormat import HDF5FileClass
 import h5py
 import time
 '''

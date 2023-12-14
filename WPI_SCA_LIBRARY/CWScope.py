@@ -3,6 +3,7 @@ import sys
 import chipwhisperer as cw
 import matplotlib.pyplot as plt
 import numpy as np
+from WPI_SCA_LIBRARY.FileFormat import *
 import os
 
 
@@ -49,3 +50,28 @@ class CWScope:
                 power_traces.append(trace)
 
         return power_traces
+
+    def cw_to_hdf5(self, file_name, experiment_name, num_traces, fixed_key=False, fixed_pt=False):
+
+        # capture traces
+        traces = self.standard_capture_traces(num_traces, fixed_key, fixed_pt)
+
+        # configure hdf5 file class
+        fileClass = HDF5FileClass(file_name)
+        fileClass.addExperiment(experiment_name)
+        experiment = fileClass.experiments[experiment_name]
+
+        # add plaintext, trace, and label dataset to file
+        experiment.addDataset("plaintext", (num_traces, 16), definition="Plaintext Input To the Algorithm", dtype='uint8')
+        plaintextDataset = experiment.dataset["plaintext"]
+
+        experiment.addDataset("key", (num_traces, 16), definition="Key To the Algorithm", dtype='uint8')
+        keyDataset = experiment.dataset["key"]
+
+        experiment.addDataset("traces", (num_traces, self.scope.adc.samples), definition="Traces", dtype='float64')
+        tracesDataset = experiment.dataset["traces"]
+
+        for i in range(len(traces)):
+            plaintextDataset.addData(i, traces[i].textin)
+            tracesDataset.addData(i, traces[i].wave)
+            keyDataset.addData(i, traces[i].key)
