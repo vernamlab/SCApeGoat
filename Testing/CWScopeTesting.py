@@ -15,7 +15,6 @@ class CWScopeTesting:
         plt.xlabel("Sample")
         plt.ylabel("Power")
         plt.show()
-        self.cw_scope.disconnect()
 
     def standard_trace_collection_timing(self, num_traces):
         start_time = time.time()

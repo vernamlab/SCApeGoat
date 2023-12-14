@@ -65,8 +65,8 @@ class CWScope:
         experiment.addDataset("plaintext", (num_traces, 16), definition="Plaintext Input To the Algorithm", dtype='uint8')
         plaintextDataset = experiment.dataset["plaintext"]
 
-        experiment.addDataset("key", (num_traces, 16), definition="Key To the Algorithm", dtype='uint8')
-        keyDataset = experiment.dataset["key"]
+        experiment.addDataset("keys", (num_traces, 16), definition="Key To the Algorithm", dtype='uint8')
+        keyDataset = experiment.dataset["keys"]
 
         experiment.addDataset("traces", (num_traces, self.scope.adc.samples), definition="Traces", dtype='float64')
         tracesDataset = experiment.dataset["traces"]
