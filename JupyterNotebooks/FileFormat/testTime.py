@@ -106,10 +106,56 @@ class ExperimentClass:
                 self.addDataset(datasetID, 0, 0, definition=self.groupPath.attrs[f'{datasetID}_dataset_description'], existing=1, datasetPathIn = self.groupPath[datasetID])
 
 
+    def prepareSnrWithLabels(self, tracesName, labelsName, size):
+        tracesClass = self.dataset[tracesName]
+        labelsClass = self.dataset[labelsName]
+        traces = tracesClass.readData(range(size))
+        labels = labelsClass.readData(range(size))
+
+        labelsUnique = np.unique(labels)
+        # initialize the dictionary
+        sortedLabels = {}
+        for i in labelsUnique:
+            sortedLabels[i] = []
+
+        for index, label in enumerate(labels):
+            sortedLabels[label[0]].append(traces[index])
+        return sortedLabels, labelsUnique
 
     def addMetadata(self, metadataName, metadataContents):
         self.metadata[metadataName] = metadataContents
         self.groupPath.attrs[metadataName] = metadataContents
+
+    def readAll(self, index):
+        keys = {}
+        values = []
+        keyIndex = 0
+        for key in self.dataset.keys():
+            keys[key] = keyIndex
+            values.append(self.dataset[key].readData(index))
+            keyIndex = keyIndex + 1
+        return keys, values
+
+    def getDatasetNames(self):
+        return self.dataset.keys()
+
+    def getSpecifiedDatasets(self, datasets, index):
+        keys = {}
+        values = []
+        keyIndex = 0
+        for key in datasets:
+            keys[key] = keyIndex
+            values.append(self.dataset[key].readData(index))
+            keyIndex = keyIndex + 1
+        return keys, values
+
+    def getDatasetDefinitions(self):
+        definitionReturn = {}
+        for key in self.dataset.keys():
+            definition = self.metadata[f'{key}_dataset_description']
+            definitionReturn[key] = definition
+        return definitionReturn
+
     def addDataset(self, datasetName, datasetSize, chunksIn = (400,110000), definition = "", dtype = 'f', existing = 0, datasetPathIn= 0):
         self.dataset[datasetName] = DatasetClass(datasetName, self.groupPath, datasetSize, chunksIn, definition, dtype, existing = existing, datasetPathIn = datasetPathIn)
         if existing == 0:

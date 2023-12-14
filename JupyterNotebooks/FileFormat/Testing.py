@@ -1,6 +1,7 @@
 from testTime import HDF5FileClass
 import testTime
 import h5py
+import time
 '''
 with h5py.File('ATMega8515_raw_traces.h5', 'r') as f:
     print("Keys: %s" % f.keys())
@@ -39,10 +40,34 @@ with h5py.File('ATMega8515_raw_traces.h5', 'r') as f:
 
 
 '''
+
+
 with h5py.File('test_output_55.hdf5', "a") as data_file:
     fileClass = HDF5FileClass('test_output_55.hdf5',fileInputType="existing", data_file=data_file)
     print(fileClass.experiments)
     expOne = fileClass.experiments['experimentOne']
     print(expOne.dataset)
     ciphertext = expOne.dataset['ciphertext']
-    print(ciphertext.readData(1))
+    print(expOne.getDatasetNames())
+    keys, values = expOne.readAll(1)
+    print(keys)
+    print(keys['ciphertext'])
+    print(values[keys['ciphertext']])
+    print(expOne.getDatasetDefinitions())
+
+    start = time.time()
+    keys, values = expOne.readAll(range(60000))
+    print(type(values[1]))
+    end = time.time()
+    print(end - start)
+
+'''
+with h5py.File('ATMega8515_raw_traces.h5', 'r') as f:
+    print("Keys: %s" % f.keys())
+    a_group_key = list(f.keys())[0]
+    b_group_key = list(f.keys())[1]
+    start = time.time()
+    ooga = f[b_group_key][0:60000]
+    end = time.time()
+    print(end - start)
+'''
