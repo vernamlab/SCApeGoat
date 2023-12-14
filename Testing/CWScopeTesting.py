@@ -15,6 +15,7 @@ class CWScopeTesting:
         plt.xlabel("Sample")
         plt.ylabel("Power")
         plt.show()
+        self.cw_scope.disconnect()
 
     def standard_trace_collection_timing(self, num_traces):
         start_time = time.time()
@@ -28,16 +29,3 @@ class CWScopeTesting:
                    self.standard_trace_collection_timing(1000), self.standard_trace_collection_timing(10000)]
         num_traces = [1, 10, 50, 100, 1000, 10000]
         return num_traces, timings
-
-
-# Script Goes Here
-
-scope = CWScopeTesting()
-
-num_t, times = scope.plot_collection_timings()
-print(times)
-plt.plot(num_t, times)
-plt.title("Time as a Function of Number of Traces")
-plt.xlabel("Number of Traces")
-plt.ylabel("Time in Seconds")
-plt.show()

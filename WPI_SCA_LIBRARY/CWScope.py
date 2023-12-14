@@ -24,6 +24,10 @@ class CWScope:
         # upload encryption algorithm firmware to the board
         cw.program_target(self.scope, cw.programmers.STM32FProgrammer, str(os.path.abspath(firmware_name)))
 
+    def disconnect(self):
+        self.scope.dis()
+        self.target.dis()
+
     def standard_capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
         # init return values
         power_traces = []
