@@ -114,6 +114,7 @@ def pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_sam
 # T-test with TVlA metric:  In general |t| > th where th = 4.5 means that the system leaks information about the
 # cryptographic key. - fixed:  Trace set recorded with a fixed plaintext - random: Trace set recorded with a random
 # set of plaintexts return: an array of t-statistics
+# TODO: Unsure if this works will probably need to fix this
 def t_test_tvla(fixed, random, num_traces):
     # calculate t-statistic for each trace
     t_stats = []
