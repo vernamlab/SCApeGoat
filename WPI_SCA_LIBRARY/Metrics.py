@@ -12,9 +12,9 @@ def signal_to_noise_ratio(labels):
     set_means = []
     set_variances = []
 
-    for label in labels:
-        set_means.append(np.mean(label, axis=0))  # take the mean along the column
-        set_variances.append(np.var(label, axis=0))  # take the variance along the column
+    for trace_set in labels.values():
+        set_means.append(np.mean(trace_set, axis=0))  # take the mean along the column
+        set_variances.append(np.var(trace_set, axis=0))  # take the variance along the column
 
     # calculate overall mean and variance
     overall_mean = np.mean(set_means, axis=0)
