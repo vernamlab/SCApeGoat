@@ -4,7 +4,6 @@ import h5py
 import numpy as np
 import trsfile
 
-
 sampleNumber = 509000
 
 ''''' with h5py.File(filename, "r") as f:
@@ -24,17 +23,17 @@ sampleNumber = 509000
 
 
 class HDF5FileClass:
-    def __init__(self,path,fileInputType = "undefined",data_file = 0):
+    def __init__(self, path, fileInputType="undefined", data_file=0):
         if fileInputType == "existing":
             self.path = path
 
             self.hdf5Object = data_file
             self.experiments = {}
             self.metadata = {}
-            #check for and add experiments
+            # check for and add experiments
             for key in list(data_file.keys()):
                 self.addExperiment(key, existing=1, groupPath=data_file[key])
-            #check for and add metadata
+            # check for and add metadata
         if fileInputType == "undefined":
             self.path = path
             self.hdf5Object = h5py.File(path, 'w')
@@ -42,69 +41,68 @@ class HDF5FileClass:
             self.metadata = {}
         elif fileInputType == "trs":
             with trsfile.open(path, 'r') as traces:
-                #create experiment and main file
-                path = path.replace(".trs",".hdf5",1)
+                # create experiment and main file
+                path = path.replace(".trs", ".hdf5", 1)
                 self.experiments = {}
                 self.metadata = {}
-                self.hdf5Object = h5py.File(path,'a', rdcc_nbytes = 2060000000)
+                self.hdf5Object = h5py.File(path, 'a', rdcc_nbytes=2060000000)
                 self.addExperiment("ExperimentOne", self.hdf5Object)
 
-                #add hdf5 metadata
+                # add hdf5 metadata
                 for header, value in traces.get_headers().items():
                     print(header, '=', value)
                     if isinstance(value, str) or isinstance(value, int):
-                        self.experiments["ExperimentOne"].addMetadata(header.name,value)
+                        self.experiments["ExperimentOne"].addMetadata(header.name, value)
                 print(self.experiments["ExperimentOne"].metadata)
 
-                #add dataset
+                # add dataset
                 experiment = self.experiments["ExperimentOne"]
-                experiment.addDataset("traces",experiment.groupPath)
+                experiment.addDataset("traces", experiment.groupPath)
                 tracesDataset = experiment.dataset["traces"]
 
                 start = time.perf_counter()
                 for i, trace in enumerate(traces[0:sampleNumber]):
                     tracesDataset.addData(i, trace[:])
-               # traceData = traces[1]
-               # traceData = traceData[:]
-               # for i in range(sampleNumber):
-               #     tracesDataset.addData(i,traceData)
+                # traceData = traces[1]
+                # traceData = traceData[:]
+                # for i in range(sampleNumber):
+                #     tracesDataset.addData(i,traceData)
                 print(time.perf_counter() - start)
 
         elif fileInputType == "WPI_lab":
             with h5py.File(path, "a") as data_file:
                 print("you tried")
 
-
-
             ''' self.path = path
             self.hdf5Object = h5py.File(path, 'w')
             self.experiments = {}
             self.metadata = {}'''
 
-
-    def addExperiment(self, experimentName, existing = 0, groupPath = 0):
+    def addExperiment(self, experimentName, existing=0, groupPath=0):
         self.experiments[experimentName] = ExperimentClass(experimentName, self.hdf5Object, existing, groupPath)
+
     def addMetadata(self, metadataName, metadataContents):
         self.metadata[metadataName] = metadataContents
         self.hdf5Object.attrs[metadataName] = metadataContents
 
+
 class ExperimentClass:
-    def __init__(self, experimentName, hdf5Object, existing = 0, groupPath = 0):
+    def __init__(self, experimentName, hdf5Object, existing=0, groupPath=0):
         self.hdf5Object = hdf5Object
         self.dataset = {}
         self.metadata = {}
         if existing == 0:
             self.groupPath = hdf5Object.create_group(experimentName)
         else:
-            #set group path
+            # set group path
             self.groupPath = groupPath
 
             for attIndex in list(self.groupPath.attrs.keys()):
                 self.metadata[attIndex] = self.groupPath.attrs[attIndex]
-            #create datasets from what is present
+            # create datasets from what is present
             for datasetID in list(self.groupPath.keys()):
-                self.addDataset(datasetID, 0, 0, definition=self.groupPath.attrs[f'{datasetID}_dataset_description'], existing=1, datasetPathIn = self.groupPath[datasetID])
-
+                self.addDataset(datasetID, 0, 0, definition=self.groupPath.attrs[f'{datasetID}_dataset_description'],
+                                existing=1, datasetPathIn=self.groupPath[datasetID])
 
     def prepareSnrWithLabels(self, tracesName, labelsName, size):
         tracesClass = self.dataset[tracesName]
@@ -156,16 +154,21 @@ class ExperimentClass:
             definitionReturn[key] = definition
         return definitionReturn
 
-    def addDataset(self, datasetName, datasetSize, chunksIn = (400,110000), definition = "", dtype = 'f', existing = 0, datasetPathIn= 0):
-        self.dataset[datasetName] = DatasetClass(datasetName, self.groupPath, datasetSize, chunksIn, definition, dtype, existing = existing, datasetPathIn = datasetPathIn)
+    def addDataset(self, datasetName, datasetSize, chunksIn=(400, 110000), definition="", dtype='f', existing=0,
+                   datasetPathIn=0):
+        self.dataset[datasetName] = DatasetClass(datasetName, self.groupPath, datasetSize, chunksIn, definition, dtype,
+                                                 existing=existing, datasetPathIn=datasetPathIn)
         if existing == 0:
             self.addMetadata(f'{datasetName}_dataset_description', definition)
 
+
 class DatasetClass:
-    def __init__(self,datasetName, groupObject, datasetSize, chunksIn = (100000,1730), definition = "", dtype = 'f', existing = 0, datasetPathIn = 0):
+    def __init__(self, datasetName, groupObject, datasetSize, chunksIn=(100000, 1730), definition="", dtype='f',
+                 existing=0, datasetPathIn=0):
         self.groupPath = groupObject
         if existing == 0:
-            self.datasetPath = groupObject.create_dataset(datasetName, datasetSize, maxshape=(None,None), chunks = chunksIn, dtype=dtype)
+            self.datasetPath = groupObject.create_dataset(datasetName, datasetSize, maxshape=(None, None),
+                                                          chunks=chunksIn, dtype=dtype)
         else:
             self.datasetPath = datasetPathIn
         self.metadata = {}
@@ -175,8 +178,8 @@ class DatasetClass:
         self.metadata[metadataName] = metadataContents
         self.datasetPath.attrs[metadataName] = metadataContents
 
-    def addData(self,index,dataToAdd):
+    def addData(self, index, dataToAdd):
         self.datasetPath[index] = dataToAdd
 
-    def readData(self,index):
+    def readData(self, index):
         return self.datasetPath[index]
