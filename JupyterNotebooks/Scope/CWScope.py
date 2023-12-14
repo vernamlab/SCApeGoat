@@ -44,7 +44,7 @@ class CWScope:
         return power_traces
 
 
-scope = CWScope("C:\\Users\\samka\\PycharmProjects\\SCLA_API_MQP\\MQP Work\\Scope\\firmware\\simpleserial-aes-CWLITEARM.hex")
+scope = CWScope("/JupyterNotebooks/Scope/firmware/simpleserial-aes-CWLITEARM.hex")
 traces = scope.capture_traces(10)
 plt.plot(traces[0].wave)
 plt.show()
