@@ -31,9 +31,12 @@ class HDF5FileClass:
             self.experiments = {}
             self.metadata = {}
             # check for and add experiments
+            for attIndex in list(self.hdf5Object.attrs.keys()):
+                self.metadata[attIndex] = self.hdf5Object.attrs[attIndex]
+
             for key in list(data_file.keys()):
-                self.addExperiment(key, existing=1, groupPath=data_file[key])
-            # check for and add metadata
+                self.addExperiment(key, existing=1, groupPath=data_file[key], definition=self.metadata[f'{key}_experiment_description'])
+
         if fileInputType == "undefined":
             self.path = path
             self.hdf5Object = h5py.File(path, 'w')
@@ -78,19 +81,35 @@ class HDF5FileClass:
             self.experiments = {}
             self.metadata = {}'''
 
-    def addExperiment(self, experimentName, existing=0, groupPath=0):
-        self.experiments[experimentName] = ExperimentClass(experimentName, self.hdf5Object, existing, groupPath)
+    def addExperiment(self, experimentName, existing=0, groupPath=0, definition=""):
+        self.experiments[experimentName] = ExperimentClass(experimentName, self.hdf5Object, existing, groupPath, definition = definition)
+        self.addMetadata(f'{experimentName}_experiment_description', definition)
+
+    def getMetadata(self):
+        return self.metadata
 
     def addMetadata(self, metadataName, metadataContents):
         self.metadata[metadataName] = metadataContents
         self.hdf5Object.attrs[metadataName] = metadataContents
 
+    def getExperimentDefinitions(self):
+        definitionReturn = {}
+        for key in self.experiments.keys():
+            definition = self.metadata[f'{key}_experiment_description']
+            definitionReturn[key] = definition
+        return definitionReturn
+
+    def redefine(self, experimentName, newDefinition):
+        self.addMetadata(f'{experimentName}_experiment_description', newDefinition)
+
+
 
 class ExperimentClass:
-    def __init__(self, experimentName, hdf5Object, existing=0, groupPath=0):
+    def __init__(self, experimentName, hdf5Object, existing=0, groupPath=0, definition = ""):
         self.hdf5Object = hdf5Object
         self.dataset = {}
         self.metadata = {}
+        self.definition = definition
         if existing == 0:
             self.groupPath = hdf5Object.create_group(experimentName)
         else:
@@ -123,6 +142,18 @@ class ExperimentClass:
     def addMetadata(self, metadataName, metadataContents):
         self.metadata[metadataName] = metadataContents
         self.groupPath.attrs[metadataName] = metadataContents
+
+    def deleteMetadata(self, metadataName):
+        self.groupPath.attrs.pop(metadataName)
+        self.metadata.pop(metadataName)
+
+    def handleDatasetRename(self, oldDatasetName, newDatasetName):
+        stringHolderOld = f'{oldDatasetName}_dataset_description'
+        stringHolderNew = f'{newDatasetName}_dataset_description'
+        definition = self.metadata[stringHolderOld]
+        self.deleteMetadata(stringHolderOld)
+        self.addMetadata(stringHolderNew, definition)
+        self.dataset[newDatasetName] = self.dataset.pop(oldDatasetName)
 
     def readAll(self, index):
         keys = {}
@@ -161,6 +192,14 @@ class ExperimentClass:
         if existing == 0:
             self.addMetadata(f'{datasetName}_dataset_description', definition)
 
+    def resizeDataset(self, datasetName, newDatasetSize):
+        self.dataset[datasetName].resizeDataset(newDatasetSize)
+
+    def readMetadata(self):
+        return self.metadata
+    def redefine(self, datasetName, newDefinition):
+        self.addMetadata(f'{datasetName}_dataset_description', newDefinition)
+
 
 class DatasetClass:
     def __init__(self, datasetName, groupObject, datasetSize, chunksIn=(100000, 1730), definition="", dtype='f',
@@ -173,6 +212,7 @@ class DatasetClass:
             self.datasetPath = datasetPathIn
         self.metadata = {}
         self.definition = definition
+        self.datasetName = datasetName
 
     def addMetadata(self, metadataName, metadataContents):
         self.metadata[metadataName] = metadataContents
@@ -183,3 +223,18 @@ class DatasetClass:
 
     def readData(self, index):
         return self.datasetPath[index]
+
+    def resizeDataset(self, newDatasetSize):
+        self.datasetPath.resize(newDatasetSize)
+
+    def getDatasetSize(self):
+        return self.datasetPath.shape
+
+    def rename(self, newName, experimentClass):
+        #first rename the dataset
+        oldName = self.datasetName
+        experimentClass.groupPath[newName] = experimentClass.groupPath[oldName]
+        del experimentClass.groupPath[oldName]
+        self.datasetName = newName
+        experimentClass.handleDatasetRename(oldName, newName)
+

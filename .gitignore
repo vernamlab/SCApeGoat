@@ -4,3 +4,9 @@
 /*.cw
 /*/__pycache__
 /Testing/*.hdf5
+/JupyterNotebooks/FileFormat/SNR_LSB.png
+/JupyterNotebooks/FileFormat/SnR_testing.py
+/JupyterNotebooks/FileFormat/SnR_test.hdf5
+/Testing/plaintext_new.txt
+/Testing/*.npy
+/JupyterNotebooks/FileFormat/__pycache__/
