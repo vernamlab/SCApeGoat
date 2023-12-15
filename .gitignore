@@ -10,3 +10,4 @@
 /Testing/plaintext_new.txt
 /Testing/*.npy
 /JupyterNotebooks/FileFormat/__pycache__/
+/ATMega8515_raw_traces.h5
