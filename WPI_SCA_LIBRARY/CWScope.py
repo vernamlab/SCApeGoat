@@ -26,10 +26,20 @@ class CWScope:
         cw.program_target(self.scope, cw.programmers.STM32FProgrammer, str(os.path.abspath(firmware_name)))
 
     def disconnect(self):
+        """Disconnect CW Scope and Target"""
         self.scope.dis()
         self.target.dis()
 
     def standard_capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
+        """
+        Capture traces from CW Device and return as an array. Ensure that the scope as been properly configured using
+        the constructor.
+
+        :param num_traces: The number of traces to capture
+        :param fixed_key: Whether to use a fixed key in trace capture
+        :param fixed_pt: Whether to use a fixed plaintext in trace capture
+        :return: A 2D array representing the collected power traces.
+        """
         # init return values
         power_traces = []
 
@@ -52,26 +62,35 @@ class CWScope:
         return power_traces
 
     def cw_to_hdf5(self, file_name, experiment_name, num_traces, fixed_key=False, fixed_pt=False):
+        """
+        Captures trcaes from the CW device and saves them and related metadata to an hdf5 file.
+        :param file_name: The name of the file that will be saved
+        :param experiment_name: The name of the experiment that will be associated with the trace collection
+        :param num_traces: The number of traces to capture
+        :param fixed_key: Whether to use a fixed key in trace capture
+        :param fixed_pt: Whether to use a fixed plaintext in trace capture
+        :return: None (a file is generated in working directory)
+        """
 
         # capture traces
         traces = self.standard_capture_traces(num_traces, fixed_key, fixed_pt)
 
         # configure hdf5 file class
-        fileClass = HDF5FileClass(file_name)
-        fileClass.addExperiment(experiment_name)
-        experiment = fileClass.experiments[experiment_name]
+        file_class = HDF5FileClass(file_name)
+        file_class.addExperiment(experiment_name)
+        experiment = file_class.experiments[experiment_name]
 
         # add plaintext, trace, and label dataset to file
         experiment.addDataset("plaintext", (num_traces, 16), definition="Plaintext Input To the Algorithm", dtype='uint8')
-        plaintextDataset = experiment.dataset["plaintext"]
+        plaintext_dataset = experiment.dataset["plaintext"]
 
         experiment.addDataset("keys", (num_traces, 16), definition="Key To the Algorithm", dtype='uint8')
-        keyDataset = experiment.dataset["keys"]
+        key_dataset = experiment.dataset["keys"]
 
         experiment.addDataset("traces", (num_traces, self.scope.adc.samples), definition="Traces", dtype='float64')
-        tracesDataset = experiment.dataset["traces"]
+        traces_dataset = experiment.dataset["traces"]
 
         for i in range(len(traces)):
-            plaintextDataset.addData(i, traces[i].textin)
-            tracesDataset.addData(i, traces[i].wave)
-            keyDataset.addData(i, traces[i].key)
+            plaintext_dataset.addData(i, traces[i].textin)
+            traces_dataset.addData(i, traces[i].wave)
+            key_dataset.addData(i, traces[i].key)
