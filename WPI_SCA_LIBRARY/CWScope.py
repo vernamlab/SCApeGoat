@@ -10,6 +10,13 @@ import os
 class CWScope:
 
     def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0):
+        """
+        Initializes a CW scope object
+        :param firmware_name: The name of the compiled firmware that will be loaded on the CW device.
+        :param gain: The gain of the CW scope
+        :param num_samples: The number of samples to collect for each trace on the CW scope
+        :param offset: The offset of the trace collection
+        """
         # setup scope
         self.scope = cw.scope()
         self.scope.default_setup()
