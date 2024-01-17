@@ -14,7 +14,7 @@ def signal_to_noise_ratio(labels):
     l_n = []
 
     for trace_set in labels.values():
-        set_means.append(np.mean(trace_set, axis=0))  # take the mean along the column #good
+        set_means.append(np.mean(trace_set, axis=0))  # take the mean along the column
         for trace in trace_set:
             l_n.append(trace - set_means[-1])
         signal_traces.append(set_means[-1])
