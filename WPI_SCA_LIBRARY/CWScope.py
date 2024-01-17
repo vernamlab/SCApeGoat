@@ -101,3 +101,7 @@ class CWScope:
             plaintext_dataset.addData(i, traces[i].textin)
             traces_dataset.addData(i, traces[i].wave)
             key_dataset.addData(i, traces[i].key)
+
+    def segmented_capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
+        """TODO"""
+        return None
