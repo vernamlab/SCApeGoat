@@ -6,9 +6,9 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Example'
-copyright = 'workshop participant'
-author = 'workshop participant'
+project = 'WPI SCA LIBRARY'
+copyright = 'Worcester Polytechnic Institute'
+author = 'Samuel Karkache'
 release = '0.1'
 
 
