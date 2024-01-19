@@ -1,2 +1,2 @@
 # SCLA_API_MQP
-Codes for the side channel assessment project 
+Documentation: http://vernamlab.org/SCLA_API_MQP/
