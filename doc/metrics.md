@@ -1,14 +1,19 @@
 # Metric Solver API
 
+## Signal-to-Noise Ratio 
+The signal-to-noise ratio of a signal is defined as the ratio of a signal's data component to the signal's noise 
+component. For side-channel analysis, the SNR of a power trace relates to the ability for an attacker to obtain 
+information from a power trace during an attack. The effectiveness of side channel attack increases for larger SNR 
+values since the signal leakage is more prominent relative to the noise of the signal. Typically recorded power traces 
+need to be partitioned into different sets called labels.
+```{math}
+SNR = \frac{VAR(L_d)}{VAR(L_n)} = \frac{\sum_{v=0}^{V} (\hat{\mu_v}^2 - \hat{\mu})^2}{\hat{\sigma}^2}
+```
+The resulting array is the value of the SNR at a given discrete time sample. Windows of the resulting trace where the 
+magnitude of the SNR is high may also indicate an area of interest since it implies that there exists a significant 
+amount of leakage at that sample. 
+signal_to_noise_ratio(labels)
 
-## Some text
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 
 ## Table

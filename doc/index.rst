@@ -17,3 +17,5 @@ Library Documentation
    fileformat.md
    metrics.md
    scope.md
+
+.. class:: CWScope
