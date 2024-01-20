@@ -6,13 +6,12 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
 .. py:function:: signal_to_noise_ratio (labels)
 
-    Computes the signal to noise ratio of a set of traces associated with intermediate labels. Spikes in
+    Computes the signal-to-noise ratio of a set of traces associated with intermediate labels. Spikes in
     magnitude of the resulting SNR trance indicate possible cryptographic information leakage.
 
    :param labels: SNR label set where label[L] are power traces associated with label L
-   :type labels: list[float]
+   :type labels: dict
    :return: The SNR trace of the supplied trace set
-   :rtype: list[float]
 
 .. py:function:: pearson_correlation (predicted_leakage, observed_leakage, num_traces, num_samples)
 
