@@ -14,8 +14,6 @@ Library Documentation
 .. toctree::
    :maxdepth: 3
 
-   fileformat.md
-   metrics.md
-   scope.md
-
-.. class:: CWScope
+   fileformat.rst
+   metrics.rst
+   scope.tst
