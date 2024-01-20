@@ -16,4 +16,4 @@ Library Documentation
 
    fileformat.rst
    metrics.rst
-   scope.tst
+   scope.rst
