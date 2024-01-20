@@ -1,4 +1,4 @@
-# More features here
+# Metric Solver API
 
 
 ## Some text

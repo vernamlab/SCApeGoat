@@ -1,4 +1,4 @@
-# File Storage API
+# Oscilloscope Interface
 
 Exciting documentation in here.
 Let's make a list (empty surrounding lines required):
