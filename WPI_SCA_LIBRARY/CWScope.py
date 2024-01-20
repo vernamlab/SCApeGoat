@@ -70,12 +70,17 @@ class CWScope:
 
     def cw_to_hdf5(self, file_name, experiment_name, num_traces, fixed_key=False, fixed_pt=False):
         """
-        Captures trcaes from the CW device and saves them and related metadata to an hdf5 file.
+        Captures traces from the CW device and saves them and related metadata to an hdf5 file.
         :param file_name: The name of the file that will be saved
+        :type file_name: str
         :param experiment_name: The name of the experiment that will be associated with the trace collection
+        :type experiment_name: str
         :param num_traces: The number of traces to capture
+        :type num_traces: int
         :param fixed_key: Whether to use a fixed key in trace capture
+        :type fixed_key: bool
         :param fixed_pt: Whether to use a fixed plaintext in trace capture
+        :type fixed_pt: bool
         :return: None (a file is generated in working directory)
         """
 
