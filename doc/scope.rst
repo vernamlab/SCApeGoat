@@ -1,7 +1,4 @@
 Oscilloscope Interface
 ======================
 
-.. class:: CWScope
-   :members:
-
-.. autofunction:: CWScope.cw_to_hdf5()
+.. autofunction:: WPI_SCA_LIBRARY.CWScope.cw_to_hdf5()
