@@ -18,7 +18,16 @@ class CWScopeTesting:
 
     def standard_trace_collection_timing(self, num_traces):
         start_time = time.time()
-        self.cw_scope.standard_capture_traces(num_traces, True, False)
+        self.cw_scope.standard_capture_traces(num_traces, True, True)
+        end_time = time.time()
+        return end_time - start_time
+
+    def segmented_trace_collection_timing(self, num_traces):
+        start_time = time.time()
+        self.cw_scope.scope.adc.fifo_fill_mode = "segment"
+        ktp = cw.ktp.Basic()
+        key, pt = ktp.next()
+        self.cw_scope.segmented_capture_traces(num_traces, key, pt)
         end_time = time.time()
         return end_time - start_time
 
@@ -28,3 +37,18 @@ class CWScopeTesting:
                    self.standard_trace_collection_timing(1000), self.standard_trace_collection_timing(10000)]
         num_traces = [1, 10, 50, 100, 1000, 10000]
         return num_traces, timings
+
+
+test = CWScopeTesting()
+t1 = test.standard_trace_collection_timing(100)
+print("Standard " + str(t1))
+t2 = test.segmented_trace_collection_timing(100)
+print("Segmented " + str(t2))
+
+# scope = CWScope("firmware\\simpleserial-aes-CWLITEARM.hex", 25, 5000, 0, True)
+#
+# ktp = cw.ktp.Basic()
+# key, pt = ktp.next()
+# seg = scope.segmented_capture_traces(100, key, pt)
+# #plt.plot(seg[0])
+# #plt.show()

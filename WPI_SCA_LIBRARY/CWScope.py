@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from WPI_SCA_LIBRARY.FileFormat import *
 import os
+import struct
 
 
 class CWScope:
 
-    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0):
+    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0, segmented=False):
         """
         Initializes a CW scope object
         :param firmware_name: The name of the compiled firmware that will be loaded on the CW device.
@@ -28,6 +29,10 @@ class CWScope:
         self.scope.gain.db = gain
         self.scope.adc.samples = num_samples
         self.scope.offset = offset
+        self.segmented = segmented
+
+        if segmented:
+            self.scope.adc.fifo_fill_mode = "segment"
 
         # upload encryption algorithm firmware to the board
         cw.program_target(self.scope, cw.programmers.STM32FProgrammer, str(os.path.abspath(firmware_name)))
@@ -140,6 +145,33 @@ class CWScope:
             traces_dataset.addData(i, traces[i].wave)
             key_dataset.addData(i, traces[i].key)
 
-    def segmented_capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
-        """TODO"""
-        return None
+    def segmented_capture_traces(self, num_traces, fixed_key, fixed_pt):
+
+        seg_max = round(self.scope.adc.oa.hwMaxSamples / self.scope.adc.samples + 1)
+        done = False
+
+        # configure plaintext, key generation
+        ktp = cw.ktp.Basic()
+        ktp.fixed_key = fixed_key
+        ktp.fixed_pt = fixed_pt
+        key, pt = ktp.next()
+
+        segments = []
+
+        while not done:
+            self.scope.arm()
+
+            for i in range(0, seg_max):
+                self.target.simpleserial_write('p', pt)
+                self.target.set_key(key)
+                self.target.simpleserial_read('r', self.target.output_len)
+
+            self.scope.capture_segmented()
+            buffer = self.scope.get_last_trace_segmented()
+
+            segments.extend(buffer)
+
+            if len(segments) > num_traces:
+                done = True
+
+        return segments
