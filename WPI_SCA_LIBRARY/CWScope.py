@@ -68,19 +68,51 @@ class CWScope:
 
         return power_traces
 
+    def arr_to_hdf5(self, file_name, experiment_name, traces, plaintexts, keys, num_traces):
+        """
+        Converts arrays/lists containing traces, pt, and keys to hdf5 file format
+        :param file_name: The name of the file that will be saved
+        :param experiment_name: The name of the experiment that will be associated with the trace collection
+        :param traces: a list of power traces
+        :param plaintexts: a list of plaintexts
+        :param keys: a list of keys
+        :param num_traces: the number of traces
+        :return: None (a file is generated in working directory)
+        """
+
+        # enforce that all lists have the same length
+        if len(traces) != len(plaintexts) or len(plaintexts) != len(keys) or len(plaintexts) != len(experiment_name):
+            raise Exception("Malformed trace, pt, key data")
+
+        # configure hdf5 file class
+        file_class = HDF5FileClass(file_name)
+        file_class.addExperiment(experiment_name)
+        experiment = file_class.experiments[experiment_name]
+
+        # add plaintext, trace, and label dataset to file
+        experiment.addDataset("plaintext", (num_traces, 16), definition="Plaintext Input To the Algorithm",
+                              dtype='uint8')
+        plaintext_dataset = experiment.dataset["plaintext"]
+
+        experiment.addDataset("keys", (num_traces, 16), definition="Key To the Algorithm", dtype='uint8')
+        key_dataset = experiment.dataset["keys"]
+
+        experiment.addDataset("traces", (num_traces, self.scope.adc.samples), definition="Traces", dtype='float64')
+        traces_dataset = experiment.dataset["traces"]
+
+        for i in range(num_traces):
+            plaintext_dataset.addData(i, traces[i])
+            traces_dataset.addData(i, plaintexts[i])
+            key_dataset.addData(i, keys[i])
+
     def cw_to_hdf5(self, file_name, experiment_name, num_traces, fixed_key=False, fixed_pt=False):
         """
         Captures traces from the CW device and saves them and related metadata to an hdf5 file.
         :param file_name: The name of the file that will be saved
-        :type file_name: str
         :param experiment_name: The name of the experiment that will be associated with the trace collection
-        :type experiment_name: str
         :param num_traces: The number of traces to capture
-        :type num_traces: int
         :param fixed_key: Whether to use a fixed key in trace capture
-        :type fixed_key: bool
         :param fixed_pt: Whether to use a fixed plaintext in trace capture
-        :type fixed_pt: bool
         :return: None (a file is generated in working directory)
         """
 
@@ -93,7 +125,8 @@ class CWScope:
         experiment = file_class.experiments[experiment_name]
 
         # add plaintext, trace, and label dataset to file
-        experiment.addDataset("plaintext", (num_traces, 16), definition="Plaintext Input To the Algorithm", dtype='uint8')
+        experiment.addDataset("plaintext", (num_traces, 16), definition="Plaintext Input To the Algorithm",
+                              dtype='uint8')
         plaintext_dataset = experiment.dataset["plaintext"]
 
         experiment.addDataset("keys", (num_traces, 16), definition="Key To the Algorithm", dtype='uint8')
