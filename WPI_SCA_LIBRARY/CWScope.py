@@ -145,6 +145,7 @@ class CWScope:
             traces_dataset.addData(i, traces[i].wave)
             key_dataset.addData(i, traces[i].key)
 
+    # TODO: This is way to slow, investigate why the multi-encrypt is not working
     def segmented_capture_traces(self, num_traces, fixed_key, fixed_pt):
 
         seg_max = round(self.scope.adc.oa.hwMaxSamples / self.scope.adc.samples + 1)
