@@ -159,20 +159,18 @@ class CWScope:
 
         segments = []
 
+        self.target.simpleserial_write('s', struct.pack(">H", seg_max))
+
         while not done:
             self.scope.arm()
-
-            for i in range(0, seg_max):
-                self.target.simpleserial_write('p', pt)
-                self.target.set_key(key)
-                self.target.simpleserial_read('r', self.target.output_len)
-
+            self.target.simpleserial_write('f', pt)
             self.scope.capture_segmented()
             buffer = self.scope.get_last_trace_segmented()
-
             segments.extend(buffer)
+
+            self.target.flush()
 
             if len(segments) > num_traces:
                 done = True
 
-        return segments
+        return segments, key, pt
