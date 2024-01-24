@@ -15,5 +15,6 @@ Library Documentation
    :maxdepth: 3
 
    fileformat.rst
-   metrics.rst
    scope.rst
+   metrics.rst
+   about_project.rst
