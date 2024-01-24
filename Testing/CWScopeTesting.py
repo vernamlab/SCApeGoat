@@ -25,9 +25,7 @@ class CWScopeTesting:
     def segmented_trace_collection_timing(self, num_traces):
         start_time = time.time()
         self.cw_scope.scope.adc.fifo_fill_mode = "segment"
-        ktp = cw.ktp.Basic()
-        key, pt = ktp.next()
-        self.cw_scope.segmented_capture_traces(num_traces, key, pt)
+        self.cw_scope.segmented_capture_traces(num_traces)
         end_time = time.time()
         return end_time - start_time
 

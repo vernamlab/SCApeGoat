@@ -145,16 +145,21 @@ class CWScope:
             traces_dataset.addData(i, traces[i].wave)
             key_dataset.addData(i, traces[i].key)
 
-    # TODO: This is way to slow, investigate why the multi-encrypt is not working
-    def segmented_capture_traces(self, num_traces, fixed_key, fixed_pt):
+    # TODO: Still need to verify the functionality here
+    def segmented_capture_traces(self, num_traces):
+        """
+        Captures traces using the segmented fifo fill mode. Multiple encryption are performed for a fixed key
+        and plaintext and stored in the ChipWhisperer buffer. Each traces corresponds to a segment in the buffer.
+        The procedure finished once greater than num_traces segments are captured.
+        :param num_traces: the number of traces to capture
+        :return: an array of the captured power traces
+        """
 
         seg_max = round(self.scope.adc.oa.hwMaxSamples / self.scope.adc.samples + 1)
         done = False
 
         # configure plaintext, key generation
         ktp = cw.ktp.Basic()
-        ktp.fixed_key = fixed_key
-        ktp.fixed_pt = fixed_pt
         key, pt = ktp.next()
 
         segments = []
