@@ -10,7 +10,7 @@ import struct
 
 class CWScope:
 
-    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0, segmented=False):
+    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0, simple_serial_version="1", segmented=False):
         """
         Initializes a CW scope object
         :param firmware_name: The name of the compiled firmware that will be loaded on the CW device.
@@ -23,7 +23,12 @@ class CWScope:
         self.scope.default_setup()
 
         # configure target
-        self.target = cw.target(self.scope)
+        if simple_serial_version == "1":
+            self.target = cw.target(self.scope, cw.targets.SimpleSerial)
+        elif simple_serial_version == "2":
+            self.target = cw.target(self.scope, cw.targets.SimpleSerial2)
+        else:
+            raise Exception("Unknown Simple Serial Version: {}".format(simple_serial_version))
 
         # configure scope parameters
         self.scope.gain.db = gain
