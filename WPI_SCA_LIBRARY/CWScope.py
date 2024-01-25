@@ -73,9 +73,46 @@ class CWScope:
 
         return power_traces
 
+    # TODO: Still need to verify the functionality here
+    def segmented_capture_traces(self, num_traces):
+        """
+        Captures traces using the segmented fifo fill mode. Multiple encryption are performed for a fixed key
+        and plaintext and stored in the ChipWhisperer buffer. Each traces correspond to a segment in the buffer.
+        The procedure finished once greater than num_traces segments are captured.
+
+        :param num_traces: the number of traces to capture
+        :return: an array of the captured power traces
+        """
+
+        seg_max = round(self.scope.adc.oa.hwMaxSamples / self.scope.adc.samples + 1)
+        done = False
+
+        # configure plaintext, key generation
+        ktp = cw.ktp.Basic()
+        key, pt = ktp.next()
+
+        segments = []
+
+        self.target.simpleserial_write('s', struct.pack(">H", seg_max))
+
+        while not done:
+            self.scope.arm()
+            self.target.simpleserial_write('f', pt)
+            self.scope.capture_segmented()
+            buffer = self.scope.get_last_trace_segmented()
+            segments.extend(buffer)
+
+            self.target.flush()
+
+            if len(segments) > num_traces:
+                done = True
+
+        return segments, key, pt
+
     def arr_to_hdf5(self, file_name, experiment_name, traces, plaintexts, keys, num_traces):
         """
         Converts arrays/lists containing traces, pt, and keys to hdf5 file format
+
         :param file_name: The name of the file that will be saved
         :param experiment_name: The name of the experiment that will be associated with the trace collection
         :param traces: a list of power traces
@@ -113,6 +150,7 @@ class CWScope:
     def cw_to_hdf5(self, file_name, experiment_name, num_traces, fixed_key=False, fixed_pt=False):
         """
         Captures traces from the CW device and saves them and related metadata to an hdf5 file.
+
         :param file_name: The name of the file that will be saved
         :param experiment_name: The name of the experiment that will be associated with the trace collection
         :param num_traces: The number of traces to capture
@@ -145,37 +183,36 @@ class CWScope:
             traces_dataset.addData(i, traces[i].wave)
             key_dataset.addData(i, traces[i].key)
 
-    # TODO: Still need to verify the functionality here
-    def segmented_capture_traces(self, num_traces):
+    def segments_to_hdf5(self, file_name, experiment_name, segments, key, pt, num_traces):
         """
-        Captures traces using the segmented fifo fill mode. Multiple encryption are performed for a fixed key
-        and plaintext and stored in the ChipWhisperer buffer. Each traces corresponds to a segment in the buffer.
-        The procedure finished once greater than num_traces segments are captured.
-        :param num_traces: the number of traces to capture
-        :return: an array of the captured power traces
+        generates a hdf5 file from segmented data input
+
+        :param file_name: the name of the resulting hdf5 file
+        :param experiment_name: the name of the experiment
+        :param segments: the collected segments
+        :param key: the encryption key used
+        :param pt: the plaintext used
+        :param num_traces: the number of traces
+        :return: None (a file is generated in working directory)
         """
 
-        seg_max = round(self.scope.adc.oa.hwMaxSamples / self.scope.adc.samples + 1)
-        done = False
+        # configure hdf5 file class
+        file_class = HDF5FileClass(file_name)
+        file_class.addExperiment(experiment_name)
+        experiment = file_class.experiments[experiment_name]
 
-        # configure plaintext, key generation
-        ktp = cw.ktp.Basic()
-        key, pt = ktp.next()
+        # add plaintext, trace, and label dataset to file
+        experiment.addDataset("plaintext", (num_traces, 16), definition="Plaintext Input To the Algorithm",
+                              dtype='uint8')
+        plaintext_dataset = experiment.dataset["plaintext"]
 
-        segments = []
+        experiment.addDataset("keys", (num_traces, 16), definition="Key To the Algorithm", dtype='uint8')
+        key_dataset = experiment.dataset["keys"]
 
-        self.target.simpleserial_write('s', struct.pack(">H", seg_max))
+        experiment.addDataset("traces", (num_traces, self.scope.adc.samples), definition="Traces", dtype='float64')
+        traces_dataset = experiment.dataset["traces"]
 
-        while not done:
-            self.scope.arm()
-            self.target.simpleserial_write('f', pt)
-            self.scope.capture_segmented()
-            buffer = self.scope.get_last_trace_segmented()
-            segments.extend(buffer)
-
-            self.target.flush()
-
-            if len(segments) > num_traces:
-                done = True
-
-        return segments, key, pt
+        for i in range(num_traces):
+            plaintext_dataset.addData(i, pt)
+            traces_dataset.addData(i, segments[i])
+            key_dataset.addData(i, key)
