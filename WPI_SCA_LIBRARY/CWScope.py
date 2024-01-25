@@ -54,7 +54,7 @@ class CWScope:
         :return: A 2D array representing the collected power traces.
         """
         # init return values
-        power_traces = []
+        power_traces = np.empty([num_traces], dtype=object)
 
         # configure plaintext, key generation
         ktp = cw.ktp.Basic()
@@ -70,7 +70,7 @@ class CWScope:
 
             # append arrays if trace successfully captured
             if trace:
-                power_traces.append(trace)
+                power_traces[i] = trace
 
         return power_traces
 
