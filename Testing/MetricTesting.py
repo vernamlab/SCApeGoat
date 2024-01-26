@@ -1,4 +1,5 @@
 import os.path
+import time
 
 import h5py
 from WPI_SCA_LIBRARY.Metrics import Sbox, signal_to_noise_ratio
@@ -20,8 +21,21 @@ def snr_ascad_verification():
         snr3_labels = rout
 
         # compute SNR for each
-        snr2 = signal_to_noise_ratio(organize_labels_for_testing(snr2_labels, traces))
-        snr3 = signal_to_noise_ratio(organize_labels_for_testing(snr3_labels, traces))
+        organizedSN2 = organize_labels_for_testing(snr2_labels, traces)
+
+        start = time.time()
+        snr2 = signal_to_noise_ratio(organizedSN2)
+        end = time.time()
+
+        organizedSN3 = organize_labels_for_testing(snr3_labels, traces)
+
+        start2 = time.time()
+        snr3 = signal_to_noise_ratio(organizedSN3)
+        end2 = time.time()
+
+        total_time = ((end - start) + (end2 - start2)) / 2
+
+        print("SNR Execution Time on 10,000 ASCAD Traces: " + str(total_time) + " seconds")
 
         plt.plot(snr2, label="SNR2")
         plt.plot(snr3, label="SNR3")

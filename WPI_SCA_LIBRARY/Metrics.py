@@ -13,21 +13,20 @@ def signal_to_noise_ratio(labels):
     :return: The SNR trace of the supplied trace set
     """
 
-    # statistical mean and variances of each set
-    set_means = []
-    signal_traces = []
-    l_n = []
+    # define the label set
+    label_set = labels.values()
+    label_set_size = len(label_set)
 
-    for trace_set in labels.values():
-        set_means.append(np.mean(trace_set, axis=0))  # take the mean along the column
-        for trace in trace_set:
-            l_n.append(trace - set_means[-1])
-        signal_traces.append(set_means[-1])
+    # statistical mean and variances of each set, preallocate memory when possible
+    set_means = np.empty(label_set_size, dtype=object)
+    set_var = np.empty(label_set_size, dtype=object)
 
-    l_n = np.var(l_n, axis=0)
-    l_d = np.var(signal_traces, axis=0)
+    for i, trace_set in enumerate(label_set):
+        # compute statistical mean of every label set
+        set_means[i] = np.mean(trace_set, axis=0)
+        set_var[i] = np.var(trace_set, axis=0)
 
-    snr = np.divide(l_d, l_n)
+    snr = np.divide(np.var(set_means, axis=0), np.mean(set_var, axis=0))
 
     return snr
 

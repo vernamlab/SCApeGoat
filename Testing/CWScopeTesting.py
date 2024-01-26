@@ -37,4 +37,4 @@ class CWScopeTesting:
         plt.show()
 
 
-CWScopeTesting().plot_collection_timings()
+# CWScopeTesting().plot_collection_timings()
