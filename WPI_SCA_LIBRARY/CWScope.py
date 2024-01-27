@@ -35,7 +35,9 @@ class CWScope:
         self.scope.offset = offset
 
         # upload encryption algorithm firmware to the board
-        cw.program_target(self.scope, cw.programmers.STM32FProgrammer, str(os.path.abspath(firmware_name)))
+        cw.program_target(self.scope, cw.programmers.STM32FProgrammer,
+                          os.path.dirname(os.path.abspath(__file__)) + "\\firmware\\{}".format(
+                              firmware_name))
 
     def disconnect(self):
         """Disconnect CW Scope and Target"""

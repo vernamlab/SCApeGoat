@@ -64,7 +64,7 @@ def organize_labels_for_testing(labels, traces):
 
 def validate_t_test():
     cw_scope = CWScope(
-        "firmware\\simpleserial-aes-CWLITEARM-SS_2_1.hex",
+        "simpleserial-aes-CWLITEARM-SS_2_1.hex",
         25,
         5000,
         0,
@@ -97,3 +97,5 @@ def validate_t_test():
     plt.ylabel("T-statistic")
     plt.xlabel("Sample")
     plt.show()
+
+validate_t_test()
