@@ -31,6 +31,54 @@ def signal_to_noise_ratio(labels):
     return snr
 
 
+def t_test(fixed_t, random_t, num_samples, step=2000, order_2=False):
+    """
+    author: Dev Mehta
+    Computes the t-statistic between fixed and random trace sets
+    :param fixed_t: the set of traces collected with a fixed pt
+    :param random_t: the set of traces collected with a random pt
+    :param num_samples: the number of samples per trace
+    :param step: TODO: ask Dev about this
+    :param order_2: compute second order
+    :return: (tf, tf_2) where tf is the first order t-statistic and tf_2 is the second order t-statistic
+    """
+    # initialize t-test results
+    tf = np.zeros(num_samples)
+    tf_2 = np.zeros(num_samples)
+
+    for i in range(0, num_samples, step):
+        stt = i
+        end = i + step
+        if end > num_samples:
+            end = num_samples
+
+        # get traces for a no. of samples
+        r = []
+        for j, trace_r in enumerate(random_t):
+            r.append(trace_r[stt:end])
+
+        f = []
+        for k, trace_f in enumerate(fixed_t):
+            f.append(trace_f[stt:end])
+
+        # calculate t-test
+        t = ttest_ind(f, r, axis=0, equal_var=False)[0]
+
+        # append the output
+        tf[stt:end] = t
+
+        if order_2:
+            # convert to numpy and preprocess them
+            r = np.array(r)
+            f = np.array(f)
+            r_2 = (r - r.mean(axis=0)) ** 2
+            f_2 = (f - f.mean(axis=0)) ** 2
+            t_2 = ttest_ind(f_2, r_2, axis=0, equal_var=False)[0]
+            tf_2[stt:end] = t_2
+
+    return tf, tf_2
+
+
 def pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_samples):
     """
     Compares two trace sets corresponding to predicted and observed leakage. High magnitudes indicate
@@ -70,53 +118,6 @@ def leakage_model_hw(plaintext, key):
     :return: the intermediate output
     """
     return bin(Sbox[plaintext ^ key]).count('1')
-
-
-def t_test(fixed_t, random_t, num_samples, step=2000, order_2=False):
-    """
-    Computes the t-statistic between fixed and random trace sets
-    :param fixed_t:
-    :param random_t:
-    :param num_samples:
-    :param step:
-    :param order_2:
-    :return:
-    """
-    # initialize t-test results
-    tf = np.zeros(num_samples)
-    tf_2 = np.zeros(num_samples)
-
-    for i in range(0, num_samples, step):
-        stt = i
-        end = i + step
-        if end > num_samples:
-            end = num_samples
-
-        # get traces for a no. of samples
-        r = []
-        for j, trace_r in enumerate(random_t):
-            r.append(trace_r[stt:end])
-
-        f = []
-        for k, trace_f in enumerate(fixed_t):
-            f.append(trace_f[stt:end])
-
-        # calculate t-test
-        t = ttest_ind(f, r, axis=0, equal_var=False)[0]
-
-        # append the output
-        tf[stt:end] = t
-
-        if order_2:
-            # convert to numpy and preprocess them
-            r = np.array(r)
-            f = np.array(f)
-            r_2 = (r - r.mean(axis=0)) ** 2
-            f_2 = (f - f.mean(axis=0)) ** 2
-            t_2 = ttest_ind(f_2, r_2, axis=0, equal_var=False)[0]
-            tf_2[stt:end] = t_2
-
-    return tf, tf_2
 
 
 def score_and_rank(traces, score_fcn, key_candidates, partitions):

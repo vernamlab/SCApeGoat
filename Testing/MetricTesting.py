@@ -1,8 +1,6 @@
 import os.path
-import time
-
-import h5py
-from WPI_SCA_LIBRARY.Metrics import Sbox, signal_to_noise_ratio
+from WPI_SCA_LIBRARY.Metrics import *
+from WPI_SCA_LIBRARY.CWScope import *
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -64,4 +62,38 @@ def organize_labels_for_testing(labels, traces):
     return sorted_labels
 
 
-snr_ascad_verification()
+def validate_t_test():
+    cw_scope = CWScope(
+        "firmware\\simpleserial-aes-CWLITEARM-SS_2_1.hex",
+        25,
+        5000,
+        0,
+        simple_serial_version="2"
+    )
+
+    # capture traces
+    fixed_t, rand_t = cw_scope.capture_traces_tvla(1000)
+
+    rand = []
+    fixed = []
+    for trace_r in rand_t:
+        rand.append(trace_r.wave)
+
+    for trace_f in fixed_t:
+        fixed.append(trace_f.wave)
+
+    # library calculation
+    t, t2 = t_test(fixed[:], rand[:], cw_scope.scope.adc.samples, step=2000, order_2=True)
+
+    # plot the results
+    plt.plot(t)
+    plt.title("Value of tf for 10,000 traces")
+    plt.ylabel("T-statistic")
+    plt.xlabel("Sample")
+    plt.show()
+
+    plt.plot(t2)
+    plt.title("Value of tf_2 for 10,000 traces")
+    plt.ylabel("T-statistic")
+    plt.xlabel("Sample")
+    plt.show()

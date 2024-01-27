@@ -1,11 +1,10 @@
-import sys
-
 import chipwhisperer as cw
+import cwtvla.ktp
 import matplotlib.pyplot as plt
 import numpy as np
 from WPI_SCA_LIBRARY.FileFormat import *
 import os
-import struct
+import tqdm as tqdm
 
 
 class CWScope:
@@ -59,9 +58,9 @@ class CWScope:
         # configure plaintext, key generation
         ktp = cw.ktp.Basic()
         ktp.fixed_key = fixed_key
-        ktp.fixed_pt = fixed_pt
+        ktp.fixed_text = fixed_pt
 
-        for i in range(num_traces):
+        for i in tqdm.tqdm(range(num_traces), desc="Capturing {} Traces".format(num_traces)):
             # get key, text pair, if fixed they will remain the same
             key, pt = ktp.next()
 
@@ -69,10 +68,48 @@ class CWScope:
             trace = cw.capture_trace(self.scope, self.target, pt, key)
 
             # append arrays if trace successfully captured
-            if trace:
-                power_traces[i] = trace
+            if trace is None:
+                continue
+
+            power_traces[i] = trace
 
         return power_traces
+
+    def capture_traces_tvla(self, num_traces, ktp=cwtvla.ktp.FixedVRandomText()):
+        """
+        Captures fixed and random trace set needed for TVLA
+        :param num_traces: the number of traces to capture for each set
+        :param ktp: the key text pair algorithm, defaults to cwtvla.ktp.FixedVRandomText()
+        :return: (fixed_traces, random_traces)
+        """
+        rand_traces = np.empty([num_traces], dtype=object)
+        fixed_traces = np.empty([num_traces], dtype=object)
+
+        for i in tqdm.tqdm(range(num_traces), desc='Capturing Fixed Trace Set'):
+            key, pt = ktp.next_group_A()
+
+            # capture trace
+            trace = cw.capture_trace(self.scope, self.target, pt, key)
+
+            # append arrays if trace successfully captured
+            if trace is None:
+                continue
+
+            fixed_traces[i] = trace
+
+        for i in tqdm.tqdm(range(num_traces), desc='Capturing Random Trace Set'):
+            key, pt = ktp.next_group_B()
+
+            # capture trace
+            trace = cw.capture_trace(self.scope, self.target, pt, key)
+
+            # append arrays if trace successfully captured
+            if trace is None:
+                continue
+
+            rand_traces[i] = trace
+
+        return fixed_traces, rand_traces
 
     def arr_to_hdf5(self, file_name, experiment_name, traces, plaintexts, keys, num_traces):
         """
