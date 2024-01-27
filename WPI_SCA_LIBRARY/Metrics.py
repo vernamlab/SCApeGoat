@@ -90,24 +90,34 @@ def pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_sam
     :param num_samples: the number of samples per trace
     :return: The correlation trace corresponding to the predicted leakage
     """
-    predicted_mean = np.mean(predicted_leakage, axis=0)
+
+    # take the mean of each trace set
     observed_mean = np.mean(observed_leakage, axis=0)
+    predicted_mean = np.mean(predicted_leakage, axis=0)
 
-    numerator = np.zeros(num_samples)
-    denominator1 = np.zeros(num_samples)
-    denominator2 = np.zeros(num_samples)
+    # correlation equation has three sums
+    # one in the numerator and two in the denominator
+    # they are initialized to zero to start the sum
+    top_sum_observed_predicted = np.zeros(num_samples)
+    bottom_sum_observed = np.zeros(num_samples)
+    bottom_sum_predicted = np.zeros(num_samples)
 
-    for d in range(num_traces):
-        L = observed_leakage[d] - observed_mean
-        g = predicted_leakage[d] - predicted_mean
+    # for 0 to the number of traces
+    for i in range(num_traces):
+        # these terms are referenced in both the numerator and denominator
+        observed_minus_mean = np.subtract(observed_leakage[i], observed_mean)
+        predicted_minus_mean = np.subtract(predicted_leakage[i], predicted_mean)
 
-        numerator = numerator + g * L
-        denominator1 = denominator1 + np.square(L)
-        denominator2 = denominator2 + np.square(g)
+        # this computes the sum in the numerator
+        top_sum_observed_predicted = (
+            np.add(top_sum_observed_predicted, np.multiply(observed_minus_mean, predicted_minus_mean)))
 
-    correlation_trace = numerator / np.sqrt(denominator1 * denominator2)
+        # this computes the two sums in the denominator, we can work on these in parallel
+        bottom_sum_observed = np.add(bottom_sum_observed, np.square(observed_minus_mean))
+        bottom_sum_predicted = np.add(bottom_sum_predicted, np.square(predicted_minus_mean))
 
-    return correlation_trace
+    # return the correlation trace, the denominator sums are multiplied and square rooted
+    return np.divide(top_sum_observed_predicted, np.sqrt(np.multiply(bottom_sum_observed, bottom_sum_predicted)))
 
 
 def leakage_model_hw(plaintext, key):
