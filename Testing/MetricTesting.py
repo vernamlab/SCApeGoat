@@ -98,4 +98,38 @@ def validate_t_test():
     plt.xlabel("Sample")
     plt.show()
 
-validate_t_test()
+
+def validate_correlation():
+    cw_scope = CWScope(
+        "simpleserial-aes-CWLITEARM-SS_2_1.hex",
+        25,
+        5000,
+        0,
+        simple_serial_version="2"
+    )
+
+    # capture trace set
+    traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
+
+    # TODO: This can be removed once I change the standard capture procedure
+    keys = []
+    texts = []
+    waves = []
+    for trace in traces:
+        keys.append(trace.key)
+        texts.append(trace.textin)
+        waves.append(trace.wave)
+
+    # we will target the correct key for the sake of demonstration
+    target_byte = 0
+    key_guess = keys[0][target_byte]
+    print("Key: ", key_guess)
+
+    predicted_leakage = generate_predicted_traces(1000, texts, key_guess, target_byte, leakage_model_hw)
+
+    correlation = pearson_correlation(predicted_leakage, waves, 1000, 5000)
+    plt.plot(correlation)
+    plt.title("Correlation Coefficient For Correct Key Guess {}".format(hex(key_guess)))
+    plt.ylabel("Correlation")
+    plt.xlabel("Sample")
+    plt.show()

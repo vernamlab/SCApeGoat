@@ -44,6 +44,7 @@ class CWScope:
         self.scope.dis()
         self.target.dis()
 
+    # TODO: It would probably be better to return the waves, texts, and keys separately
     def standard_capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
         """
         Capture traces from CW Device and return as an array. Ensure that the scope as been properly configured using

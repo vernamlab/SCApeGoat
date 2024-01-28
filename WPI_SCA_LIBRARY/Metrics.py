@@ -130,6 +130,16 @@ def leakage_model_hw(plaintext, key):
     return bin(Sbox[plaintext ^ key]).count('1')
 
 
+def generate_predicted_traces(num_traces, plaintexts, subkey, target_byte,
+                              leakage_model=leakage_model_hw):
+    predicted = np.empty(num_traces, dtype=object)
+
+    for i in range(num_traces):
+        predicted[i] = leakage_model(subkey, plaintexts[i][target_byte])
+
+    return predicted
+
+
 def score_and_rank(traces, score_fcn, key_candidates, partitions):
     """
     Ranks each key guess in a key partition based on a scoring function
