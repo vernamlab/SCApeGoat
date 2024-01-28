@@ -1,4 +1,5 @@
 import numpy as np
+import tqdm
 from scipy.stats import ttest_ind
 import math
 
@@ -149,24 +150,25 @@ def generate_hypothetical_leakage(num_traces, plaintexts, subkey_guess, target_b
     return predicted
 
 
-def score_and_rank(traces, score_fcn, key_candidates, partitions):
+def score_and_rank(key_candidates, partitions, traces, score_fcn, *args):
     """
-    Ranks each key guess in a key partition based on a scoring function
-    :param traces: The trace set to be evaluated
-    :param score_fcn: Scoring function callback
-    :param key_candidates: the sub-keys to be ranked
-    :param partitions: the number of partitions of the full key
-    :return: the key partitions ordered by rank from highest to lowest
+    Scores and ranks possible key guesses based on how likely a subkey is to be the actual key
+    :param key_candidates: All key possibilities per key partition. For 1-byte partitions it should be np.arrange(256)
+    :param partitions: The number of partitions. For AES-128 there are 16 1-byte partitions.
+    :param traces: A set of collected traces.
+    :param score_fcn: The function used to score each key guess. NOTE: MUST BE IN THE FORM score_fcn(traces, key_guess, target_byte, ...)
+    :param args: Additional arguments required for the score_fcn
+    :return: Subkey ranks for each partition of the full key.
     """
     dtype = [('key', int), ('score', 'float64')]
     ranks = []
     # for each key partition
-    for i in range(partitions):
+    for i in tqdm.tqdm(range(partitions), desc='Scoring {} Partitions'.format(partitions)):
         partition_scores = np.array([], dtype=dtype)
 
         # for each key guess in the partition score the value and add to list
         for k in key_candidates:
-            score_k = score_fcn(traces, k)
+            score_k = score_fcn(traces, k, i, *args)
             key_score = np.array([(k, score_k)], dtype=dtype)
             partition_scores = np.append(partition_scores, key_score)
 
@@ -175,6 +177,27 @@ def score_and_rank(traces, score_fcn, key_candidates, partitions):
 
         ranks.append(partition_ranks)
     return ranks
+
+
+def score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_model):
+    """
+    Scoring function that assigns a key guess a score based on the max value of the pearson correlation.
+    :param traces: The collected traces
+    :param key_guess: The key guess
+    :param target_byte: The target byte of the key
+    :param plaintexts: The plaintexts used during trace capture
+    :param leakage_model: The leakage model function
+    :return: The score of the key guess
+    """
+
+    # generate the predicted leakage
+    predicted_leakage = generate_hypothetical_leakage(1000, plaintexts, key_guess, target_byte, leakage_model)
+
+    # calculate correlation based on the key guess
+    correlation = pearson_correlation(predicted_leakage, traces, len(traces), len(traces[0]))
+
+    # the score will be the max correlation present in the trace
+    return np.max(np.abs(correlation))
 
 
 def success_rate_guessing_entropy(correct_key, ranks, order, num_experiments):

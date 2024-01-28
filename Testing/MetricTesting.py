@@ -135,3 +135,43 @@ def validate_correlation():
     plt.ylabel("Correlation")
     plt.xlabel("Sample")
     plt.show()
+
+
+def validate_score_and_rank():
+    cw_scope = CWScope(
+        "simpleserial-aes-CWLITEARM-SS_2_1.hex",
+        25,
+        5000,
+        0,
+        simple_serial_version="2"
+    )
+
+    # capture trace set
+    traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
+
+    # TODO: This can be removed once I change the standard capture procedure
+    keys = []
+    texts = []
+    waves = []
+    for trace in traces:
+        keys.append(trace.key)
+        texts.append(trace.textin)
+        waves.append(trace.wave)
+
+    # There are 16 partitions each are 1-byte
+    partitions = 16
+    key_candidates = np.arange(256)
+
+    # score and rank each key guess for each partition
+    rankedKeys = score_and_rank(key_candidates, partitions, waves, score_with_correlation, texts, leakage_model_hw)
+
+    # obtain the correct key and key guess based on ranks
+    full_guess = np.empty(partitions)
+    correct_key = np.empty(partitions)
+    for i in range(partitions):
+        full_guess[i] = rankedKeys[i][0]
+        correct_key[i] = keys[0][i]
+
+    # Check if the ranking function worked
+    print("Full Key Guess Based on Ranks : {}".format(full_guess))
+    print("Correct Key: {}".format(correct_key))
