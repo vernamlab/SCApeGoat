@@ -130,12 +130,21 @@ def leakage_model_hw(plaintext, key):
     return bin(Sbox[plaintext ^ key]).count('1')
 
 
-def generate_predicted_traces(num_traces, plaintexts, subkey, target_byte,
-                              leakage_model=leakage_model_hw):
+def generate_hypothetical_leakage(num_traces, plaintexts, subkey_guess, target_byte,
+                                  leakage_model=leakage_model_hw):
+    """
+    Generates hypothetical leakage based on a provided leakage model. Useful when conducting pearson correlation metric.
+    :param num_traces: The number of traces collected when measuring the observed leakage
+    :param plaintexts: The array of plaintexts used to collect the observed leakage
+    :param subkey_guess: the subkey guess
+    :param target_byte: the target byte of the key
+    :param leakage_model: the leakage model that will be used, defaults to the pre-defined hamming weight leakage model
+    :return: numpy array of the hypothetical leakage
+    """
     predicted = np.empty(num_traces, dtype=object)
 
     for i in range(num_traces):
-        predicted[i] = leakage_model(subkey, plaintexts[i][target_byte])
+        predicted[i] = leakage_model(subkey_guess, plaintexts[i][target_byte])
 
     return predicted
 
@@ -198,6 +207,7 @@ def success_rate_guessing_entropy(correct_key, ranks, order, num_experiments):
     return success_rate, guessing_entropy
 
 
+# AES 128 Sbox LUT
 Sbox = np.array([
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
     0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,

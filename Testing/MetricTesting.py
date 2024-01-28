@@ -125,8 +125,10 @@ def validate_correlation():
     key_guess = keys[0][target_byte]
     print("Key: ", key_guess)
 
-    predicted_leakage = generate_predicted_traces(1000, texts, key_guess, target_byte, leakage_model_hw)
+    # compute predicted leakage using the hamming weight leakage model
+    predicted_leakage = generate_hypothetical_leakage(1000, texts, key_guess, target_byte, leakage_model_hw)
 
+    # calculate correlation and plot, there should be a large spike since we are guessing the correct key
     correlation = pearson_correlation(predicted_leakage, waves, 1000, 5000)
     plt.plot(correlation)
     plt.title("Correlation Coefficient For Correct Key Guess {}".format(hex(key_guess)))
