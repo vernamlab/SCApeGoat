@@ -82,8 +82,9 @@ def t_test(fixed_t, random_t, num_samples, step=2000, order_2=False):
 
 def pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_samples):
     """
-    Compares two trace sets corresponding to predicted and observed leakage. High magnitudes indicate
-    that an intermediate value may be leaked at that time sample.
+    Computes the correlation between observed power traces and predicted power leakage computed using a
+    key guess. The correlation when the predicted power leakage is modeled using the correct key guess has
+    a relatively high magnitude.
 
     :param predicted_leakage: predicted traces associated with intermediate values and a key guess and plaintext value
     :param observed_leakage: predicted traces associated with intermediate values and a key guess and plaintext value
