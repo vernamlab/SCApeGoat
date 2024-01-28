@@ -83,7 +83,7 @@ def validate_t_test():
         fixed.append(trace_f.wave)
 
     # library calculation
-    t, t2 = t_test(fixed[:], rand[:], cw_scope.scope.adc.samples, step=2000, order_2=True)
+    t, t2 = t_test_tvla(fixed[:], rand[:], cw_scope.scope.adc.samples, step=2000, order_2=True)
 
     # plot the results
     plt.plot(t)

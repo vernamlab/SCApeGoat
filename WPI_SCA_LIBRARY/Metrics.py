@@ -32,7 +32,7 @@ def signal_to_noise_ratio(labels):
     return snr
 
 
-def t_test(fixed_t, random_t, num_samples, step=2000, order_2=False):
+def t_test_tvla(fixed_t, random_t, num_samples, step=2000, order_2=False):
     """
     author: Dev Mehta
     Computes the t-statistic between fixed and random trace sets
