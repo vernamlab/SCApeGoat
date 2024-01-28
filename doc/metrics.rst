@@ -4,7 +4,7 @@ This API can be used to compute various different metrics relating to side-chann
 metrics will aid with assessing a systems security and identifying areas of interest in large trace sets.
 Each metric is a standalone function and requires minimal setup to utilize.
 
-.. py:function:: signal_to_noise_ratio (labels)
+.. py:function:: signal_to_noise_ratio(labels)
 
     Computes the signal-to-noise ratio of a set of traces associated with intermediate labels. Spikes in
     magnitude of the resulting SNR trance indicate possible cryptographic information leakage.
@@ -13,7 +13,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
    :type labels: dict
    :return: The SNR trace of the supplied trace set
 
-.. py:function:: t_test (fixed_t, random_t, num_samples, step=2000, order_2=False):
+.. py:function:: t_test(fixed_t, random_t, num_samples, step=2000, order_2=False)
 
     Computes the t-statistic between fixed and random trace sets.
 
@@ -24,7 +24,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :param order_2: compute second order
     :return: (tf, tf_2) where tf is the first order t-statistic and tf_2 is the second order t-statistic
 
-.. py:function:: pearson_correlation (predicted_leakage, observed_leakage, num_traces, num_samples)
+.. py:function:: pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_samples)
 
     Computes the correlation between observed power traces and predicted power leakage computed using a
     key guess. The correlation when the predicted power leakage is modeled using the correct key guess has
@@ -37,7 +37,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
    :return: The correlation trace corresponding to the predicted leakage
 
 
-.. py:function:: leakage_model_hw (plaintext, key)
+.. py:function:: leakage_model_hw(plaintext, key)
 
     Hamming weight leakage model. Returns the Hamming weight of intermediate output Sbox[key ^ plaintext]
 
@@ -45,7 +45,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :param key: the key used to encrypt the plaintext
     :return: the intermediate output
 
-.. py:function:: generate_hypothetical_leakage (num_traces, plaintexts, subkey_guess, target_byte, leakage_model=leakage_model_hw):
+.. py:function:: generate_hypothetical_leakage(num_traces, plaintexts, subkey_guess, target_byte, leakage_model=leakage_model_hw)
 
      Generates hypothetical leakage based on a provided leakage model. Useful when conducting pearson correlation metric.
 
@@ -56,7 +56,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :param leakage_model: the leakage model that will be used, defaults to the pre-defined hamming weight leakage model
     :return: numpy array of the hypothetical leakage
 
-.. py:function:: score_and_rank (key_candidates, partitions, traces, score_fcn, *args)
+.. py:function:: score_and_rank(key_candidates, partitions, traces, score_fcn, *args)
 
     Scores and ranks possible key guesses based on how likely a subkey is to be the actual key.
 
