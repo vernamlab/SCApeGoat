@@ -85,6 +85,9 @@ def validate_t_test():
     # library calculation
     t, t2 = t_test_tvla(fixed[:], rand[:], cw_scope.scope.adc.samples, step=2000, order_2=True)
 
+    # alternate efficient t-test implementation
+    t_e, t_max = t_test_tvla_efficient(rand, fixed)
+
     # plot the results
     plt.plot(t)
     plt.title("Value of tf for 10,000 traces")
@@ -97,6 +100,20 @@ def validate_t_test():
     plt.ylabel("T-statistic")
     plt.xlabel("Sample")
     plt.show()
+
+    plt.plot(t_e)
+    plt.title("Value of t statistic for efficient implementation")
+    plt.ylabel("T-statistic")
+    plt.xlabel("Sample")
+    plt.show()
+
+    plt.plot(t_max)
+    plt.title("Value of t max for efficient implementation")
+    plt.ylabel("T-statistic")
+    plt.xlabel("Trace")
+    plt.show()
+
+validate_t_test()
 
 
 def validate_correlation():
@@ -205,7 +222,8 @@ def validate_success_rate_guessing_entropy():
     experiment_ranks = np.empty(num_experiments, dtype=object)
     for i in range(num_experiments):
         # only do one parition
-        experiment_ranks[i] = score_and_rank_subkey(key_candidates, target_byte, waves, score_with_correlation, texts, leakage_model_hw)
+        experiment_ranks[i] = score_and_rank_subkey(key_candidates, target_byte, waves, score_with_correlation, texts,
+                                                    leakage_model_hw)
 
     # compute the success rate and guessing entropy
     success_rate_guessing_entropy(keys[0][target_byte], experiment_ranks, 1, num_experiments)

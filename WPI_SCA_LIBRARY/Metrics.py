@@ -80,6 +80,52 @@ def t_test_tvla(fixed_t, random_t, num_samples, step=2000, order_2=False):
     return tf, tf_2
 
 
+def t_test_tvla_efficient(random_t, fixed_t):
+    welsh_t = []
+    new_mr = []
+    new_mf = []
+    new_sf = []
+    new_sr = []
+    t_max = []
+
+    for i in range(len(random_t)):
+
+        welsh_t, new_mr, new_mf, new_sf, new_sr = (
+            t_test_intermediate(new_mf, new_mr, new_sf, new_sr, fixed_t[i], random_t[i], i))
+
+        t_max.append(abs(max(welsh_t)))
+
+    return welsh_t, t_max
+
+
+def t_test_intermediate(mf_old, mr_old, sf_old, sr_old, new_tf, new_tr, n):
+    if n == 0:
+        new_mf = new_tf
+        new_mr = new_tr
+        new_sf = new_tf - new_mf
+        new_sr = new_tr - new_mr
+        welsh_t = new_sf
+
+        return welsh_t, new_mr, new_mf, new_sf, new_sr
+
+    elif n > 0:
+
+        new_mf = mf_old + (new_tf - mf_old) / (n + 1)
+        new_mr = mr_old + (new_tr - mr_old) / (n + 1)
+
+        new_sf = sf_old + (new_tf - mf_old) * (new_tf - new_mf)
+        new_sr = sr_old + (new_tr - mr_old) * (new_tr - new_mr)
+
+        new_stdf = np.sqrt(np.array(new_sf / n))
+        new_stdr = np.sqrt(np.array(new_sr / n))
+
+        with np.errstate(divide='ignore'):
+            welsh_t = np.array(new_mf - new_mr) / np.sqrt(
+                np.array((new_stdf ** 2)) / (n + 1) + np.array((new_stdr ** 2)) / (n + 1))
+
+        return welsh_t, new_mr, new_mf, new_sf, new_sr
+
+
 def pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_samples):
     """
     Computes the correlation between observed power traces and predicted power leakage computed using a
