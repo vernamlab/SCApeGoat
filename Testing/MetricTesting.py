@@ -9,6 +9,24 @@ import matplotlib.pyplot as plt
 
 
 def snr_ascad_verification():
+    """
+    Computes SNR with ASCAD Traces
+    """
+    def organize_labels_for_testing(labels, traces_set):
+        # find unique labels
+        labelsUnique = np.unique(labels)
+
+        # initialize the dictionary
+        sorted_labels = {}
+        for i in labelsUnique:
+            sorted_labels[i] = []
+
+        # add traces to labels
+        for index, label in enumerate(labels):
+            sorted_labels[label].append(traces_set[index])  # we only want to look over this interval
+
+        return sorted_labels
+
     with h5py.File(os.path.dirname(__file__) + "\\ATMega8515_raw_traces.h5", "r") as file:
         # obtain data from HDF5 file
         metadata = np.array(file['metadata'][:10000])
@@ -49,23 +67,10 @@ def snr_ascad_verification():
         plt.show()
 
 
-def organize_labels_for_testing(labels, traces):
-    # find unique labels
-    labelsUnique = np.unique(labels)
-
-    # initialize the dictionary
-    sorted_labels = {}
-    for i in labelsUnique:
-        sorted_labels[i] = []
-
-    # add traces to labels
-    for index, label in enumerate(labels):
-        sorted_labels[label].append(traces[index])  # we only want to look over this interval
-
-    return sorted_labels
-
-
 def validate_t_test():
+    """
+    Computes t-test and plot the t-statistics and t-max for 1000 traces of fixed and 1000 traces of random
+    """
     cw_scope = CWScope(
         "simpleserial-aes-CWLITEARM-SS_2_1.hex",
         25,
@@ -102,6 +107,9 @@ def validate_t_test():
 
 
 def validate_correlation():
+    """
+    Computes correlation for a correct key guess
+    """
     cw_scope = CWScope(
         "simpleserial-aes-CWLITEARM-SS_2_1.hex",
         25,
@@ -140,6 +148,9 @@ def validate_correlation():
 
 
 def validate_score_and_rank():
+    """
+    Scores and ranks keys using correlation. Compares result to the actual key.
+    """
     cw_scope = CWScope(
         "simpleserial-aes-CWLITEARM-SS_2_1.hex",
         25,
@@ -180,6 +191,9 @@ def validate_score_and_rank():
 
 
 def validate_success_rate_guessing_entropy():
+    """
+    Computes the success rate and guessing entropy.
+    """
     cw_scope = CWScope(
         "simpleserial-aes-CWLITEARM-SS_2_1.hex",
         25,
