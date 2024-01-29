@@ -1,4 +1,7 @@
 import os.path
+
+import cwtvla
+
 from WPI_SCA_LIBRARY.Metrics import *
 from WPI_SCA_LIBRARY.CWScope import *
 import numpy as np
@@ -83,25 +86,9 @@ def validate_t_test():
         fixed.append(trace_f.wave)
 
     # library calculation
-    t, t2 = t_test_tvla(fixed[:], rand[:], cw_scope.scope.adc.samples, step=2000, order_2=True)
+    t_stat, t_max = t_test_tvla(rand, fixed)
 
-    # alternate efficient t-test implementation
-    t_e, t_max = t_test_tvla_efficient(rand, fixed)
-
-    # plot the results
-    plt.plot(t)
-    plt.title("Value of tf for 10,000 traces")
-    plt.ylabel("T-statistic")
-    plt.xlabel("Sample")
-    plt.show()
-
-    plt.plot(t2)
-    plt.title("Value of tf_2 for 10,000 traces")
-    plt.ylabel("T-statistic")
-    plt.xlabel("Sample")
-    plt.show()
-
-    plt.plot(t_e)
+    plt.plot(t_stat)
     plt.title("Value of t statistic for efficient implementation")
     plt.ylabel("T-statistic")
     plt.xlabel("Sample")
@@ -112,8 +99,6 @@ def validate_t_test():
     plt.ylabel("T-statistic")
     plt.xlabel("Trace")
     plt.show()
-
-validate_t_test()
 
 
 def validate_correlation():

@@ -13,16 +13,13 @@ Each metric is a standalone function and requires minimal setup to utilize.
    :type labels: dict
    :return: The SNR trace of the supplied trace set
 
-.. py:function:: t_test(fixed_t, random_t, num_samples, step=2000, order_2=False)
+.. py:function:: t_test(fixed_t, random_t)
 
-    Computes the t-statistic between fixed and random trace sets.
-
-    :param fixed_t: the set of traces collected with a fixed pt
-    :param random_t: the set of traces collected with a random pt
-    :param num_samples: the number of samples per trace
-    :param step: TODO: ask Dev about this
-    :param order_2: compute second order
-    :return: (tf, tf_2) where tf is the first order t-statistic and tf_2 is the second order t-statistic
+    Computes the t-statistic and t-max between fixed and random trace sets. High t values indicate possible information
+    leakage.
+    :param random_t: The random trace set
+    :param fixed_t: The fixed trace set
+    :return: the t-statistic at each time sample and t-max at each trace
 
 .. py:function:: pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_samples)
 
