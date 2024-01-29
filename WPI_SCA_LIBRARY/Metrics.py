@@ -81,49 +81,50 @@ def t_test_tvla(fixed_t, random_t, num_samples, step=2000, order_2=False):
 
 
 def t_test_tvla_efficient(random_t, fixed_t):
-    welsh_t = []
-    new_mr = []
-    new_mf = []
-    new_sf = []
-    new_sr = []
-    t_max = []
+    welsh_t_outer = []
+    new_mr_outer = []
+    new_mf_outer = []
+    new_sf_outer = []
+    new_sr_outer = []
+    t_max_outer = []
+
+    def t_test_intermediate(mf_old, mr_old, sf_old, sr_old, new_tf, new_tr, n):
+        """
+        Inner function to help with t-test implementation. Not intended to be called outside this scope.
+        """
+        if n == 0:
+            new_mf = new_tf
+            new_mr = new_tr
+            new_sf = new_tf - new_mf
+            new_sr = new_tr - new_mr
+            welsh_t = new_sf
+
+            return welsh_t, new_mr, new_mf, new_sf, new_sr
+
+        elif n > 0:
+
+            new_mf = mf_old + (new_tf - mf_old) / (n + 1)
+            new_mr = mr_old + (new_tr - mr_old) / (n + 1)
+
+            new_sf = sf_old + (new_tf - mf_old) * (new_tf - new_mf)
+            new_sr = sr_old + (new_tr - mr_old) * (new_tr - new_mr)
+
+            new_stdf = np.sqrt(np.array(new_sf / n))
+            new_stdr = np.sqrt(np.array(new_sr / n))
+
+            with np.errstate(divide='ignore', invalid='ignore'):
+                welsh_t = np.array(new_mf - new_mr) / np.sqrt(
+                    np.array((new_stdf ** 2)) / (n + 1) + np.array((new_stdr ** 2)) / (n + 1))
+
+            return welsh_t, new_mr, new_mf, new_sf, new_sr
 
     for i in range(len(random_t)):
+        welsh_t_outer, new_mr_outer, new_mf_outer, new_sf_outer, new_sr_outer = (
+            t_test_intermediate(new_mf_outer, new_mr_outer, new_sf_outer, new_sr_outer, fixed_t[i], random_t[i], i))
 
-        welsh_t, new_mr, new_mf, new_sf, new_sr = (
-            t_test_intermediate(new_mf, new_mr, new_sf, new_sr, fixed_t[i], random_t[i], i))
+        t_max_outer.append(abs(max(welsh_t_outer)))
 
-        t_max.append(abs(max(welsh_t)))
-
-    return welsh_t, t_max
-
-
-def t_test_intermediate(mf_old, mr_old, sf_old, sr_old, new_tf, new_tr, n):
-    if n == 0:
-        new_mf = new_tf
-        new_mr = new_tr
-        new_sf = new_tf - new_mf
-        new_sr = new_tr - new_mr
-        welsh_t = new_sf
-
-        return welsh_t, new_mr, new_mf, new_sf, new_sr
-
-    elif n > 0:
-
-        new_mf = mf_old + (new_tf - mf_old) / (n + 1)
-        new_mr = mr_old + (new_tr - mr_old) / (n + 1)
-
-        new_sf = sf_old + (new_tf - mf_old) * (new_tf - new_mf)
-        new_sr = sr_old + (new_tr - mr_old) * (new_tr - new_mr)
-
-        new_stdf = np.sqrt(np.array(new_sf / n))
-        new_stdr = np.sqrt(np.array(new_sr / n))
-
-        with np.errstate(divide='ignore'):
-            welsh_t = np.array(new_mf - new_mr) / np.sqrt(
-                np.array((new_stdf ** 2)) / (n + 1) + np.array((new_stdr ** 2)) / (n + 1))
-
-        return welsh_t, new_mr, new_mf, new_sf, new_sr
+    return welsh_t_outer, t_max_outer
 
 
 def pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_samples):
