@@ -180,6 +180,22 @@ def score_and_rank(key_candidates, partitions, traces, score_fcn, *args):
     return ranks
 
 
+def score_and_rank_subkey(key_candidates, target_byte, traces, score_fcn, *args):
+    dtype = [('key', int), ('score', 'float64')]
+    key_scores = np.array([], dtype=dtype)
+
+    # for each key guess in the partition score the value and add to list
+    for k in key_candidates:
+        score_k = score_fcn(traces, k, target_byte, *args)
+        key_score = np.array([(k, score_k)], dtype=dtype)
+        key_scores = np.append(key_scores, key_score)
+
+    # rank each key where partition_ranks[0] is the key that scored the highest
+    key_ranks = np.array([key_score[0] for key_score in np.sort(key_scores, order='score')[::-1]])
+
+    return key_ranks
+
+
 def score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_model):
     """
     Scoring function that assigns a key guess a score based on the max value of the pearson correlation.
@@ -201,11 +217,11 @@ def score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_m
     return np.max(np.abs(correlation))
 
 
-def success_rate_guessing_entropy(correct_key, ranks, order, num_experiments):
+def success_rate_guessing_entropy(correct_key, experiment_ranks, order, num_experiments):
     """
     Computes the success rate and guessing entropy based on computed key ranks
     :param correct_key: the correct key of the cryptographic system, typically a key partition in practice
-    :param ranks: The ranks of key guesses for a given experiment
+    :param experiment_ranks: The ranks of a given key guess for all experiments conducted
     :param order:
     :param num_experiments: The number of experiments conducted
     :return: The values of success_rate and guessing_entropy for the given number of experiments
@@ -216,14 +232,14 @@ def success_rate_guessing_entropy(correct_key, ranks, order, num_experiments):
     # for each experiment
     for i in range(num_experiments):
 
-        # check if correct key is within o ranks
+        # check if correct key is within 'order' number of ranks
         for j in range(order):
-            if ranks[i][j] == correct_key:
+            if experiment_ranks[i][j] == correct_key:
                 success_rate += 1
                 break
 
         # guessing entropy is the log2 of the rank of the correct key
-        guessing_entropy += math.log2(ranks[i].index(correct_key) + 1)
+        guessing_entropy += math.log2(experiment_ranks[i].index(correct_key) + 1)
 
     success_rate = success_rate / num_experiments
     guessing_entropy = guessing_entropy / num_experiments

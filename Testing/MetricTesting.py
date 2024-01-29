@@ -175,3 +175,37 @@ def validate_score_and_rank():
     # Check if the ranking function worked
     print("Full Key Guess Based on Ranks : {}".format(full_guess))
     print("Correct Key: {}".format(correct_key))
+
+
+def validate_success_rate_guessing_entropy():
+    cw_scope = CWScope(
+        "simpleserial-aes-CWLITEARM-SS_2_1.hex",
+        25,
+        5000,
+        0,
+        simple_serial_version="2"
+    )
+
+    # capture trace set
+    traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
+
+    # TODO: This can be removed once I change the standard capture procedure
+    keys = []
+    texts = []
+    waves = []
+    for trace in traces:
+        keys.append(trace.key)
+        texts.append(trace.textin)
+        waves.append(trace.wave)
+
+    # conduct experiments on a given subkey
+    num_experiments = 10
+    key_candidates = np.arange(256)
+    target_byte = 2
+    experiment_ranks = np.empty(num_experiments, dtype=object)
+    for i in range(num_experiments):
+        # only do one parition
+        experiment_ranks[i] = score_and_rank_subkey(key_candidates, target_byte, waves, score_with_correlation, texts, leakage_model_hw)
+
+    # compute the success rate and guessing entropy
+    success_rate_guessing_entropy(keys[0][target_byte], experiment_ranks, 1, num_experiments)
