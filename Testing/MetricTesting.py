@@ -205,7 +205,7 @@ def validate_success_rate_guessing_entropy():
     )
 
     # capture trace set
-    traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
+    traces = cw_scope.standard_capture_traces(15, fixed_key=True, fixed_pt=False)
 
     # TODO: This can be removed once I change the standard capture procedure
     keys = []
@@ -217,7 +217,7 @@ def validate_success_rate_guessing_entropy():
         waves.append(trace.wave)
 
     # conduct experiments on a given subkey
-    num_experiments = 10
+    num_experiments = 100
     key_candidates = np.arange(256)
     target_byte = 2
     experiment_ranks = np.empty(num_experiments, dtype=object)

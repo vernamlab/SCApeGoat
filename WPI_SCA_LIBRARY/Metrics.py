@@ -213,7 +213,7 @@ def score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_m
     """
 
     # generate the predicted leakage
-    predicted_leakage = generate_hypothetical_leakage(1000, plaintexts, key_guess, target_byte, leakage_model)
+    predicted_leakage = generate_hypothetical_leakage(len(traces), plaintexts, key_guess, target_byte, leakage_model)
 
     # calculate correlation based on the key guess
     correlation = pearson_correlation(predicted_leakage, traces, len(traces), len(traces[0]))
@@ -227,7 +227,7 @@ def success_rate_guessing_entropy(correct_key, experiment_ranks, order, num_expe
     Computes the success rate and guessing entropy based on computed key ranks
     :param correct_key: the correct key of the cryptographic system, typically a key partition in practice
     :param experiment_ranks: The ranks of a given key guess for all experiments conducted
-    :param order:
+    :param order: If a key is within the number specified by the order ranks, then it will count towards the success rate
     :param num_experiments: The number of experiments conducted
     :return: The values of success_rate and guessing_entropy for the given number of experiments
     """
@@ -244,7 +244,7 @@ def success_rate_guessing_entropy(correct_key, experiment_ranks, order, num_expe
                 break
 
         # guessing entropy is the log2 of the rank of the correct key
-        guessing_entropy += math.log2(experiment_ranks[i].index(correct_key) + 1)
+        guessing_entropy += math.log2(np.where(experiment_ranks[i] == correct_key)[0][0] + 1)
 
     success_rate = success_rate / num_experiments
     guessing_entropy = guessing_entropy / num_experiments
