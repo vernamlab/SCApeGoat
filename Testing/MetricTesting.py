@@ -1,6 +1,7 @@
 import os.path
 
 import cwtvla
+import tqdm
 
 from WPI_SCA_LIBRARY.Metrics import *
 from WPI_SCA_LIBRARY.CWScope import *
@@ -12,6 +13,7 @@ def snr_ascad_verification():
     """
     Computes SNR with ASCAD Traces
     """
+
     def organize_labels_for_testing(labels, traces_set):
         # find unique labels
         labelsUnique = np.unique(labels)
@@ -219,10 +221,16 @@ def validate_success_rate_guessing_entropy():
     key_candidates = np.arange(256)
     target_byte = 2
     experiment_ranks = np.empty(num_experiments, dtype=object)
-    for i in range(num_experiments):
-        # only do one parition
+
+    # run experiments
+    for i in tqdm.tqdm(range(num_experiments), desc="Running Experiments"):
         experiment_ranks[i] = score_and_rank_subkey(key_candidates, target_byte, waves, score_with_correlation, texts,
                                                     leakage_model_hw)
 
     # compute the success rate and guessing entropy
-    success_rate_guessing_entropy(keys[0][target_byte], experiment_ranks, 1, num_experiments)
+    sr, ge = success_rate_guessing_entropy(keys[0][target_byte], experiment_ranks, 1, num_experiments)
+
+    print("Success Rate For 1000 Traces ", sr)
+    print("Guessing Entropy For 1000 Traces ", ge)
+
+validate_success_rate_guessing_entropy()

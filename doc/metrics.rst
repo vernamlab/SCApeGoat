@@ -17,6 +17,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
     Computes the t-statistic and t-max between fixed and random trace sets. High t values indicate possible information
     leakage.
+
     :param random_t: The random trace set
     :param fixed_t: The fixed trace set
     :return: the t-statistic at each time sample and t-max at each trace
@@ -66,7 +67,8 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
 .. py:function:: score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_model)
 
-    Scoring function that assigns a key guess a score based on the max value of the pearson correlation.
+    Scoring function that assigns a key guess a score based on the max value of the pearson correlation. In theory,
+    the key guess with the highest correlation will be ranked first.
 
     :param traces: The collected traces
     :param key_guess: The key guess
