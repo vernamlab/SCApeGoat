@@ -74,15 +74,15 @@ def validate_t_test():
     Computes t-test and plot the t-statistics and t-max for 1000 traces of fixed and 1000 traces of random
     """
     cw_scope = CWScope(
-        "simpleserial-aes-CWLITEARM-SS_2_1.hex",
+        "simpleserial-aes_CW308-STM32F3_MASKEDAES_ANSSI.hex",
         25,
-        5000,
+        24000,
         0,
-        simple_serial_version="2"
+        simple_serial_version="1"
     )
 
     # capture traces
-    fixed_t, rand_t = cw_scope.capture_traces_tvla(1000)
+    fixed_t, rand_t = cw_scope.capture_traces_tvla(2500)
 
     rand = []
     fixed = []
@@ -96,16 +96,15 @@ def validate_t_test():
     t_stat, t_max = t_test_tvla(rand, fixed)
 
     plt.plot(t_stat)
-    plt.title("Value of t statistic for efficient implementation")
+    plt.title("T-test using WPI_SCLA_MQP Implementation")
+    plt.axhline(y=-4.5, color='r', linestyle='--')
+    plt.axhline(y=4.5, color='r', linestyle='--')
     plt.ylabel("T-statistic")
     plt.xlabel("Sample")
     plt.show()
 
-    plt.plot(t_max)
-    plt.title("Value of t max for efficient implementation")
-    plt.ylabel("T-statistic")
-    plt.xlabel("Trace")
-    plt.show()
+
+validate_t_test()
 
 
 def validate_correlation():
@@ -113,15 +112,15 @@ def validate_correlation():
     Computes correlation for a correct key guess
     """
     cw_scope = CWScope(
-        "simpleserial-aes-CWLITEARM-SS_2_1.hex",
+        "simpleserial-aes-MASKEDAES-ANSSI-CWLITEARM.hex",
         25,
         5000,
         0,
-        simple_serial_version="2"
+        simple_serial_version="1"
     )
 
     # capture trace set
-    traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
+    traces = cw_scope.standard_capture_traces(10000, fixed_key=True, fixed_pt=False)
 
     # TODO: This can be removed once I change the standard capture procedure
     keys = []
@@ -197,15 +196,15 @@ def validate_success_rate_guessing_entropy():
     Computes the success rate and guessing entropy.
     """
     cw_scope = CWScope(
-        "simpleserial-aes-CWLITEARM-SS_2_1.hex",
+        "simpleserial-aes-MASKEDAES-ANSSI-CWLITEARM.hex",
         25,
         5000,
         0,
-        simple_serial_version="2"
+        simple_serial_version="1"
     )
 
     # capture trace set
-    traces = cw_scope.standard_capture_traces(15, fixed_key=True, fixed_pt=False)
+    traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
 
     # TODO: This can be removed once I change the standard capture procedure
     keys = []
@@ -217,7 +216,7 @@ def validate_success_rate_guessing_entropy():
         waves.append(trace.wave)
 
     # conduct experiments on a given subkey
-    num_experiments = 100
+    num_experiments = 10
     key_candidates = np.arange(256)
     target_byte = 2
     experiment_ranks = np.empty(num_experiments, dtype=object)
@@ -232,5 +231,3 @@ def validate_success_rate_guessing_entropy():
 
     print("Success Rate For 1000 Traces ", sr)
     print("Guessing Entropy For 1000 Traces ", ge)
-
-validate_success_rate_guessing_entropy()
