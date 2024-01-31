@@ -104,23 +104,20 @@ def validate_t_test():
     plt.show()
 
 
-validate_t_test()
-
-
 def validate_correlation():
     """
     Computes correlation for a correct key guess
     """
     cw_scope = CWScope(
-        "simpleserial-aes-MASKEDAES-ANSSI-CWLITEARM.hex",
+        "simpleserial-aes-CWLITEARM-SS_2_1.hex",
         25,
         5000,
         0,
-        simple_serial_version="1"
+        simple_serial_version="2"
     )
 
     # capture trace set
-    traces = cw_scope.standard_capture_traces(10000, fixed_key=True, fixed_pt=False)
+    traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
 
     # TODO: This can be removed once I change the standard capture procedure
     keys = []
@@ -133,18 +130,15 @@ def validate_correlation():
 
     # we will target the correct key for the sake of demonstration
     target_byte = 0
-    key_guess = keys[0][target_byte]
-    print("Key: ", key_guess)
+    for key_guess in tqdm.tqdm(range(40, 50), desc="Calculation Correlation"):
+        predicted_leakage = generate_hypothetical_leakage(1000, texts, key_guess, target_byte, leakage_model_hw)
+        correlation = pearson_correlation(predicted_leakage, waves, 1000, 5000)
+        plt.legend(title="Key Guess")
+        plt.plot(correlation, label=str(hex(key_guess)))
 
-    # compute predicted leakage using the hamming weight leakage model
-    predicted_leakage = generate_hypothetical_leakage(1000, texts, key_guess, target_byte, leakage_model_hw)
-
-    # calculate correlation and plot, there should be a large spike since we are guessing the correct key
-    correlation = pearson_correlation(predicted_leakage, waves, 1000, 5000)
-    plt.plot(correlation)
-    plt.title("Correlation Coefficient For Correct Key Guess {}".format(hex(key_guess)))
-    plt.ylabel("Correlation")
+    plt.title("Correlation For Different Key Guesses for Byte 0")
     plt.xlabel("Sample")
+    plt.ylabel("Correlation")
     plt.show()
 
 
