@@ -88,29 +88,18 @@ class CWScope:
         rand_traces = np.empty([num_traces], dtype=object)
         fixed_traces = np.empty([num_traces], dtype=object)
 
-        for i in tqdm.tqdm(range(num_traces), desc='Capturing Fixed Trace Set'):
+        for i in tqdm.tqdm(range(num_traces), desc='Capturing Fixed and Random Trace Sets'):
+            # capture trace from fixed group
             key, pt = ktp.next_group_A()
-
-            # capture trace
             trace = cw.capture_trace(self.scope, self.target, pt, key)
+            if trace is not None:
+                fixed_traces[i] = trace
 
-            # append arrays if trace successfully captured
-            if trace is None:
-                continue
-
-            fixed_traces[i] = trace
-
-        for i in tqdm.tqdm(range(num_traces), desc='Capturing Random Trace Set'):
+            # capture trace from random group
             key, pt = ktp.next_group_B()
-
-            # capture trace
             trace = cw.capture_trace(self.scope, self.target, pt, key)
-
-            # append arrays if trace successfully captured
-            if trace is None:
-                continue
-
-            rand_traces[i] = trace
+            if trace is not None:
+                rand_traces[i] = trace
 
         return fixed_traces, rand_traces
 

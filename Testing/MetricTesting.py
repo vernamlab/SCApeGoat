@@ -82,7 +82,7 @@ def validate_t_test():
     )
 
     # capture traces
-    fixed_t, rand_t = cw_scope.capture_traces_tvla(2500)
+    fixed_t, rand_t = cw_scope.capture_traces_tvla(5000)
 
     rand = []
     fixed = []
@@ -103,6 +103,7 @@ def validate_t_test():
     plt.xlabel("Sample")
     plt.show()
 
+validate_t_test()
 
 def validate_correlation():
     """
