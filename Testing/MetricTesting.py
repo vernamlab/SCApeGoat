@@ -74,7 +74,7 @@ def validate_t_test():
     Computes t-test and plot the t-statistics and t-max for 1000 traces of fixed and 1000 traces of random
     """
     cw_scope = CWScope(
-        "simpleserial-aes_CW308-STM32F3_MASKEDAES_ANSSI.hex",
+        "simpleserial-aes_CW308-STM32F3_MASKEDAES_ANSSI+UNROLLED+KEYSCHEDULE.hex",
         25,
         24000,
         0,
@@ -82,7 +82,7 @@ def validate_t_test():
     )
 
     # capture traces
-    fixed_t, rand_t = cw_scope.capture_traces_tvla(5000)
+    fixed_t, rand_t = cw_scope.capture_traces_tvla(2000)
 
     rand = []
     fixed = []
@@ -103,7 +103,12 @@ def validate_t_test():
     plt.xlabel("Sample")
     plt.show()
 
-validate_t_test()
+    plt.plot(t_max)
+    plt.title("Max T-value vs number of traces")
+    plt.ylabel("T-statistic")
+    plt.xlabel("Number of traces")
+    plt.show()
+
 
 def validate_correlation():
     """
