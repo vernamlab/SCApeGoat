@@ -11,7 +11,8 @@
 /Testing/*.npy
 /JupyterNotebooks/FileFormat/__pycache__/
 /*.h5
-/Testing/ATMega8515_raw_traces.h5
-/Testing/ascad-variable.h5
-/Testing/ascad-variable-desync100.h5
-/Testing/ASCAD_desync100.h5
+/Testing/ExampleData/ASCAD/ATMega8515_raw_traces.h5
+/Testing/ExampleData/ASCAD/ascad-variable.h5
+/Testing/ExampleData/ASCAD/ascad-variable-desync100.h5
+/Testing/ExampleData/ASCAD/ASCAD_desync100.h5
+/Testing/ExampleData
