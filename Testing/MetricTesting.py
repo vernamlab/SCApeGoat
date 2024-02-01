@@ -191,6 +191,49 @@ def validate_score_and_rank():
     print("Correct Key: {}".format(correct_key))
 
 
+def correct_key_rank_vs_num_traces():
+    """
+     Scores and ranks keys using correlation. Compares result to the actual key.
+     """
+    cw_scope = CWScope(
+        "simpleserial-aes-CWLITEARM-SS_2_1.hex",
+        25,
+        1400,
+        0,
+        simple_serial_version="2"
+    )
+
+    trace_amounts = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
+    correct_key_ranks = []
+    target_key_byte = 0
+
+    for num_traces in trace_amounts:
+        traces = cw_scope.standard_capture_traces(num_traces, fixed_key=True, fixed_pt=False)
+
+        # TODO: This can be removed once I change the standard capture procedure
+        keys = []
+        texts = []
+        waves = []
+        for trace in traces:
+            keys.append(trace.key)
+            texts.append(trace.textin)
+            waves.append(trace.wave)
+
+        # There are 16 partitions each are 1-byte
+        key_candidates = np.arange(256)
+
+        # score and rank each key guess for each partition
+        rankedKeys = score_and_rank_subkey(key_candidates, target_key_byte, waves, score_with_correlation, texts,
+                                           leakage_model_hw)
+        correct_key_ranks.append(np.where(rankedKeys == keys[0][target_key_byte])[0])
+
+    plt.plot(trace_amounts, correct_key_ranks)
+    plt.xlabel("Number of Traces")
+    plt.ylabel("Rank")
+    plt.title("Rank of Correct Key Guess vs. Number of Traces (1400 samples per trace)")
+    plt.show()
+
+
 def validate_success_rate_guessing_entropy():
     """
     Computes the success rate and guessing entropy.
