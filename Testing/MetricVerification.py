@@ -50,11 +50,12 @@ def snr_verification():
         # plot result
         plt.plot(snr2, label="SNR2")
         plt.plot(snr3, label="SNR3")
-        plt.title("Signal to Noise Ratio Over Samples 45400 to 46100")
+        plt.title("Signal to Noise Ratio Over Samples 45400 to 46100 ASCAD Traces")
         plt.ylabel("Amplitude")
         plt.xlabel("Sample")
         plt.xlim(45400, 46100)
         plt.ylim(0, 1)
+        plt.grid()
         plt.legend()
         plt.show()
 
@@ -126,3 +127,4 @@ def t_test_verification():
     plt.grid()
     plt.show()
 
+snr_verification()

@@ -1,5 +1,5 @@
 import numpy as np
-import tqdm
+from tqdm import *
 from scipy.stats import ttest_ind
 import math
 
@@ -22,7 +22,7 @@ def signal_to_noise_ratio(labels):
     set_means = np.empty(label_set_size, dtype=object)
     set_var = np.empty(label_set_size, dtype=object)
 
-    for i, trace_set in enumerate(label_set):
+    for i, trace_set in enumerate(tqdm(label_set, desc="Computing Signal-To-Noise Ratio")):
         # compute statistical mean of every label set
         set_means[i] = np.mean(trace_set, axis=0)
         set_var[i] = np.var(trace_set, axis=0)
@@ -76,7 +76,7 @@ def t_test_tvla(fixed_t, random_t):
 
             return welsh_t, new_mr, new_mf, new_sf, new_sr
 
-    for i in tqdm.tqdm(range(len(random_t)), desc="Calculating T-Test"):
+    for i in tqdm(range(len(random_t)), desc="Calculating T-Test"):
         welsh_t_outer, new_mr_outer, new_mf_outer, new_sf_outer, new_sr_outer = (
             t_test_intermediate(new_mf_outer, new_mr_outer, new_sf_outer, new_sr_outer, fixed_t[i], random_t[i], i))
 
@@ -170,7 +170,7 @@ def score_and_rank(key_candidates, partitions, traces, score_fcn, *args):
     dtype = [('key', int), ('score', 'float64')]
     ranks = []
     # for each key partition
-    for i in tqdm.tqdm(range(partitions), desc='Scoring {} Partitions'.format(partitions)):
+    for i in tqdm(range(partitions), desc='Scoring {} Partitions'.format(partitions)):
         partition_scores = np.array([], dtype=dtype)
 
         # for each key guess in the partition score the value and add to list
