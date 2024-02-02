@@ -1,4 +1,5 @@
 import numpy as np
+import tqdm
 from tqdm import *
 from scipy.stats import ttest_ind
 import math
@@ -191,7 +192,7 @@ def score_and_rank_subkey(key_candidates, target_byte, traces, score_fcn, *args)
     key_scores = np.array([], dtype=dtype)
 
     # for each key guess in the partition score the value and add to list
-    for k in key_candidates:
+    for k in tqdm(key_candidates):
         score_k = score_fcn(traces, k, target_byte, *args)
         key_score = np.array([(k, score_k)], dtype=dtype)
         key_scores = np.append(key_scores, key_score)

@@ -2,6 +2,7 @@ import csv
 import os.path
 
 import matplotlib.pyplot as plt
+import tqdm
 
 from WPI_SCA_LIBRARY.Metrics import *
 from WPI_SCA_LIBRARY.CWScope import *
@@ -74,7 +75,6 @@ def read_csv_traces(csv_file, num_traces):
 
 def read_bin_file_traces(bin_file, num_traces=50000, num_samples=3000):
     with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
-
         traces = np.empty(num_traces, dtype=object)
 
         for i in tqdm.tqdm(range(num_traces), desc="Reading Traces from .bin file"):
@@ -87,12 +87,18 @@ def t_test_verification():
     Verifies T-test with MetriSCA Traces
     """
     # Load in Binary Data
-    unmasked_fixed = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    unmasked_random = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    masked_fixed = read_bin_file_traces("masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    masked_random = read_bin_file_traces("masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    masked_fixed_2 = read_bin_file_traces("masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    masked_random_2 = read_bin_file_traces("masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    unmasked_fixed = read_bin_file_traces(
+        "unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    unmasked_random = read_bin_file_traces(
+        "unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    masked_fixed = read_bin_file_traces(
+        "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    masked_random = read_bin_file_traces(
+        "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    masked_fixed_2 = read_bin_file_traces(
+        "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    masked_random_2 = read_bin_file_traces(
+        "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
 
     # compute t-test for each dataset
     t, tmax = t_test_tvla(unmasked_fixed, unmasked_random)
@@ -126,3 +132,33 @@ def t_test_verification():
     plt.legend()
     plt.grid()
     plt.show()
+
+
+def correlation_validation():
+    with h5py.File(os.path.dirname(__file__) + "\\ExampleData\\ASCAD\\ATMega8515_raw_traces.h5", "r") as file:
+        # obtain data from HDF5 file
+        metadata = np.array(file['metadata'][:2500])
+        traces = file['traces'][:2500, :]
+        keys = metadata['key'][:, :]
+        plaintexts = metadata['plaintext'][:, :]
+
+        for k in tqdm.tqdm(range(70, 80)):
+            hypothetical_leakage = generate_hypothetical_leakage(len(traces), plaintexts, k, 0, leakage_model_hw)
+            correlation = pearson_correlation(hypothetical_leakage, traces, len(traces), len(traces[0]))
+
+            plt.plot(correlation, label=k)
+
+        plt.legend()
+        plt.title("Correlation for Subkey: {}".format(keys[0][0]))
+        plt.show()
+
+
+def score_and_rank_validation():
+    with h5py.File(os.path.dirname(__file__) + "\\ExampleData\\ASCAD\\ATMega8515_raw_traces.h5", "r") as file:
+        # obtain data from HDF5 file
+        metadata = np.array(file['metadata'][:1000])
+        traces = file['traces'][:1000, :]
+        plaintexts = metadata['plaintext'][:, :]
+        ranks = score_and_rank_subkey(np.arange(256), 0, traces, score_with_correlation, plaintexts, leakage_model_hw)
+        print(ranks[0])
+
