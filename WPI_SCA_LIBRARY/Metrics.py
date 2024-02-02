@@ -32,7 +32,7 @@ def signal_to_noise_ratio(labels):
     return snr
 
 
-def t_test_tvla(random_t, fixed_t):
+def t_test_tvla(fixed_t, random_t):
     """
     Computes the t-statistic and t-max between fixed and random trace sets.
     :param random_t: The random trace set
@@ -71,16 +71,17 @@ def t_test_tvla(random_t, fixed_t):
             new_stdr = np.sqrt(np.array(new_sr / n))
 
             with np.errstate(divide='ignore', invalid='ignore'):
-                welsh_t = np.array(new_mf - new_mr) / np.sqrt(
-                    np.array((new_stdf ** 2)) / (n + 1) + np.array((new_stdr ** 2)) / (n + 1))
+                welsh_t = np.array(new_mr - new_mf) / np.sqrt(
+                    np.array((new_stdr ** 2)) / (n + 1) + np.array((new_stdf ** 2)) / (n + 1))
 
             return welsh_t, new_mr, new_mf, new_sf, new_sr
 
-    for i in range(len(random_t)):
+    for i in tqdm.tqdm(range(len(random_t)), desc="Calculating T-Test"):
         welsh_t_outer, new_mr_outer, new_mf_outer, new_sf_outer, new_sr_outer = (
             t_test_intermediate(new_mf_outer, new_mr_outer, new_sf_outer, new_sr_outer, fixed_t[i], random_t[i], i))
 
-        t_max_outer.append(abs(max(welsh_t_outer)))
+        if i > 5:  # remove edge effects
+            t_max_outer.append(max(abs(welsh_t_outer)))
 
     return welsh_t_outer, t_max_outer
 

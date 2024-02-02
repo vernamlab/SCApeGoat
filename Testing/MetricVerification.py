@@ -1,12 +1,14 @@
+import csv
 import os.path
+
+import matplotlib.pyplot as plt
 
 from WPI_SCA_LIBRARY.Metrics import *
 from WPI_SCA_LIBRARY.CWScope import *
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-def snr_ascad_verification():
+def snr_verification():
     """
     Computes SNR with ASCAD Traces
     """
@@ -40,21 +42,12 @@ def snr_ascad_verification():
 
         # compute SNR for each
         organizedSN2 = organize_labels_for_testing(snr2_labels, traces)
-
-        start = time.time()
         snr2 = signal_to_noise_ratio(organizedSN2)
-        end = time.time()
 
         organizedSN3 = organize_labels_for_testing(snr3_labels, traces)
-
-        start2 = time.time()
         snr3 = signal_to_noise_ratio(organizedSN3)
-        end2 = time.time()
 
-        total_time = ((end - start) + (end2 - start2)) / 2
-
-        print("SNR Execution Time on 10,000 ASCAD Traces: " + str(total_time) + " seconds")
-
+        # plot result
         plt.plot(snr2, label="SNR2")
         plt.plot(snr3, label="SNR3")
         plt.title("Signal to Noise Ratio Over Samples 45400 to 46100")
@@ -66,17 +59,70 @@ def snr_ascad_verification():
         plt.show()
 
 
-# PATH = "C:\\Users\\samka\\PycharmProjects\\MQP\\SCLA_API_MQP\\Testing\\ExampleData\\MetriSCA\\masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.csv"
-#
-# with open(PATH) as file:
-#     reader = csv.reader(file)
-#
-#     traces = np.empty(50000, dtype=object)
-#
-#     for i, row in enumerate(reader):
-#         print("{} out of 50,000 traces loaded".format(i + 1))
-#         traces[i] = row
-#
-#     print(traces[0])
-#     plt.plot(traces[0])
-#     plt.show()
+def read_csv_traces(csv_file, num_traces):
+    traces = np.empty(num_traces, dtype=object)
+
+    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + csv_file, "r") as file:
+        csv_reader = csv.reader(file)
+
+        for i, row in tqdm.tqdm(enumerate(csv_reader), desc="Reading {} Traces From CSV".format(num_traces)):
+            traces[i] = np.array([int(i) for i in row])
+
+        return traces
+
+
+def read_bin_file_traces(bin_file, num_traces=50000, num_samples=3000):
+    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
+
+        traces = np.empty(num_traces, dtype=object)
+
+        for i in tqdm.tqdm(range(num_traces), desc="Reading Traces from .bin file"):
+            traces[i] = np.array([int(i) for i in file.read(num_samples)])
+        return traces
+
+
+def t_test_verification():
+    """
+    Verifies T-test with MetriSCA Traces
+    """
+    # Load in Binary Data
+    unmasked_fixed = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    unmasked_random = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    masked_fixed = read_bin_file_traces("masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    masked_random = read_bin_file_traces("masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    masked_fixed_2 = read_bin_file_traces("masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    masked_random_2 = read_bin_file_traces("masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+
+    # compute t-test for each dataset
+    t, tmax = t_test_tvla(unmasked_fixed, unmasked_random)
+    t1, tmax1 = t_test_tvla(masked_fixed, masked_random)
+    t2, tmax2 = t_test_tvla(masked_fixed_2, masked_random_2)
+
+    # plot t-test
+    plt.plot(t[1000:1500], label="Unprotected Sbox", color='tab:blue')
+    plt.plot(t1[1000:1500], label="Masked Sbox 1", color='tab:green')
+    plt.plot(t2[1000:1500], label="Masked Sbox 2", color='tab:orange')
+
+    plt.title("T-test implementation using MetriSCA Example Traces")
+    plt.xlabel("Sample")
+    plt.ylabel("T-Statistic")
+    plt.axhline(y=-4.5, color='0', linestyle='--')
+    plt.axhline(y=4.5, color='0', linestyle='--')
+    plt.yticks([4.5, 0, -4.5, -10, -20, -30, -40])
+    plt.legend()
+    plt.grid()
+    plt.show()
+
+    # plot t-max
+    plt.plot(tmax, label="Unprotected Sbox", color='tab:blue')
+    plt.plot(tmax1, label="Masked Sbox 1", color='tab:green')
+    plt.plot(tmax2, label="Masked Sbox 2", color='tab:orange')
+
+    plt.title("T-Max as a Function of the Number of Traces")
+    plt.xlabel("Number of Traces")
+    plt.ylabel("T-Max")
+    plt.axhline(y=4.5, color='0', linestyle='--')
+    plt.legend()
+    plt.grid()
+    plt.show()
+

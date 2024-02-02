@@ -3,14 +3,6 @@
 /*.hdf5
 /*.cw
 /*/__pycache__
-/Testing/*.hdf5
-/JupyterNotebooks/FileFormat/SNR_LSB.png
-/JupyterNotebooks/FileFormat/SnR_testing.py
-/JupyterNotebooks/FileFormat/SnR_test.hdf5
-/Testing/plaintext_new.txt
-/Testing/*.npy
-/JupyterNotebooks/FileFormat/__pycache__/
-/*.h5
 /Testing/ExampleData/ASCAD/ATMega8515_raw_traces.h5
 /Testing/ExampleData/ASCAD/ascad-variable.h5
 /Testing/ExampleData/ASCAD/ascad-variable-desync100.h5
