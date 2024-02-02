@@ -77,7 +77,7 @@ def correlation_demo():
     # we will target the correct key for the sake of demonstration
     target_byte = 0
     for key_guess in tqdm.tqdm(range(40, 50), desc="Calculation Correlation"):
-        predicted_leakage = generate_hypothetical_leakage(1000, texts, key_guess, target_byte, leakage_model_hw)
+        predicted_leakage = generate_hypothetical_leakage(1000, texts, key_guess, leakage_model_hw)
         correlation = pearson_correlation(predicted_leakage, waves, 1000, 5000)
         plt.legend(title="Key Guess")
         plt.plot(correlation, label=str(hex(key_guess)))
