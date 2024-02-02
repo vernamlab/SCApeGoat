@@ -150,6 +150,8 @@ def score_and_rank_validation():
     partitions = 16
     key_candidates = np.arange(256)
 
+    # TODO: Check correlation
+
     # score and rank each key guess for each partition
     rankedKeys = score_and_rank_subkey(key_candidates, partitions, traces, score_with_correlation, texts, leakage_model_hw)
 
