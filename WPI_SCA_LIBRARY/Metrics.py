@@ -138,19 +138,21 @@ def leakage_model_hw(plaintext, key):
     return bin(Sbox[plaintext ^ key]).count('1')
 
 
-def generate_hypothetical_leakage(num_traces, plaintext_byte, subkey_guess, leakage_model=leakage_model_hw):
+def generate_hypothetical_leakage(num_traces, plaintexts, subkey_guess, target_byte,
+                                  leakage_model=leakage_model_hw):
     """
     Generates hypothetical leakage based on a provided leakage model. Useful when conducting pearson correlation metric.
     :param num_traces: The number of traces collected when measuring the observed leakage
-    :param plaintext_byte: The array of plaintexts used to collect the observed leakage
+    :param plaintexts: The array of plaintexts used to collect the observed leakage
     :param subkey_guess: the subkey guess
+    :param target_byte: the target byte of the key
     :param leakage_model: the leakage model that will be used, defaults to the pre-defined hamming weight leakage model
     :return: numpy array of the hypothetical leakage
     """
     predicted = np.empty(num_traces, dtype=object)
 
     for i in range(num_traces):
-        predicted[i] = leakage_model(subkey_guess, plaintext_byte[i])
+        predicted[i] = leakage_model(subkey_guess, plaintexts[i][target_byte])
 
     return predicted
 
@@ -189,7 +191,7 @@ def score_and_rank_subkey(key_candidates, target_byte, traces, score_fcn, *args)
     key_scores = np.array([], dtype=dtype)
 
     # for each key guess in the partition score the value and add to list
-    for k in tqdm(key_candidates):
+    for k in key_candidates:
         score_k = score_fcn(traces, k, target_byte, *args)
         key_score = np.array([(k, score_k)], dtype=dtype)
         key_scores = np.append(key_scores, key_score)
@@ -212,7 +214,7 @@ def score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_m
     """
 
     # generate the predicted leakage
-    predicted_leakage = generate_hypothetical_leakage(len(traces), plaintexts, key_guess, leakage_model)
+    predicted_leakage = generate_hypothetical_leakage(len(traces), plaintexts, key_guess, target_byte, leakage_model)
 
     # calculate correlation based on the key guess
     correlation = pearson_correlation(predicted_leakage, traces, len(traces), len(traces[0]))

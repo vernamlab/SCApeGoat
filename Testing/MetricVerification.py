@@ -82,17 +82,6 @@ def read_bin_file_traces(bin_file, num_traces=50000, num_samples=3000):
         return traces
 
 
-def read_bin_file_keys_or_texts(bin_file, set_type="Random"):
-    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
-        dataset = np.array([int(i) for i in file.read(100000)])
-        if set_type == "Random":
-            return dataset[0::2]
-        elif set_type == "Fixed":
-            return dataset[1::2]
-        else:
-            raise Exception("Unknown text set: {}".format(set_type))
-
-
 def t_test_verification():
     """
     Verifies T-test with MetriSCA Traces
@@ -137,25 +126,3 @@ def t_test_verification():
     plt.legend()
     plt.grid()
     plt.show()
-
-
-def score_and_rank_validation():
-
-    # load in traces and plaintexts
-    traces = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    texts = read_bin_file_keys_or_texts("unprotected_sbox\\single\\traces\\oscilloscope_traces\\plaintexts.bin", "Random")
-    keys = read_bin_file_keys_or_texts("unprotected_sbox\\single\\traces\\oscilloscope_traces\\keys.bin", "Random")
-
-    # There are 16 partitions each are 1-byte
-    partitions = 16
-    key_candidates = np.arange(256)
-
-    # TODO: Check correlation
-
-    # score and rank each key guess for each partition
-    rankedKeys = score_and_rank_subkey(key_candidates, partitions, traces, score_with_correlation, texts, leakage_model_hw)
-
-    print(rankedKeys)
-
-
-score_and_rank_validation()
