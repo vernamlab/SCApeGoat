@@ -74,6 +74,17 @@ def read_csv_traces(csv_file, num_traces):
         return traces
 
 
+def read_bin_file_keys_or_texts(bin_file, set_type="Random"):
+    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
+        dataset = np.array([int(i) for i in file.read(100000)])
+        if set_type == "Random":
+            return dataset[0::2]
+        elif set_type == "Fixed":
+            return dataset[1::2]
+        else:
+            raise Exception("Unknown text set: {}".format(set_type))
+
+
 def read_bin_file_traces(bin_file, num_traces=50000, num_samples=3000):
     with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
         traces = np.empty(num_traces, dtype=object)
@@ -161,5 +172,3 @@ def score_and_rank_validation():
         plaintexts = metadata['plaintext'][:, :]
         ranks = score_and_rank_subkey(np.arange(256), 0, traces, score_with_correlation, plaintexts, leakage_model_sbox_output)
         print(ranks[0])
-
-score_and_rank_validation()
