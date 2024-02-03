@@ -144,7 +144,7 @@ def correlation_validation():
         plaintexts = metadata['plaintext'][:, :]
 
         for k in tqdm.tqdm(range(70, 80)):
-            hypothetical_leakage = leakage_model_hw(len(traces), plaintexts, k, 0)
+            hypothetical_leakage = leakage_model_sbox_output(len(traces), plaintexts, k, 0)
             correlation = pearson_correlation(hypothetical_leakage, traces, len(traces), len(traces[0]))
             plt.plot(correlation, label=k)
 
@@ -159,7 +159,7 @@ def score_and_rank_validation():
         metadata = np.array(file['metadata'][:1000])
         traces = file['traces'][:1000, :]
         plaintexts = metadata['plaintext'][:, :]
-        ranks = score_and_rank_subkey(np.arange(256), 0, traces, score_with_correlation, plaintexts, leakage_model_hw)
+        ranks = score_and_rank_subkey(np.arange(256), 0, traces, score_with_correlation, plaintexts, leakage_model_sbox_output)
         print(ranks[0])
 
 score_and_rank_validation()

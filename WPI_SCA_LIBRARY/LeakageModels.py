@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def leakage_model_hw(num_traces, plaintexts, subkey_guess, target_byte):
+def leakage_model_sbox_output(num_traces, plaintexts, subkey_guess, target_byte):
     """
     Generates hypothetical leakage based on a provided leakage model. Useful when conducting pearson correlation metric.
     :param num_traces: The number of traces collected when measuring the observed leakage
