@@ -6,6 +6,7 @@ import tqdm
 
 from WPI_SCA_LIBRARY.Metrics import *
 from WPI_SCA_LIBRARY.CWScope import *
+from WPI_SCA_LIBRARY.LeakageModels import *
 import numpy as np
 
 
@@ -143,9 +144,8 @@ def correlation_validation():
         plaintexts = metadata['plaintext'][:, :]
 
         for k in tqdm.tqdm(range(70, 80)):
-            hypothetical_leakage = generate_hypothetical_leakage(len(traces), plaintexts, k, 0, leakage_model_hw)
+            hypothetical_leakage = leakage_model_hw(len(traces), plaintexts, k, 0)
             correlation = pearson_correlation(hypothetical_leakage, traces, len(traces), len(traces[0]))
-
             plt.plot(correlation, label=k)
 
         plt.legend()
@@ -162,3 +162,4 @@ def score_and_rank_validation():
         ranks = score_and_rank_subkey(np.arange(256), 0, traces, score_with_correlation, plaintexts, leakage_model_hw)
         print(ranks[0])
 
+score_and_rank_validation()
