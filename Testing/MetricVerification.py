@@ -1,9 +1,7 @@
 import csv
 import os.path
 
-import matplotlib.pyplot as plt
-import tqdm
-
+from tqdm import *
 from WPI_SCA_LIBRARY.Metrics import *
 from WPI_SCA_LIBRARY.CWScope import *
 from WPI_SCA_LIBRARY.LeakageModels import *
@@ -147,28 +145,24 @@ def t_test_verification():
 
 
 def correlation_validation():
-    with h5py.File(os.path.dirname(__file__) + "\\ExampleData\\ASCAD\\ATMega8515_raw_traces.h5", "r") as file:
-        # obtain data from HDF5 file
-        metadata = np.array(file['metadata'][:2500])
-        traces = file['traces'][:2500, :]
-        keys = metadata['key'][:, :]
-        plaintexts = metadata['plaintext'][:, :]
+    unmasked_random = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    texts = read_bin_file_keys_or_texts("unprotected_sbox\\single\\traces\\oscilloscope_traces\\plaintexts.bin","Random")
+    num_traces = 50000
+    num_samples = 3000
 
-        for k in tqdm.tqdm(range(70, 80)):
-            hypothetical_leakage = leakage_model_sbox_output(len(traces), plaintexts, k, 0)
-            correlation = pearson_correlation(hypothetical_leakage, traces, len(traces), len(traces[0]))
-            plt.plot(correlation, label=k)
+    leakage = np.empty(num_traces, dtype=object)
 
-        plt.legend()
-        plt.title("Correlation for Subkey: {}".format(keys[0][0]))
-        plt.show()
+    colors = ['tab:purple', 'tab:green', 'tab:pink', 'tab:red', 'tab:orange', 'tab:blue']
+    for j, k in tqdm.tqdm(enumerate(range(200, 206))):
+        for i in range(num_traces):
+            leakage[i] = bin(Sbox[0] ^ Sbox[k ^ texts[i]]).count('1')
 
+        correlation = pearson_correlation(leakage, unmasked_random, num_traces, num_samples)
+        plt.plot(correlation, label=k, color=colors[j])
 
-def score_and_rank_validation():
-    with h5py.File(os.path.dirname(__file__) + "\\ExampleData\\ASCAD\\ATMega8515_raw_traces.h5", "r") as file:
-        # obtain data from HDF5 file
-        metadata = np.array(file['metadata'][:1000])
-        traces = file['traces'][:1000, :]
-        plaintexts = metadata['plaintext'][:, :]
-        ranks = score_and_rank_subkey(np.arange(256), 0, traces, score_with_correlation, plaintexts, leakage_model_sbox_output)
-        print(ranks[0])
+    plt.legend(title="Key Guess")
+    plt.title("Correlation For Correct Key 203 MetriSCA Example Traces")
+    plt.xlabel("Sample")
+    plt.ylabel("Correlation")
+    plt.grid()
+    plt.show()

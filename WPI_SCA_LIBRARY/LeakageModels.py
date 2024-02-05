@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def leakage_model_sbox_output(num_traces, plaintexts, subkey_guess, target_byte):
+def leakage_model_hamming_weight(num_traces, plaintexts, subkey_guess, target_byte):
     """
     Generates hypothetical leakage based on a provided leakage model. Useful when conducting pearson correlation metric.
     :param num_traces: The number of traces collected when measuring the observed leakage
@@ -14,6 +14,23 @@ def leakage_model_sbox_output(num_traces, plaintexts, subkey_guess, target_byte)
 
     for i in range(num_traces):
         leakage[i] = bin(Sbox[subkey_guess ^ plaintexts[i][target_byte]]).count('1')
+
+    return leakage
+
+
+def leakage_model_hamming_distance(num_traces, plaintexts, subkey_guess, target_byte):
+    """
+    Generates hypothetical leakage using the damming distance leakage model.
+    :param num_traces:
+    :param plaintexts:
+    :param subkey_guess:
+    :param target_byte:
+    :return:
+    """
+    leakage = np.empty(num_traces, dtype=object)
+
+    for i in range(num_traces):
+        leakage[i] = bin(Sbox[0] ^ Sbox[subkey_guess ^ plaintexts[i][target_byte]]).count('1')
 
     return leakage
 
