@@ -8,6 +8,7 @@ from WPI_SCA_LIBRARY.CWScope import *
 import numpy as np
 import matplotlib.pyplot as plt
 
+# TODO: This entire file needs to fixed due to updates in the CWSCope and Metric Functionality
 
 def t_test_demo():
     """
@@ -65,7 +66,6 @@ def correlation_demo():
     # capture trace set
     traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
 
-    # TODO: This can be removed once I change the standard capture procedure
     keys = []
     texts = []
     waves = []
@@ -103,7 +103,6 @@ def score_and_rank_demo():
     # capture trace set
     traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
 
-    # TODO: This can be removed once I change the standard capture procedure
     keys = []
     texts = []
     waves = []
@@ -150,7 +149,6 @@ def correct_key_rank_vs_num_traces():
     for num_traces in trace_amounts:
         traces = cw_scope.standard_capture_traces(num_traces, fixed_key=True, fixed_pt=False)
 
-        # TODO: This can be removed once I change the standard capture procedure
         keys = []
         texts = []
         waves = []
@@ -189,7 +187,6 @@ def success_rate_guessing_entropy_demo():
     # capture trace set
     traces = cw_scope.standard_capture_traces(1000, fixed_key=True, fixed_pt=False)
 
-    # TODO: This can be removed once I change the standard capture procedure
     keys = []
     texts = []
     waves = []

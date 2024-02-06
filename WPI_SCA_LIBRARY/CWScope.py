@@ -6,6 +6,7 @@ from WPI_SCA_LIBRARY.FileFormat import *
 import os
 import tqdm as tqdm
 
+# TODO: Implement changes in the Capture procedure in order to make them more generic
 
 class CWScope:
 

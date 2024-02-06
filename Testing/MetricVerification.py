@@ -1,6 +1,7 @@
 import csv
 import os.path
 
+import matplotlib.pyplot as plt
 from tqdm import *
 from WPI_SCA_LIBRARY.Metrics import *
 from WPI_SCA_LIBRARY.CWScope import *
@@ -186,17 +187,35 @@ def score_and_rank_verification():
 
     key_candidates = range(256)
     kc_score = []
+    kc_rank = []
+    trace_nums = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 6000, 7000, 8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
 
-    for i in range(0, 50000, 2000):
-        ranks = score_and_rank_subkey(key_candidates, 0, unmasked_random[:i], score_with_correlation, texts, leakage_model_hamming_distance)
+    # TODO: I want all the key guesses to show up on the plots like in the figure
+    for i in trace_nums:
+        ranks = score_and_rank_subkey(key_candidates, 0, unmasked_random[:i], score_with_correlation, texts[:i], leakage_model_hamming_distance)
         kc_score.append([key_and_score for key_and_score in ranks if key_and_score[0] == 203][0][1])
-        
+        kc_rank.append([idx for idx, key_and_score in enumerate(ranks) if key_and_score[0] == 203][0] + 1)
 
-    score_kc = [key_and_score for key_and_score in ranks if key_and_score[0] == 203][0][1]
+    plt.plot(trace_nums, kc_score)
+    plt.title("Correct Key Score as a Function of the Number of Traces")
+    plt.xlabel("Score")
+    plt.ylabel("Rank")
+    plt.grid()
+    plt.show()
 
+    plt.plot(trace_nums, kc_rank)
+    plt.title("Correct Key Rank as a Function of the Number of Traces")
+    plt.xlabel("Number of Traces")
+    plt.ylabel("Rank")
+    plt.ylim(0, 256)
+    plt.xlim(0, 50000)
+    plt.grid()
+    plt.show()
 
-    # TODO: Replicate plot from paper
-
-
-
-score_and_rank_verification()
+def success_rate_guessing_entropy_verification():
+    """
+    Verification function for success rate and guessing entropy metric. References to Figure 4 and Figure 5 in
+    https://eprint.iacr.org/2022/253.pdf
+    """
+    # TODO: Implement and reference Figure 4 and Figure 5 in the SCA Cheat Sheet
+    return None
