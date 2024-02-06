@@ -186,32 +186,47 @@ def score_and_rank_verification():
     ]
 
     key_candidates = range(256)
-    kc_score = []
-    kc_rank = []
     trace_nums = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 6000, 7000, 8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
 
-    # TODO: I want all the key guesses to show up on the plots like in the figure
+    key_ranks = np.empty(256, dtype=object)
+    key_scores = np.empty(256, dtype=object)
+    for i in range(256):
+        key_scores[i] = []
+        key_ranks[i] = []
+
     for i in trace_nums:
         ranks = score_and_rank_subkey(key_candidates, 0, unmasked_random[:i], score_with_correlation, texts[:i], leakage_model_hamming_distance)
-        kc_score.append([key_and_score for key_and_score in ranks if key_and_score[0] == 203][0][1])
-        kc_rank.append([idx for idx, key_and_score in enumerate(ranks) if key_and_score[0] == 203][0] + 1)
 
-    plt.plot(trace_nums, kc_score)
+        for k in range(256):
+            key_scores[k].append([key_and_score for key_and_score in ranks if key_and_score[0] == k][0][1])
+            key_ranks[k].append([idx for idx, key_and_score in enumerate(ranks) if key_and_score[0] == k][0] + 1)
+
+    # plot key scores
+    for k in range(256):
+        if k != 203:
+            plt.plot(trace_nums, key_scores[k], color="#C0C0C0")
+    plt.plot(trace_nums, key_scores[203], color="tab:blue", label="203")
     plt.title("Correct Key Score as a Function of the Number of Traces")
-    plt.xlabel("Score")
-    plt.ylabel("Rank")
-    plt.grid()
-    plt.show()
-
-    plt.plot(trace_nums, kc_rank)
-    plt.title("Correct Key Rank as a Function of the Number of Traces")
+    plt.ylabel("Score")
     plt.xlabel("Number of Traces")
-    plt.ylabel("Rank")
-    plt.ylim(0, 256)
-    plt.xlim(0, 50000)
+    plt.legend(title="Correct Key")
     plt.grid()
     plt.show()
 
+    # plot key ranks
+    for k in range(256):
+        if k != 203:
+            plt.plot(trace_nums, key_ranks[k], color="#C0C0C0")
+    plt.plot(trace_nums, key_ranks[203], color="tab:blue", label="203")
+    plt.title("Correct Key Rank as a Function of the Number of Traces")
+    plt.ylabel("Rank")
+    plt.xlabel("Number of Traces")
+    plt.legend(title="Correct Key")
+    plt.grid()
+    plt.show()
+
+
+score_and_rank_verification()
 def success_rate_guessing_entropy_verification():
     """
     Verification function for success rate and guessing entropy metric. References to Figure 4 and Figure 5 in
