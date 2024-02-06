@@ -236,7 +236,7 @@ def score_and_rank_verification():
     plt.show()
 
 
-def success_rate_guessing_entropy_verification():
+def success_rate_verification():
     """
     Verification function for success rate and guessing entropy metric. References to Figure 4 and Figure 5 in
     https://eprint.iacr.org/2022/253.pdf
@@ -251,14 +251,22 @@ def success_rate_guessing_entropy_verification():
     experiment_ranks = np.empty(num_experiments, dtype=object)
     experiment_keys = np.empty(num_experiments)
 
-    for i in range(num_experiments):
-        ranks = score_and_rank_subkey(key_candidates, i, unprotected_parallel[:20000], score_with_correlation, texts[:20000], leakage_model_hamming_distance)
-        experiment_ranks[i] = ranks
-        experiment_keys[i] = 203
+    success_rates = []
+    num_t = []
 
-    s, e = success_rate_guessing_entropy([203] * 16, experiment_ranks, 1, num_experiments)
-    print("Success Rate: ", s)
-    print("Guessing Entropy: ", e)
+    for t in range(1000, 100000 + 1000, 4500):
+        for i in tqdm.tqdm(range(num_experiments), desc="Running Experiments for {} Traces".format(t)):
+            ranks = score_and_rank_subkey(key_candidates, i, unprotected_parallel[:t], score_with_correlation, texts[:t], leakage_model_hamming_distance)
+            experiment_ranks[i] = ranks
+            experiment_keys[i] = 203
 
+        s, e = success_rate_guessing_entropy([203] * 16, experiment_ranks, 1, num_experiments)
+        success_rates.append(s)
+        num_t.append(t)
 
-success_rate_guessing_entropy_verification()
+    plt.plot(num_t, success_rates)
+    plt.title("Success Rate as a Function of the Number of Traces")
+    plt.xlabel("Number of Traces")
+    plt.ylabel("Success Rate")
+    plt.grid()
+    plt.show()
