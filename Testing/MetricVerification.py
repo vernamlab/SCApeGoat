@@ -8,9 +8,41 @@ from WPI_SCA_LIBRARY.LeakageModels import *
 import numpy as np
 
 
+def read_csv_traces(csv_file, num_traces):
+    traces = np.empty(num_traces, dtype=object)
+
+    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + csv_file, "r") as file:
+        csv_reader = csv.reader(file)
+
+        for i, row in tqdm.tqdm(enumerate(csv_reader), desc="Reading {} Traces From CSV".format(num_traces)):
+            traces[i] = np.array([int(i) for i in row])
+
+        return traces
+
+
+def read_bin_file_keys_or_texts(bin_file, set_type="Random"):
+    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
+        dataset = np.array([int(i) for i in file.read(100000)])
+        if set_type == "Random":
+            return dataset[0::2]
+        elif set_type == "Fixed":
+            return dataset[1::2]
+        else:
+            raise Exception("Unknown text set: {}".format(set_type))
+
+
+def read_bin_file_traces(bin_file, num_traces=50000, num_samples=3000):
+    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
+        traces = np.empty(num_traces, dtype=object)
+
+        for i in tqdm.tqdm(range(num_traces), desc="Reading Traces from .bin file"):
+            traces[i] = np.array([int(i) for i in file.read(num_samples)])
+        return traces
+
+
 def snr_verification():
     """
-    Computes SNR with ASCAD Traces
+    Computes SNR with ASCAD Traces. Reference Figure 3 in https://eprint.iacr.org/2018/053.pdf
     """
 
     def organize_labels_for_testing(labels, traces_set):
@@ -60,41 +92,9 @@ def snr_verification():
         plt.show()
 
 
-def read_csv_traces(csv_file, num_traces):
-    traces = np.empty(num_traces, dtype=object)
-
-    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + csv_file, "r") as file:
-        csv_reader = csv.reader(file)
-
-        for i, row in tqdm.tqdm(enumerate(csv_reader), desc="Reading {} Traces From CSV".format(num_traces)):
-            traces[i] = np.array([int(i) for i in row])
-
-        return traces
-
-
-def read_bin_file_keys_or_texts(bin_file, set_type="Random"):
-    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
-        dataset = np.array([int(i) for i in file.read(100000)])
-        if set_type == "Random":
-            return dataset[0::2]
-        elif set_type == "Fixed":
-            return dataset[1::2]
-        else:
-            raise Exception("Unknown text set: {}".format(set_type))
-
-
-def read_bin_file_traces(bin_file, num_traces=50000, num_samples=3000):
-    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
-        traces = np.empty(num_traces, dtype=object)
-
-        for i in tqdm.tqdm(range(num_traces), desc="Reading Traces from .bin file"):
-            traces[i] = np.array([int(i) for i in file.read(num_samples)])
-        return traces
-
-
 def t_test_verification():
     """
-    Verifies T-test with MetriSCA Traces
+    Verifies T-test with MetriSCA Traces. Reference Figure 8(a) and Figure 8(b) in https://eprint.iacr.org/2022/253.pdf
     """
     # Load in Binary Data
     unmasked_fixed = read_bin_file_traces(
@@ -145,8 +145,14 @@ def t_test_verification():
 
 
 def correlation_validation():
-    unmasked_random = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    texts = read_bin_file_keys_or_texts("unprotected_sbox\\single\\traces\\oscilloscope_traces\\plaintexts.bin","Random")
+    """
+    Verifies Correlation with MetriSCA traces. Uses hamming distance leakage model. There is no figure to reference
+    but the correct key is 203.
+    """
+    unmasked_random = read_bin_file_traces(
+        "unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    texts = read_bin_file_keys_or_texts("unprotected_sbox\\single\\traces\\oscilloscope_traces\\plaintexts.bin",
+                                        "Random")
     num_traces = 50000
     num_samples = 3000
 
@@ -166,3 +172,31 @@ def correlation_validation():
     plt.ylabel("Correlation")
     plt.grid()
     plt.show()
+
+
+def score_and_rank_verification():
+    """
+    Verify score and rank metric. References Figure 2(a) and Figure 2(b) https://eprint.iacr.org/2022/253.pdf
+    """
+    unmasked_random = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    texts = [
+        [t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] for t in
+        read_bin_file_keys_or_texts("unprotected_sbox\\single\\traces\\oscilloscope_traces\\plaintexts.bin", "Random")
+    ]
+
+    key_candidates = range(256)
+    kc_score = []
+
+    for i in range(0, 50000, 2000):
+        ranks = score_and_rank_subkey(key_candidates, 0, unmasked_random[:i], score_with_correlation, texts, leakage_model_hamming_distance)
+        kc_score.append([key_and_score for key_and_score in ranks if key_and_score[0] == 203][0][1])
+        
+
+    score_kc = [key_and_score for key_and_score in ranks if key_and_score[0] == 203][0][1]
+
+
+    # TODO: Replicate plot from paper
+
+
+
+score_and_rank_verification()

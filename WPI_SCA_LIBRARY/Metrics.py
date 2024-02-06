@@ -169,7 +169,7 @@ def score_and_rank_subkey(key_candidates, target_byte, traces, score_fcn, *args)
         key_scores = np.append(key_scores, key_score)
 
     # rank each key where partition_ranks[0] is the key that scored the highest
-    key_ranks = np.array([key_score[0] for key_score in np.sort(key_scores, order='score')[::-1]])
+    key_ranks = np.sort(key_scores, order='score')[::-1]
 
     return key_ranks
 
