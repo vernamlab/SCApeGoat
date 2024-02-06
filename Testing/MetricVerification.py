@@ -238,7 +238,7 @@ def score_and_rank_verification():
 
 def success_rate_verification():
     """
-    Verification function for success rate and guessing entropy metric. References to Figure 4 and Figure 5 in
+    Verification function for success rate and guessing entropy metric. References to Figure 4 in
     https://eprint.iacr.org/2022/253.pdf
     """
 
@@ -271,3 +271,16 @@ def success_rate_verification():
     plt.axhline(y=1.0, color='0', linestyle='--')
     plt.grid()
     plt.show()
+
+
+def guessing_entropy_validation():
+    """Validates guessing entropy metric. References Figure 5 in https://eprint.iacr.org/2022/253.pdf"""
+    # Load in Binary Data
+    unmasked_fixed = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    unmasked_random = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    masked_fixed = read_bin_file_traces("masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    masked_random = read_bin_file_traces("masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    masked_fixed_2 = read_bin_file_traces("masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    masked_random_2 = read_bin_file_traces("masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+
+    # TODO: Implement this
