@@ -2,6 +2,7 @@ import csv
 import os.path
 
 import matplotlib.pyplot as plt
+import tqdm
 from tqdm import *
 from WPI_SCA_LIBRARY.Metrics import *
 from WPI_SCA_LIBRARY.CWScope import *
@@ -28,6 +29,8 @@ def read_bin_file_keys_or_texts(bin_file, set_type="Random"):
             return dataset[0::2]
         elif set_type == "Fixed":
             return dataset[1::2]
+        elif set_type == "Multi":
+            return dataset
         else:
             raise Exception("Unknown text set: {}".format(set_type))
 
@@ -39,6 +42,13 @@ def read_bin_file_traces(bin_file, num_traces=50000, num_samples=3000):
         for i in tqdm.tqdm(range(num_traces), desc="Reading Traces from .bin file"):
             traces[i] = np.array([int(i) for i in file.read(num_samples)])
         return traces
+
+
+def read_parallel_from_bin_file(bin_file, num_traces):
+    with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
+        dataset = np.array([int(i) for i in file.read(num_traces * 16)]).reshape(num_traces, 16)
+
+        return dataset
 
 
 def snr_verification():
@@ -226,11 +236,29 @@ def score_and_rank_verification():
     plt.show()
 
 
-score_and_rank_verification()
 def success_rate_guessing_entropy_verification():
     """
     Verification function for success rate and guessing entropy metric. References to Figure 4 and Figure 5 in
     https://eprint.iacr.org/2022/253.pdf
     """
-    # TODO: Implement and reference Figure 4 and Figure 5 in the SCA Cheat Sheet
-    return None
+
+    # Figure 4 Success Rate 16 parallel unprotected Sboxes
+    unprotected_parallel = read_bin_file_traces("unprotected_sbox\\multiple\\traces\\oscilloscope_traces\\oscilloscope_traces_100k_535_samples_random_positive_uint8_t.bin", num_traces=100000, num_samples=535)
+    texts = read_parallel_from_bin_file("unprotected_sbox\\multiple\\traces\\oscilloscope_traces\\plaintexts_random.bin", 100000)
+
+    key_candidates = range(256)
+    num_experiments = 16
+    experiment_ranks = np.empty(num_experiments, dtype=object)
+    experiment_keys = np.empty(num_experiments)
+
+    for i in range(num_experiments):
+        ranks = score_and_rank_subkey(key_candidates, i, unprotected_parallel[:20000], score_with_correlation, texts[:20000], leakage_model_hamming_distance)
+        experiment_ranks[i] = ranks
+        experiment_keys[i] = 203
+
+    s, e = success_rate_guessing_entropy([203] * 16, experiment_ranks, 1, num_experiments)
+    print("Success Rate: ", s)
+    print("Guessing Entropy: ", e)
+
+
+success_rate_guessing_entropy_verification()

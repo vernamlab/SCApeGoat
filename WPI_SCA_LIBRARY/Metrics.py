@@ -195,10 +195,10 @@ def score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_m
     return np.max(np.abs(correlation))
 
 
-def success_rate_guessing_entropy(correct_key, experiment_ranks, order, num_experiments):
+def success_rate_guessing_entropy(correct_keys, experiment_ranks, order, num_experiments):
     """
     Computes the success rate and guessing entropy based on computed key ranks
-    :param correct_key: the correct key of the cryptographic system, typically a key partition in practice
+    :param correct_keys: an array of the correct keys of the given experiment
     :param experiment_ranks: The ranks of a given key guess for all experiments conducted
     :param order: If a key is within the number specified by the order ranks, then it will count towards the success rate
     :param num_experiments: The number of experiments conducted
@@ -212,12 +212,12 @@ def success_rate_guessing_entropy(correct_key, experiment_ranks, order, num_expe
 
         # check if correct key is within 'order' number of ranks
         for j in range(order):
-            if experiment_ranks[i][j] == correct_key:
+            if experiment_ranks[i][j][0] == correct_keys[i]:
                 success_rate += 1
                 break
 
         # guessing entropy is the log2 of the rank of the correct key
-        guessing_entropy += math.log2(np.where(experiment_ranks[i] == correct_key)[0][0] + 1)
+        guessing_entropy += math.log2([idx for idx, key_and_score in enumerate(experiment_ranks[i]) if key_and_score[0] == correct_keys[i]][0] + 1)
 
     success_rate = success_rate / num_experiments
     guessing_entropy = guessing_entropy / num_experiments
