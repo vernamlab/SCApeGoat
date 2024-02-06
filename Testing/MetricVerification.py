@@ -268,5 +268,6 @@ def success_rate_verification():
     plt.title("Success Rate as a Function of the Number of Traces")
     plt.xlabel("Number of Traces")
     plt.ylabel("Success Rate")
+    plt.axhline(y=1.0, color='0', linestyle='--')
     plt.grid()
     plt.show()
