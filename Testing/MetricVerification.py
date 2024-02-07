@@ -275,11 +275,66 @@ def success_rate_verification():
 def guessing_entropy_validation():
     """Validates guessing entropy metric. References Figure 5 in https://eprint.iacr.org/2022/253.pdf"""
     # Load in Binary Data
-    unmasked_fixed = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    unmasked_random = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    masked_fixed = read_bin_file_traces("masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    masked_random = read_bin_file_traces("masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    masked_fixed_2 = read_bin_file_traces("masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    masked_random_2 = read_bin_file_traces("masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    unprotected_sbox = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    unprotected_texts = [
+        [t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] for t in
+        read_bin_file_keys_or_texts("unprotected_sbox\\single\\traces\\oscilloscope_traces\\plaintexts.bin", "Random")
+    ]
 
-    # TODO: Implement this
+    masked_sbox_1 = read_bin_file_traces("masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    masked_texts_1 = [
+        [t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] for t in
+        read_bin_file_keys_or_texts("masked_sbox1\\traces\\oscilloscope_traces\\plaintexts.bin", "Random")
+    ]
+
+    masked_sbox_2 = read_bin_file_traces("masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    masked_texts_2 = [
+        [t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] for t in
+        read_bin_file_keys_or_texts("masked_sbox2\\traces\\oscilloscope_traces\\plaintexts.bin", "Random")
+    ]
+
+    key_candidates = range(256)
+    num_experiments = 8
+    experiment_ranks_unprotected = np.empty(num_experiments, dtype=object)
+    experiment_ranks_protected_1 = np.empty(num_experiments, dtype=object)
+    experiment_ranks_protected_2 = np.empty(num_experiments, dtype=object)
+    experiment_keys = np.empty(num_experiments)
+
+    trace_nums = [1000, 2000, 3000, 4000, 5000, 9000, 12000, 18000, 22000, 30000, 40000, 50000]
+    entropy_unprotected = []
+    entropy_protected_1 = []
+    entropy_protected_2 = []
+
+    for t in trace_nums:
+        for i in trange(num_experiments):
+            rank_unprotected = score_and_rank_subkey(key_candidates, 0, unprotected_sbox[:t], score_with_correlation, unprotected_texts[:t], leakage_model_hamming_distance)
+            experiment_ranks_unprotected[i] = rank_unprotected
+
+            rank_protected_1 = score_and_rank_subkey(key_candidates, 0, masked_sbox_1[:t], score_with_correlation, masked_texts_1[:t], leakage_model_hamming_distance)
+            experiment_ranks_protected_1[i] = rank_protected_1
+
+            rank_protected_2 = score_and_rank_subkey(key_candidates, 0, masked_sbox_2[:t], score_with_correlation, masked_texts_2[:t], leakage_model_hamming_distance)
+            experiment_ranks_protected_2[i] = rank_protected_2
+
+            experiment_keys[i] = 203
+
+        s_unprotected, e_unprotected = success_rate_guessing_entropy(experiment_keys, experiment_ranks_unprotected, 1, num_experiments)
+        s_protected_1, e_protected_1 = success_rate_guessing_entropy(experiment_keys, experiment_ranks_protected_1, 1, num_experiments)
+        s_protected_2, e_protected_2 = success_rate_guessing_entropy(experiment_keys, experiment_ranks_protected_2, 1, num_experiments)
+
+        entropy_unprotected.append(e_unprotected)
+        entropy_protected_1.append(e_protected_1)
+        entropy_protected_2.append(e_protected_2)
+
+        print("T = {} Done".format(t))
+
+    plt.plot(trace_nums, entropy_unprotected, color="tab:blue", label="Unprotected Sbox")
+    plt.plot(trace_nums, entropy_protected_1, color="tab:green", label="Masked Sbox 1")
+    plt.plot(trace_nums, entropy_protected_2, color="tab:orange", label="Masked Sbox 2")
+    plt.title("Guessing Entropy as a Function of The Number of Traces")
+    plt.xlabel("Number of Traces")
+    plt.ylabel("Guessing Entropy")
+    plt.legend()
+    plt.grid()
+    plt.show()
+
