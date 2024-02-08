@@ -131,13 +131,7 @@ def pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_sam
 
 def score_and_rank(key_candidates, partitions, traces, score_fcn, *args):
     """
-    Scores and ranks possible key guesses based on how likely a subkey is to be the actual key
-    :param key_candidates: All key possibilities per key partition. For 1-byte partitions it should be np.arrange(256)
-    :param partitions: The number of partitions. For AES-128 there are 16 1-byte partitions.
-    :param traces: A set of collected traces.
-    :param score_fcn: The function used to score each key guess. NOTE: MUST BE IN THE FORM score_fcn(traces, key_guess, target_byte, ...)
-    :param args: Additional arguments required for the score_fcn
-    :return: Subkey ranks for each partition of the full key.
+    TODO: Remove this and use score_and_rank_subkey instead
     """
     dtype = [('key', int), ('score', 'float64')]
     ranks = []
@@ -159,6 +153,15 @@ def score_and_rank(key_candidates, partitions, traces, score_fcn, *args):
 
 
 def score_and_rank_subkey(key_candidates, target_byte, traces, score_fcn, *args):
+    """
+
+    :param key_candidates:
+    :param target_byte:
+    :param traces:
+    :param score_fcn:
+    :param args:
+    :return:
+    """
     dtype = [('key', int), ('score', 'float64')]
     key_scores = np.array([], dtype=dtype)
 
