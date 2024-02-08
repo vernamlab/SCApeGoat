@@ -272,6 +272,7 @@ def success_rate_verification():
     plt.grid()
     plt.show()
 
+
 def guessing_entropy_validation():
     """Validates guessing entropy metric. References Figure 5 in https://eprint.iacr.org/2022/253.pdf"""
     # Load in Binary Data
