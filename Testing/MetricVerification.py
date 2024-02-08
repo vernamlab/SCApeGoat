@@ -112,24 +112,24 @@ def t_test_verification():
         "unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
     unmasked_random = read_bin_file_traces(
         "unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    masked_fixed = read_bin_file_traces(
-        "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    masked_random = read_bin_file_traces(
-        "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    masked_fixed_2 = read_bin_file_traces(
-        "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    masked_random_2 = read_bin_file_traces(
-        "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    # masked_fixed = read_bin_file_traces(
+    #     "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    # masked_random = read_bin_file_traces(
+    #     "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    # masked_fixed_2 = read_bin_file_traces(
+    #     "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    # masked_random_2 = read_bin_file_traces(
+    #     "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
 
     # compute t-test for each dataset
     t, tmax = t_test_tvla(unmasked_fixed, unmasked_random)
-    t1, tmax1 = t_test_tvla(masked_fixed, masked_random)
-    t2, tmax2 = t_test_tvla(masked_fixed_2, masked_random_2)
+    # t1, tmax1 = t_test_tvla(masked_fixed, masked_random)
+    # t2, tmax2 = t_test_tvla(masked_fixed_2, masked_random_2)
 
     # plot t-test
     plt.plot(t[1000:1500], label="Unprotected Sbox", color='tab:blue')
-    plt.plot(t1[1000:1500], label="Masked Sbox 1", color='tab:green')
-    plt.plot(t2[1000:1500], label="Masked Sbox 2", color='tab:orange')
+    # plt.plot(t1[1000:1500], label="Masked Sbox 1", color='tab:green')
+    # plt.plot(t2[1000:1500], label="Masked Sbox 2", color='tab:orange')
 
     plt.title("T-test implementation using MetriSCA Example Traces")
     plt.xlabel("Sample")
@@ -143,8 +143,8 @@ def t_test_verification():
 
     # plot t-max
     plt.plot(tmax, label="Unprotected Sbox", color='tab:blue')
-    plt.plot(tmax1, label="Masked Sbox 1", color='tab:green')
-    plt.plot(tmax2, label="Masked Sbox 2", color='tab:orange')
+    # plt.plot(tmax1, label="Masked Sbox 1", color='tab:green')
+    # plt.plot(tmax2, label="Masked Sbox 2", color='tab:orange')
 
     plt.title("T-Max as a Function of the Number of Traces")
     plt.xlabel("Number of Traces")
@@ -153,6 +153,7 @@ def t_test_verification():
     plt.legend()
     plt.grid()
     plt.show()
+
 
 
 def correlation_validation():
