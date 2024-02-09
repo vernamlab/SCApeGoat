@@ -2,7 +2,7 @@ import math
 import numpy as np
 import tqdm
 from tqdm import *
-
+from collections.abc import *
 
 def signal_to_noise_ratio(labels: dict) -> np.ndarray:
     """
@@ -141,26 +141,39 @@ def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: 
     return np.divide(top_sum_observed_predicted, np.sqrt(np.multiply(bottom_sum_observed, bottom_sum_predicted)))
 
 
-def score_and_rank(key_candidates, target_byte, traces, score_fcn, *args):
+def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np.ndarray, score_fcn: Callable, *args: any) -> np.ndarray:
+    """
+    Scores and ranks a set of key candidates based on how likely they are to be the actual key.
+
+    :param key_candidates: List of key possible key candidates. For a one-byte subkey it would be [0, 1, ..., 255].
+    :type key_candidates: np.ndarray | list
+    :param target_byte: The byte of the full key that you are targeting. Ignore and set to 0 if your scoring function does not need it.
+    :type target_byte: int
+    :param traces: The set of power traces that will be used for scoring
+    :type traces: numpy.ndarray | list
+    :param score_fcn: Callback to the scoring function used to score each key candidate. The score with correlation scoring
+                    function is pre-defined and can be used. NOTE: User defined scoring functions must be in the form
+                    score_fcn(traces, key_guess, target_byte, ...) to work with this metric. Your scoring function does not
+                    need to use all the required arguments, but they must be present as shown.
+    :type score_fcn: Callable
+    :param args: Additional arguments for the scoring function supplied in score_fcn. For example, the predefined score with
+                    correlation function requires plaintexts and a leakage model callback as additional arguments.
+    :type args: Any
+    :return: An numpy array of sorted tuples containing the key candidates and corresponding scores. For example, assuming that
+                    numpy array `ranks` was returned from the metric, ranks[0][0] is the highest ranked key candidate and
+                    ranks[0][1] is the score of the highest ranked key candidate.
+    :rtype: numpy.ndarray
+    :Authors: Samuel Karkache (swkarkache@wpi.edu)
     """
 
-    :param key_candidates:
-    :param target_byte:
-    :param traces:
-    :param score_fcn:
-    :param args:
-    :return:
-    """
     dtype = [('key', int), ('score', 'float64')]
     key_scores = np.array([], dtype=dtype)
 
-    # for each key guess in the partition score the value and add to list
     for k in key_candidates:
         score_k = score_fcn(traces, k, target_byte, *args)
         key_score = np.array([(k, score_k)], dtype=dtype)
         key_scores = np.append(key_scores, key_score)
 
-    # rank each key where partition_ranks[0] is the key that scored the highest
     key_ranks = np.sort(key_scores, order='score')[::-1]
 
     return key_ranks

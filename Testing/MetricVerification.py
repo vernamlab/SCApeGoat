@@ -188,8 +188,6 @@ def correlation_validation():
     plt.show()
 
 
-correlation_validation()
-
 def score_and_rank_verification():
     """
     Verify score and rank metric. References Figure 2(a) and Figure 2(b) https://eprint.iacr.org/2022/253.pdf

@@ -52,6 +52,31 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
 .. py:function:: score_and_rank(key_candidates, partitions, traces, score_fcn, *args)
 
+    Scores and ranks a set of key candidates based on how likely they are to be the actual key.
+
+    :param key_candidates: List of key possible key candidates. For a one-byte subkey it would be [0, 1, ..., 255].
+    :type key_candidates: np.ndarray | list
+    :param target_byte: The byte of the full key that you are targeting. Ignore and set to 0 if your scoring function does not need it.
+    :type target_byte: int
+    :param traces: The set of power traces that will be used for scoring
+    :type traces: numpy.ndarray | list
+    :param score_fcn: Callback to the scoring function used to score each key candidate. The score with correlation scoring
+                    function is pre-defined and can be used. NOTE: User defined scoring functions must be in the form
+                    score_fcn(traces, key_guess, target_byte, ...) to work with this metric. Your scoring function does not
+                    need to use all the required arguments, but they must be present as shown.
+    :type score_fcn: Callable
+    :param args: Additional arguments for the scoring function supplied in score_fcn. For example, the predefined score with
+                    correlation function requires plaintexts and a leakage model callback as additional arguments.
+    :type args: Any
+    :return: An numpy array of sorted tuples containing the key candidates and corresponding scores. For example, assuming that
+                    numpy array `ranks` was returned from the metric, ranks[0][0] is the highest ranked key candidate and
+                    ranks[0][1] is the score of the highest ranked key candidate.
+    :rtype: numpy.ndarray
+    :Authors: Samuel Karkache (swkarkache@wpi.edu)
+
 
 .. py:function:: score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_model)
+
+
+.. py:function:: success_rate_guessing_entropy(correct_keys, experiment_ranks, order, num_experiments)
 
