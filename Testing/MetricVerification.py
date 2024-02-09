@@ -206,7 +206,7 @@ def score_and_rank_verification():
         key_ranks[i] = []
 
     for i in trace_nums:
-        ranks = score_and_rank_subkey(key_candidates, 0, unmasked_random[:i], score_with_correlation, texts[:i], leakage_model_hamming_distance)
+        ranks = score_and_rank(key_candidates, 0, unmasked_random[:i], score_with_correlation, texts[:i], leakage_model_hamming_distance)
 
         for k in range(256):
             key_scores[k].append([key_and_score for key_and_score in ranks if key_and_score[0] == k][0][1])
@@ -257,7 +257,7 @@ def success_rate_verification():
 
     for t in range(1000, 100000 + 1000, 4500):
         for i in tqdm.tqdm(range(num_experiments), desc="Running Experiments for {} Traces".format(t)):
-            ranks = score_and_rank_subkey(key_candidates, i, unprotected_parallel[:t], score_with_correlation, texts[:t], leakage_model_hamming_distance)
+            ranks = score_and_rank(key_candidates, i, unprotected_parallel[:t], score_with_correlation, texts[:t], leakage_model_hamming_distance)
             experiment_ranks[i] = ranks
             experiment_keys[i] = 203
 
@@ -309,13 +309,13 @@ def guessing_entropy_validation():
 
     for t in trace_nums:
         for i in trange(num_experiments):
-            rank_unprotected = score_and_rank_subkey(key_candidates, 0, unprotected_sbox[:t], score_with_correlation, unprotected_texts[:t], leakage_model_hamming_distance)
+            rank_unprotected = score_and_rank(key_candidates, 0, unprotected_sbox[:t], score_with_correlation, unprotected_texts[:t], leakage_model_hamming_distance)
             experiment_ranks_unprotected[i] = rank_unprotected
 
-            rank_protected_1 = score_and_rank_subkey(key_candidates, 0, masked_sbox_1[:t], score_with_correlation, masked_texts_1[:t], leakage_model_hamming_distance)
+            rank_protected_1 = score_and_rank(key_candidates, 0, masked_sbox_1[:t], score_with_correlation, masked_texts_1[:t], leakage_model_hamming_distance)
             experiment_ranks_protected_1[i] = rank_protected_1
 
-            rank_protected_2 = score_and_rank_subkey(key_candidates, 0, masked_sbox_2[:t], score_with_correlation, masked_texts_2[:t], leakage_model_hamming_distance)
+            rank_protected_2 = score_and_rank(key_candidates, 0, masked_sbox_2[:t], score_with_correlation, masked_texts_2[:t], leakage_model_hamming_distance)
             experiment_ranks_protected_2[i] = rank_protected_2
 
             experiment_keys[i] = 203

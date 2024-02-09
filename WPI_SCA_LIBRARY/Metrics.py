@@ -1,8 +1,7 @@
+import math
 import numpy as np
 import tqdm
 from tqdm import *
-from scipy.stats import ttest_ind
-import math
 
 
 def signal_to_noise_ratio(labels):
@@ -129,30 +128,7 @@ def pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_sam
     return np.divide(top_sum_observed_predicted, np.sqrt(np.multiply(bottom_sum_observed, bottom_sum_predicted)))
 
 
-def score_and_rank(key_candidates, partitions, traces, score_fcn, *args):
-    """
-    TODO: Remove this and use score_and_rank_subkey instead
-    """
-    dtype = [('key', int), ('score', 'float64')]
-    ranks = []
-    # for each key partition
-    for i in tqdm(range(partitions), desc='Scoring {} Partitions'.format(partitions)):
-        partition_scores = np.array([], dtype=dtype)
-
-        # for each key guess in the partition score the value and add to list
-        for k in key_candidates:
-            score_k = score_fcn(traces, k, i, *args)
-            key_score = np.array([(k, score_k)], dtype=dtype)
-            partition_scores = np.append(partition_scores, key_score)
-
-        # rank each key where partition_ranks[0] is the key that scored the highest
-        partition_ranks = np.array([key_score[0] for key_score in np.sort(partition_scores, order='score')[::-1]])
-
-        ranks.append(partition_ranks)
-    return ranks
-
-
-def score_and_rank_subkey(key_candidates, target_byte, traces, score_fcn, *args):
+def score_and_rank(key_candidates, target_byte, traces, score_fcn, *args):
     """
 
     :param key_candidates:
