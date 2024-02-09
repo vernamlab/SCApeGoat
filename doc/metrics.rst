@@ -6,8 +6,6 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
 .. py:function:: signal_to_noise_ratio(labels)
 
-   :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
-
     Computes the signal-to-noise ratio of a trace set and associated labels. High magnitudes of the resulting SNR traces
     indicate cryptographic leakage at that sample.
 
@@ -16,8 +14,11 @@ Each metric is a standalone function and requires minimal setup to utilize.
                     For example, the label can be the output of the AES Sbox such that L = Sbox[key ^ text].
    :type labels: dict
 
-
    :return: The SNR of the provided trace set
+   :rtype: np.ndarray
+   :raises TypeError: if any value in labels.items() is not a np.ndarray or list type
+
+   :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
 
 .. py:function:: t_test(fixed_t, random_t)
 

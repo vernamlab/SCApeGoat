@@ -6,16 +6,16 @@ from tqdm import *
 
 def signal_to_noise_ratio(labels: dict):
     """
-    :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
-
     Computes the signal-to-noise ratio of a trace set and associated labels. High magnitudes of the resulting SNR traces
     indicate cryptographic leakage at that sample.
 
     :param labels: A Python dictionary where the keys are labels and the values are the associated power traces. The value of
                     labels[L] is a list of power traces, list[trace_0, trace_1, ..., trace_N], associated with label L.
                     For example, the label can be the output of the AES Sbox such that L = Sbox[key ^ text].
-
     :return: The SNR of the provided trace set
+    :rtype: np.ndarray
+    :raises TypeError: if any value in labels.items() is not a np.ndarray or list type
+    :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
     """
 
     # define the label set
