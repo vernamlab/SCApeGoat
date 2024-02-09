@@ -107,7 +107,6 @@ def snr_verification():
         plt.legend()
         plt.show()
 
-snr_verification()
 
 def t_test_verification():
     """

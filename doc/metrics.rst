@@ -6,12 +6,18 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
 .. py:function:: signal_to_noise_ratio(labels)
 
-    Computes the signal-to-noise ratio of a set of traces associated with intermediate labels. Spikes in
-    magnitude of the resulting SNR trance indicate possible cryptographic information leakage.
+   :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
 
-   :param labels: SNR label set where label[L] are power traces associated with label L
+    Computes the signal-to-noise ratio of a trace set and associated labels. High magnitudes of the resulting SNR traces
+    indicate cryptographic leakage at that sample.
+
+   :param labels: A Python dictionary where the keys are labels and the values are the associated power traces. The value of
+                    labels[L] is a list of power traces, list[trace_0, trace_1, ..., trace_N], associated with label L.
+                    For example, the label can be the output of the AES Sbox such that L = Sbox[key ^ text].
    :type labels: dict
-   :return: The SNR trace of the supplied trace set
+
+
+   :return: The SNR of the provided trace set
 
 .. py:function:: t_test(fixed_t, random_t)
 
