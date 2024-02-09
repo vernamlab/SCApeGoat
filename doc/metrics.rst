@@ -40,26 +40,6 @@ Each metric is a standalone function and requires minimal setup to utilize.
    :param num_samples: the number of samples per trace
    :return: The correlation trace corresponding to the predicted leakage
 
-
-.. py:function:: leakage_model_hw(plaintext, key)
-
-    Hamming weight leakage model. Returns the Hamming weight of intermediate output Sbox[key ^ plaintext]
-
-    :param plaintext: the plaintext
-    :param key: the key used to encrypt the plaintext
-    :return: the intermediate output
-
-.. py:function:: generate_hypothetical_leakage(num_traces, plaintexts, subkey_guess, target_byte, leakage_model=leakage_model_hw)
-
-     Generates hypothetical leakage based on a provided leakage model. Useful when conducting pearson correlation metric.
-
-    :param num_traces: The number of traces collected when measuring the observed leakage
-    :param plaintexts: The array of plaintexts used to collect the observed leakage
-    :param subkey_guess: the subkey guess
-    :param target_byte: the target byte of the key
-    :param leakage_model: the leakage model that will be used, defaults to the pre-defined hamming weight leakage model
-    :return: numpy array of the hypothetical leakage
-
 .. py:function:: score_and_rank(key_candidates, partitions, traces, score_fcn, *args)
 
     Scores and ranks possible key guesses based on how likely a subkey is to be the actual key.
