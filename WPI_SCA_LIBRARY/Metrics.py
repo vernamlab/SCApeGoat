@@ -4,14 +4,13 @@ import tqdm
 from tqdm import *
 
 
-def signal_to_noise_ratio(labels):
+def signal_to_noise_ratio(labels: dict):
     """
-    Computes the signal-to-noise ratio of a set of traces associated with intermediate labels. Spikes in
-    magnitude of the resulting SNR trance indicate possible cryptographic information leakage.
+    Computes the signal-to-noise ratio of a trace set and associated labels.
 
-    :param labels: SNR label set where label[L] are power traces associated with label L
+    :param labels: Dictionary where the key the label and the value is the associated power traces
     :type labels: dict
-    :return: The SNR trace of the supplied trace set
+    :return: The SNR of the provided trace set
     """
 
     # define the label set
@@ -23,9 +22,12 @@ def signal_to_noise_ratio(labels):
     set_var = np.empty(label_set_size, dtype=object)
 
     for i, trace_set in enumerate(tqdm(label_set, desc="Computing Signal-To-Noise Ratio")):
-        # compute statistical mean of every label set
-        set_means[i] = np.mean(trace_set, axis=0)
-        set_var[i] = np.var(trace_set, axis=0)
+        if isinstance(trace_set, np.ndarray) or isinstance(trace_set, list):
+            # compute statistical mean of every label set
+            set_means[i] = np.mean(trace_set, axis=0)
+            set_var[i] = np.var(trace_set, axis=0)
+        else:
+            raise TypeError("All items of the labels dict must be a list or numpy array")
 
     snr = np.divide(np.var(set_means, axis=0), np.mean(set_var, axis=0))
 

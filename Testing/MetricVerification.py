@@ -1,5 +1,6 @@
 import csv
 import os.path
+import time
 
 import matplotlib.pyplot as plt
 import tqdm
@@ -67,7 +68,7 @@ def snr_verification():
 
         # add traces to labels
         for index, label in enumerate(labels):
-            sorted_labels[label].append(traces_set[index])  # we only want to look over this interval
+            sorted_labels[label].append(np.array(traces_set[index]))  # we only want to look over this interval
 
         return sorted_labels
 
@@ -85,7 +86,11 @@ def snr_verification():
 
         # compute SNR for each
         organizedSN2 = organize_labels_for_testing(snr2_labels, traces)
+        start = time.time()
         snr2 = signal_to_noise_ratio(organizedSN2)
+        end = time.time()
+
+        print(end - start)
 
         organizedSN3 = organize_labels_for_testing(snr3_labels, traces)
         snr3 = signal_to_noise_ratio(organizedSN3)
@@ -102,6 +107,7 @@ def snr_verification():
         plt.legend()
         plt.show()
 
+snr_verification()
 
 def t_test_verification():
     """
