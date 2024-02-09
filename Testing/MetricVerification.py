@@ -170,8 +170,6 @@ def correlation_validation():
     texts = read_bin_file_keys_or_texts("unprotected_sbox\\single\\traces\\oscilloscope_traces\\plaintexts.bin",
                                         "Random")
     num_traces = 50000
-    num_samples = 3000
-
     leakage = np.empty(num_traces, dtype=object)
 
     colors = ['tab:purple', 'tab:green', 'tab:pink', 'tab:red', 'tab:orange', 'tab:blue']
@@ -179,7 +177,7 @@ def correlation_validation():
         for i in range(num_traces):
             leakage[i] = bin(Sbox[0] ^ Sbox[k ^ texts[i]]).count('1')
 
-        correlation = pearson_correlation(leakage, unmasked_random, num_traces, num_samples)
+        correlation = pearson_correlation(leakage, unmasked_random)
         plt.plot(correlation, label=k, color=colors[j])
 
     plt.legend(title="Key Guess")
@@ -189,6 +187,8 @@ def correlation_validation():
     plt.grid()
     plt.show()
 
+
+correlation_validation()
 
 def score_and_rank_verification():
     """
