@@ -3,6 +3,7 @@ import numpy as np
 import tqdm
 from tqdm import *
 from collections.abc import *
+from numbers import Number
 
 def signal_to_noise_ratio(labels: dict) -> np.ndarray:
     """
@@ -179,15 +180,23 @@ def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np
     return key_ranks
 
 
-def score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_model):
+def score_with_correlation(traces: list | np.ndarray, key_guess: any, target_byte: int, plaintexts: list | np.ndarray, leakage_model: Callable) -> Number:
     """
     Scoring function that assigns a key guess a score based on the max value of the pearson correlation.
-    :param traces: The collected traces
+    :param traces: The collected power traces
+    :type traces: list | np.ndarray
     :param key_guess: The key guess
+    :type key_guess: any
     :param target_byte: The target byte of the key
+    :type target_byte: int
     :param plaintexts: The plaintexts used during trace capture
-    :param leakage_model: The leakage model function
+    :type plaintexts: list | np.ndarray
+    :param leakage_model: The leakage model function. The hamming weight and hamming distance leakage model function are
+                        pre-defined in this library.
+    :type leakage_model: Callable
     :return: The score of the key guess
+    :rtype: Number
+    :Authors: Samuel Karkache (swkarkache@wpi.edu)
     """
 
     # generate the predicted leakage
