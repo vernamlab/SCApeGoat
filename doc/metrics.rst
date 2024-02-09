@@ -97,3 +97,17 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
 .. py:function:: success_rate_guessing_entropy(correct_keys, experiment_ranks, order, num_experiments)
 
+    Computes the success rate and guessing entropy based on computed key ranks.
+
+    :param correct_keys: an array of the correct keys of the given experiment
+    :type correct_keys: list | np.ndarray
+    :param experiment_ranks: The ranks of a given key guess for all experiments conducted
+    :type experiment_ranks: list | np.ndarray
+    :param order: If a key is within the number specified by the order ranks, then it will count towards the success rate
+    :type order: int
+    :param num_experiments: The number of experiments conducted
+    :type num_experiments: int
+    :return: The values of success_rate and guessing_entropy for the given number of experiments
+    :rtype: (Number, Number)
+    :Authors: Samuel Karkache (swkarkache@wpi)
+

@@ -209,14 +209,20 @@ def score_with_correlation(traces: list | np.ndarray, key_guess: any, target_byt
     return np.max(np.abs(correlation))
 
 
-def success_rate_guessing_entropy(correct_keys, experiment_ranks, order, num_experiments):
+def success_rate_guessing_entropy(correct_keys: list | np.ndarray, experiment_ranks: list | np.ndarray, order: int, num_experiments: int) -> (Number, Number):
     """
-    Computes the success rate and guessing entropy based on computed key ranks
+    Computes the success rate and guessing entropy based on computed key ranks.
     :param correct_keys: an array of the correct keys of the given experiment
+    :type correct_keys: list | np.ndarray
     :param experiment_ranks: The ranks of a given key guess for all experiments conducted
+    :type experiment_ranks: list | np.ndarray
     :param order: If a key is within the number specified by the order ranks, then it will count towards the success rate
+    :type order: int
     :param num_experiments: The number of experiments conducted
+    :type num_experiments: int
     :return: The values of success_rate and guessing_entropy for the given number of experiments
+    :rtype: (Number, Number)
+    :Authors: Samuel Karkache (swkarkache@wpi)
     """
     success_rate = 0
     guessing_entropy = 0
