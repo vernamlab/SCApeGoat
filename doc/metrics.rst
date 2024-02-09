@@ -22,44 +22,23 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
 .. py:function:: t_test(fixed_t, random_t)
 
-    Computes the t-statistic and t-max between fixed and random trace sets. High t values indicate possible information
-    leakage.
+    Computes the t-statistic and t-max between fixed and random trace sets. T-statistic magnitudes above or below
+    \|th\| = 4.5 indicate cryptographic vulnerabilities.
 
     :param random_t: The random trace set
+    :type random_t: np.ndarray | list
     :param fixed_t: The fixed trace set
-    :return: the t-statistic at each time sample and t-max at each trace
+    :type fixed_t: np.ndarray | list
+    :return: The t-statistic at each time sample and t-max at each trace as a tuple of numpy arrays
+    :rtype: (np.ndarray, np.ndarray)
+    :raises ValueError: if fixed_t and random_t do not have the same length
+    :Authors: Dev Mehta (dmmehta2@wpi.edu), Samuel Karkache (swkarkache@wpi.edu)
 
 .. py:function:: pearson_correlation(predicted_leakage, observed_leakage, num_traces, num_samples)
 
-    Computes the correlation between observed power traces and predicted power leakage computed using a
-    key guess. The correlation when the predicted power leakage is modeled using the correct key guess has
-    a relatively high magnitude.
-
-   :param predicted_leakage: predicted leakage modeled by a given leakage model
-   :param observed_leakage: observed traces collected with the key and plaintexts used to generate the predicted leakage
-   :param num_traces: number of traces collected
-   :param num_samples: the number of samples per trace
-   :return: The correlation trace corresponding to the predicted leakage
 
 .. py:function:: score_and_rank(key_candidates, partitions, traces, score_fcn, *args)
 
-    Scores and ranks possible key guesses based on how likely a subkey is to be the actual key.
-
-    :param key_candidates: All key possibilities per key partition. For 1-byte partitions it should be np.arrange(256)
-    :param partitions: The number of partitions. For AES-128 there are 16 1-byte partitions.
-    :param traces: A set of collected traces.
-    :param score_fcn: The function used to score each key guess. NOTE: MUST BE IN THE FORM score_fcn(traces, key_guess, target_byte, ...)
-    :param args: Additional arguments required for the score_fcn
-    :return: Subkey ranks for each partition of the full key.
 
 .. py:function:: score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_model)
 
-    Scoring function that assigns a key guess a score based on the max value of the pearson correlation. In theory,
-    the key guess with the highest correlation will be ranked first.
-
-    :param traces: The collected traces
-    :param key_guess: The key guess
-    :param target_byte: The target byte of the key
-    :param plaintexts: The plaintexts used during trace capture
-    :param leakage_model: The leakage model function
-    :return: The score of the key guess

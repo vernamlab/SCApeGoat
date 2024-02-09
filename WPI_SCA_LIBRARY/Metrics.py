@@ -4,7 +4,7 @@ import tqdm
 from tqdm import *
 
 
-def signal_to_noise_ratio(labels: dict):
+def signal_to_noise_ratio(labels: dict) -> np.ndarray:
     """
     Computes the signal-to-noise ratio of a trace set and associated labels. High magnitudes of the resulting SNR traces
     indicate cryptographic leakage at that sample.
@@ -12,23 +12,20 @@ def signal_to_noise_ratio(labels: dict):
     :param labels: A Python dictionary where the keys are labels and the values are the associated power traces. The value of
                     labels[L] is a list of power traces, list[trace_0, trace_1, ..., trace_N], associated with label L.
                     For example, the label can be the output of the AES Sbox such that L = Sbox[key ^ text].
+    :type labels: dict
     :return: The SNR of the provided trace set
     :rtype: np.ndarray
     :raises TypeError: if any value in labels.items() is not a np.ndarray or list type
     :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
     """
 
-    # define the label set
     label_set = labels.values()
     label_set_size = len(label_set)
-
-    # statistical mean and variances of each set, preallocate memory when possible
     set_means = np.empty(label_set_size, dtype=object)
     set_var = np.empty(label_set_size, dtype=object)
 
     for i, trace_set in enumerate(tqdm(label_set, desc="Computing Signal-To-Noise Ratio")):
         if isinstance(trace_set, np.ndarray) or isinstance(trace_set, list):
-            # compute statistical mean of every label set
             set_means[i] = np.mean(trace_set, axis=0)
             set_var[i] = np.var(trace_set, axis=0)
         else:
@@ -39,12 +36,19 @@ def signal_to_noise_ratio(labels: dict):
     return snr
 
 
-def t_test_tvla(fixed_t, random_t):
+def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list) -> (np.ndarray, np.ndarray):
     """
-    Computes the t-statistic and t-max between fixed and random trace sets.
+    Computes the t-statistic and t-max between fixed and random trace sets. T-statistic magnitudes above or below
+    |th| = 4.5 indicate cryptographic vulnerabilities.
+
     :param random_t: The random trace set
+    :type random_t: np.ndarray | list
     :param fixed_t: The fixed trace set
-    :return: the t-statistic at each time sample and t-max at each trace
+    :type fixed_t: np.ndarray | list
+    :return: The t-statistic at each time sample and t-max at each trace as a tuple of numpy arrays
+    :rtype: (np.ndarray, np.ndarray)
+    :raises ValueError: if fixed_t and random_t do not have the same length
+    :Authors: Dev Mehta (dmmehta2@wpi.edu), Samuel Karkache (swkarkache@wpi.edu)
     """
     welsh_t_outer = []
     new_mr_outer = []
@@ -52,6 +56,9 @@ def t_test_tvla(fixed_t, random_t):
     new_sf_outer = []
     new_sr_outer = []
     t_max_outer = []
+
+    if len(fixed_t) != len(random_t):
+        raise ValueError("Length of fixed_t and random_t must be equal")
 
     def t_test_intermediate(mf_old, mr_old, sf_old, sr_old, new_tf, new_tr, n):
         """
@@ -77,7 +84,7 @@ def t_test_tvla(fixed_t, random_t):
             new_stdf = np.sqrt(np.array(new_sf / n))
             new_stdr = np.sqrt(np.array(new_sr / n))
 
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide='ignore', invalid='ignore'):  # we get divide by zero warnings for first ~5 traces
                 welsh_t = np.array(new_mr - new_mf) / np.sqrt(
                     np.array((new_stdr ** 2)) / (n + 1) + np.array((new_stdf ** 2)) / (n + 1))
 
