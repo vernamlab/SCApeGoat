@@ -1,24 +1,15 @@
-import sys
-import os
 import time
-# import visa
 import logging
 import pyvisa as visa
 import numpy as np
-
 import chipwhisperer as cw
 import regex as re
-
-# ----------- libraries for serial(Dut Pico board) ---------
 import serial.tools.list_ports
 from serial import Serial
 from serial.tools import list_ports
 
 
-# -------------Oscilloscope object --------------------
-
-# scope functionality
-class Scope(object):
+class LecroyScope(object):
 
     def __init__(self):
         self.open()
@@ -28,16 +19,14 @@ class Scope(object):
         self.close()
 
     def open(self):
-        #  get all resources connected to PC
         self.rm = visa.ResourceManager()
-        #  open vcip protocol
         try:
             self.scope = self.rm.open_resource('TCPIP0::192.168.1.79::inst0::INSTR')  # insert your scope IP here
             self.reset()
             self.scope.timeout = 5000
             self.scope.clear()
             r = self.scope.query(r"""vbs? 'return=app.WaitUntilIdle(5)' """)
-        except:
+        except IOError:
             self.scope = None
             logging.info("Unable to locate the scope VISA interface")
 
@@ -48,8 +37,7 @@ class Scope(object):
 
             if self.rm is not None:
                 self.rm.close()
-
-        except:
+        except IOError:
             logging.info("pyvisa error in closing resource")
 
     def setup(self, vdiv, timebase, samplerate, duration, voffset):
@@ -80,8 +68,7 @@ class Scope(object):
             self.scope.write("TRDL " + delay)
         if self.scope:
             self.scope.write("C1:TRLV " + level)
-        # set triggr positive edge
-        if (self.scope):
+        if self.scope:
             self.scope.write("C1:TRSL POS")
 
     def start_trigger(self):
@@ -114,7 +101,6 @@ class Scope(object):
         return False
 
     def get_channel(self, samples, isshort, channel='C3'):
-        # read channel data
         if self.scope is None:
             self.open()
         if self.scope:
@@ -139,7 +125,7 @@ class Scope(object):
         else:
             return None
 
-    def reset(self):  # reset the ocssiloscope
+    def reset(self):
         if self.scope is not None:
             logging.info("resetting oscilloscope!")
             time.sleep(1)
@@ -163,7 +149,7 @@ def scope_setup(trig_channel='C1', num_of_samples=200, sample_rate=500E6, isshor
         yscale = 1
     timebase = str(xscale * num_of_samples / 10) + "S"  # timebase: s/div
 
-    oscope = Scope()
+    oscope = LecroyScope()
     oscope.setup(str(vdiv) + "V", timebase, str(sample_rate / 1E6) + "MS/s", str(duration) + "S", voffset)
     oscope.set_trigger(trg_delay, trg_level)
     return oscope
@@ -171,7 +157,7 @@ def scope_setup(trig_channel='C1', num_of_samples=200, sample_rate=500E6, isshor
 
 def dut_setup(board="CW305", key=[0], bitfile=None):
     if board == "CW305":
-        target = cw.target(None, cw.targets.CW305, fpga_id='35t', force=True, bsfile=bitfile)
+        target = cw.target(None, cw.targets.CW305, fpga_id='100t', force=True, bsfile=bitfile)
         target.pll.pll_enable_set(True)  # Enable PLL chip
         target.pll.pll_outenable_set(False, 0)  # Disable unused PLL0
         target.pll.pll_outenable_set(True, 1)  # Enable PLL
@@ -230,7 +216,6 @@ def capture_nopt(oscope, num_of_samples=600, isshort=False, channel='C3'):
         print("Triggering Error!")
         return
 
-    # Get trace: if Lecroy has not stopped yet, discard this trace
     if not oscope.wait_for_trigger():
         return
 
