@@ -217,7 +217,11 @@ def capture_cw305(oscope, target, num_of_samples=600, isshort=False, channel='C3
     output = target.fpga_read(target.REG_CRYPT_CIPHEROUT, 16)  # read ciphertext
     return trc, output
 
-# t st
+# sco = scope_setup()
+# tar = dut_setup()
+# trc, out = capture_cw305(sco, tar)
+# sco.close()
+# print(trc)
 
 # Capture without sending the inputs
 def capture_nopt(oscope, num_of_samples=600, isshort=False, channel='C3'):
