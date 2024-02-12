@@ -1,11 +1,18 @@
-from __future__ import annotations
+"""
+File: Metrics.py
+Authors: Samuel Karkache (swkarkache@wpi.edu), Dev Mehta (dmmehta2@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
+Date: 2024-12-02
+Description: Metric API for side-channel analysis experiments. Includes SNR, t-test, correlation, score and rank, and success rate and guessing entropy.
+"""
 
+from __future__ import annotations
 import math
 import numpy as np
 import tqdm
 from tqdm import *
 from collections.abc import *
 from numbers import Number
+
 
 def signal_to_noise_ratio(labels: dict) -> np.ndarray:
     """
@@ -144,7 +151,8 @@ def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: 
     return np.divide(top_sum_observed_predicted, np.sqrt(np.multiply(bottom_sum_observed, bottom_sum_predicted)))
 
 
-def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np.ndarray, score_fcn: Callable, *args: any) -> np.ndarray:
+def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np.ndarray, score_fcn: Callable,
+                   *args: any) -> np.ndarray:
     """
     Scores and ranks a set of key candidates based on how likely they are to be the actual key.
 
@@ -182,7 +190,8 @@ def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np
     return key_ranks
 
 
-def score_with_correlation(traces: list | np.ndarray, key_guess: any, target_byte: int, plaintexts: list | np.ndarray, leakage_model: Callable) -> Number:
+def score_with_correlation(traces: list | np.ndarray, key_guess: any, target_byte: int, plaintexts: list | np.ndarray,
+                           leakage_model: Callable) -> Number:
     """
     Scoring function that assigns a key guess a score based on the max value of the pearson correlation.
     :param traces: The collected power traces
@@ -211,7 +220,8 @@ def score_with_correlation(traces: list | np.ndarray, key_guess: any, target_byt
     return np.max(np.abs(correlation))
 
 
-def success_rate_guessing_entropy(correct_keys: list | np.ndarray, experiment_ranks: list | np.ndarray, order: int, num_experiments: int) -> (Number, Number):
+def success_rate_guessing_entropy(correct_keys: list | np.ndarray, experiment_ranks: list | np.ndarray, order: int,
+                                  num_experiments: int) -> (Number, Number):
     """
     Computes the success rate and guessing entropy based on computed key ranks.
     :param correct_keys: an array of the correct keys of the given experiment
@@ -239,7 +249,9 @@ def success_rate_guessing_entropy(correct_keys: list | np.ndarray, experiment_ra
                 break
 
         # guessing entropy is the log2 of the rank of the correct key
-        guessing_entropy += math.log2([idx for idx, key_and_score in enumerate(experiment_ranks[i]) if key_and_score[0] == correct_keys[i]][0] + 1)
+        guessing_entropy += math.log2(
+            [idx for idx, key_and_score in enumerate(experiment_ranks[i]) if key_and_score[0] == correct_keys[i]][
+                0] + 1)
 
     success_rate = success_rate / num_experiments
     guessing_entropy = guessing_entropy / num_experiments
