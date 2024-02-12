@@ -247,7 +247,7 @@ def scope_setup(trig_channel='C1', num_of_samples=200, sample_rate=500E6, isshor
 # DUT setup for communication start and bit stream program for CW305 and Picochip
 def dut_setup(board="CW305", key=[0], bitfile=None):
     if (board == "CW305"):
-        target = cw.target(None, cw.targets.CW305, fpga_id='35t', force=True, bsfile=bitfile)
+        target = cw.target(None, cw.targets.CW305, fpga_id='100t', force=True, bsfile=bitfile)
 
         # Configuration of the PLL Clocks
         target.pll.pll_enable_set(True)  # Enable PLL chip
