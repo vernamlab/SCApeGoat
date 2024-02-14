@@ -1,5 +1,4 @@
 import time
-import logging
 import pyvisa as visa
 import numpy as np
 import chipwhisperer as cw
@@ -10,8 +9,15 @@ from serial.tools import list_ports
 
 
 class LecroyScope(object):
+    """
+    Lecroy oscilloscope interface module. Use this class when collecting traces using a Lecroy scope.
+    """
 
     def __init__(self, scope_ip='TCPIP0::192.168.1.79::inst0::INSTR'):
+        """
+        Initialize LecroyScope object.
+        :param scope_ip: The scope IP of the Lecroy scope
+        """
         self.scope = None
         self.rm = None
         self.scope_ip = scope_ip
@@ -22,6 +28,11 @@ class LecroyScope(object):
         self.close()
 
     def open(self, scope_ip, scope_timeout=5000):
+        """
+        Opens a Lecroy scope using the PyVisa library
+        :param scope_ip: The ip of the Lecroy scope
+        :param scope_timeout: The amount of time to wait for the Lecroy until timeout
+        """
         self.rm = visa.ResourceManager()
         try:
             self.scope = self.rm.open_resource(scope_ip)
@@ -31,18 +42,31 @@ class LecroyScope(object):
             self.scope.query(r"""vbs? 'return=app.WaitUntilIdle(5)' """)
         except IOError:
             self.scope = None
-            logging.info("Unable to locate the scope VISA interface")
+            print("Unable to locate the scope VISA interface")
 
     def close(self):
+        """
+        Closes the Lecroy scope using the PyVisa library
+        :return:
+        """
         try:
             if self.scope is not None:
                 self.scope.close()
             if self.rm is not None:
                 self.rm.close()
         except IOError:
-            logging.info("PyVisa error in closing resource")
+            print("PyVisa error in closing resource")
 
     def setup(self, v_div, timebase, samplerate, duration, v_offset, channel):
+        """
+        Sets up the Lecroy scope for trace capture
+        :param v_div: voltage scale per division
+        :param timebase: the timescale for the scope
+        :param samplerate: the rate in which measurements are sampled
+        :param duration: the duration of capture
+        :param v_offset: the voltage offset for the measurement
+        :param channel: the channel to capture the traces on
+        """
         if self.scope:
             self.scope.write("{}:TRA ON".format(channel))
             self.scope.write(r"""vbs 'app.Acquisition.ClearSweeps' """)
@@ -55,6 +79,12 @@ class LecroyScope(object):
             self.scope.write(r"""vbs 'app.Acquisition.%s.VerOffset = "%s" '""" % (channel, v_offset))
 
     def set_trigger(self, delay, level, channel='C1'):
+        """
+        Set the trigger for the trace capture
+        :param delay: the trigger delay
+        :param level: the trigger level
+        :param channel: the trigger channel
+        """
         if self.scope is None:
             self.open(self.scope_ip)
         if self.scope:
@@ -65,6 +95,9 @@ class LecroyScope(object):
             self.scope.write("{}:TRSL POS".format(channel))
 
     def start_trigger(self):
+        """
+        Tells the LecroyScope to start the trigger based on the parameters set in LecroyScope.set_trigger
+        """
         if self.scope:
             self.scope.write("TRMD SINGLE")
             self.scope.write(r"""vbs 'app.acquisition.triggermode = "stopped" ' """)
@@ -73,6 +106,10 @@ class LecroyScope(object):
             self.scope.query(r"""vbs? 'return=app.WaitUntilIdle(.01)' """)
 
     def get_trigger(self):
+        """
+        Returns the trigger status
+        :return: A string representing the trigger status
+        """
         if self.scope is None:
             self.open(self.scope_ip)
         if self.scope:
@@ -80,6 +117,10 @@ class LecroyScope(object):
             return ret.split()[1]
 
     def wait_for_trigger(self):
+        """
+        Waits for the Lecroy trigger
+        :return: True if successful, False if the trigger timeout
+        """
         if self.scope is None:
             self.open(self.scope_ip)
 
@@ -89,10 +130,17 @@ class LecroyScope(object):
                     return True
                 else:
                     time.sleep(0.5)
-        logging.info("Trigger timout!")
+        print("Trigger timout!")
         return False
 
     def get_channel(self, samples, is_short, channel='C3'):
+        """
+        Get the measurement data from the Lecroy from specified channel
+        :param samples: The number of samples to record
+        :param is_short:
+        :param channel: The channel to collect data from
+        :return: The data from the scope
+        """
         if self.scope is None:
             self.open(self.scope_ip)
         if self.scope:
@@ -118,8 +166,11 @@ class LecroyScope(object):
             return None
 
     def reset(self):
+        """
+        Resets the scope
+        """
         if self.scope is not None:
-            logging.info("Resetting oscilloscope!")
+            print("Resetting oscilloscope!")
             time.sleep(1)
             not_ready = True
             while not_ready:
@@ -130,12 +181,24 @@ class LecroyScope(object):
         return
 
 
-def scope_setup(channel='C3', trig_channel='C1', num_of_samples=200, sample_rate=500E6, is_short='False', v_div=2.5E-3, trg_delay="0",
+def scope_setup(channel='C3', trig_channel='C1', num_of_samples=200, sample_rate=500E6, is_short=False, v_div=2.5E-3, trg_delay="0",
                 trg_level="1.65V", v_offset='0'):
+    """
+    Sets up a Lecroy Scope object for power trace collection
+    :param channel: the channel that records power trace measurements
+    :param trig_channel: the trigger channel
+    :param num_of_samples: the number of samples to capture
+    :param sample_rate: the rate in which samples are captured
+    :param is_short:
+    :param v_div: the voltage scale per division
+    :param trg_delay: the trigger delay
+    :param trg_level: the trigger level
+    :param v_offset: the voltage offset
+    :return: the fully configured scope object
+    """
     xscale = 1 / sample_rate
     duration = xscale * num_of_samples
 
-    # TODO: The y_scale variable is not being used here, unsure about what to do with it
     if is_short:
         y_scale = v_div / (65536 / 10.0)
     else:
@@ -149,6 +212,13 @@ def scope_setup(channel='C3', trig_channel='C1', num_of_samples=200, sample_rate
 
 
 def dut_setup(board="CW305", fpga_id='100t', bitfile=None):
+    """
+    Sets up a target board for trace capture
+    :param board: The DUT type (CW305 or pico)
+    :param fpga_id: the FPGA id for CW305 target
+    :param bitfile: the bitfile for CW305 target
+    :return: The configured target
+    """
     if board == "CW305":
         target = cw.target(None, cw.targets.CW305, fpga_id=fpga_id, force=True, bsfile=bitfile)
         target.pll.pll_enable_set(True)
@@ -177,22 +247,32 @@ def dut_setup(board="CW305", fpga_id='100t', bitfile=None):
               ' at ' + str(serialBaud) + ' BAUD.')
         try:
             ser = serial.Serial(serialPort, serialBaud, timeout=4)
-            print('Connected!')
+            return ser
         except IOError:
-            print("Failed to connect with " + str(serialPort) +
-                  ' at ' + str(serialBaud) + ' BAUD.')
-    return ser
+            print("Failed to connect with " + str(serialPort) + ' at ' + str(serialBaud) + ' BAUD.')
 
 
-def capture_cw305(scope, target, num_of_samples=600, short=False, channel='C3', plain_text=None, key=None):
+def capture_cw305(scope, target, num_of_samples=600, short=False, channel='C3', plaintext=None, key=None):
+    """
+    Captures traces on the CW305 target board
+    :param scope: The configured LecroyScope object
+    :param target: The configured CW305 target board
+    :param num_of_samples: The number of samples to capture
+    :param short:
+    :param channel: The channel to collect traces on
+    :param plaintext: The plaintext for the encryption algorithm
+    :param key: The key for the encryption algorithm
+    :return: the recorded trace and algorithm output
+    """
+
     if key is None:
         key = [0]
-    if plain_text is None:
-        plain_text = [0]
+    if plaintext is None:
+        plaintext = [0]
 
-    if scope.start_trigger():
+    if scope.start_trigger() is not False:
         target.fpga_write(target.REG_CRYPT_KEY, key[::-1])
-        target.fpga_write(target.REG_CRYPT_TEXTIN, plain_text[::-1])
+        target.fpga_write(target.REG_CRYPT_TEXTIN, plaintext[::-1])
         target.usb_trigger_toggle()
 
         if scope.wait_for_trigger() is False:
@@ -208,36 +288,45 @@ def capture_cw305(scope, target, num_of_samples=600, short=False, channel='C3', 
         raise Exception("Trigger Error!")
 
 
-def capture_nopt(oscope, num_of_samples=600, isshort=False, channel='C3'):
-    if oscope.start_trigger() == False:
-        print("Triggering Error!")
-        return
+def capture_nopt(scope, num_of_samples=600, short=False, channel='C3'):
+    """
+    Captures traces with no input
+    :param scope: the configured LecroyScope object
+    :param num_of_samples: The number of samples to capture
+    :param short:
+    :param channel: The channel to collect traces on
+    :return: The resulting trace
+    """
+    if scope.start_trigger() is not False:
+        if scope.wait_for_trigger() is False:
+            return
+        trc = scope.get_channel(num_of_samples, short, channel)
+        return trc
+    else:
+        raise Exception("Trigger Error!")
 
-    if oscope.wait_for_trigger() == False:
-        return
 
-    trc = oscope.get_channel(num_of_samples, isshort, channel)
-    return trc
+def capture_pico(scope, ser, num_of_samples=600, short=False, channel='C3', plain_text=None):
 
+    if plain_text is None:
+        plain_text = [0]
 
-def capture_pico(oscope, ser, num_of_samples=600, isshort=False, channel='C3', plain_text=[0]):
     ser.write([82])
     print('Send soft reset(R) to clear variables')
     Ack = ser.read(1)
     print('Acknowledgement(A) from DUT:', Ack)
-
     print('plaintext', bytearray(plain_text))
 
-    if oscope.start_trigger() == False:
+    if scope.start_trigger() is False:
         print("Triggering Error!")
         return
     ser.write(plain_text)
 
-    if oscope.wait_for_trigger() == False:
+    if scope.wait_for_trigger() is False:
         return
 
-    trc = oscope.get_channel(num_of_samples, isshort, channel)
+    trc = scope.get_channel(num_of_samples, short, channel)
     ciphertext = bytearray(ser.read(2))
-    print('AES sbox output', ciphertext)
+    print('AES Sbox output', ciphertext)
 
     return trc
