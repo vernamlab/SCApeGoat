@@ -9,23 +9,24 @@ from serial import Serial
 from serial.tools import list_ports
 
 
-class Scope(object):
-    
+class LecroyScope(object):
+
     def __init__(self, scope_ip='TCPIP0::192.168.1.79::inst0::INSTR'):
         self.scope = None
         self.rm = None
-        self.open(scope_ip)
+        self.scope_ip = scope_ip
+        self.open(self.scope_ip)
         self.valid_trigger_states = ['AUTO', 'NORM', 'SINGLE', 'STOP']
-        
+
     def __del__(self):
         self.close()
 
-    def open(self, scope_ip):
+    def open(self, scope_ip, scope_timeout=5000):
         self.rm = visa.ResourceManager()
         try:
             self.scope = self.rm.open_resource(scope_ip)
             self.reset()
-            self.scope.timeout = 5000
+            self.scope.timeout = scope_timeout
             self.scope.clear()
             self.scope.query(r"""vbs? 'return=app.WaitUntilIdle(5)' """)
         except IOError:
@@ -39,23 +40,23 @@ class Scope(object):
             if self.rm is not None:
                 self.rm.close()
         except IOError:
-            logging.info("Pvisa error in closing resource")
+            logging.info("PyVisa error in closing resource")
 
-    def setup(self, vdiv, timebase, samplerate, duration, voffset):
+    def setup(self, v_div, timebase, samplerate, duration, v_offset, channel):
         if self.scope:
-            self.scope.write("C3:TRA ON")
+            self.scope.write("{}:TRA ON".format(channel))
             self.scope.write(r"""vbs 'app.Acquisition.ClearSweeps' """)
             self.scope.write("TDIV " + timebase)
-            self.scope.write("C3:VDIV " + vdiv)
+            self.scope.write("{}:VDIV {}".format(channel, v_div))
             self.scope.write("CFMT DEF9,WORD,BIN")
             self.scope.write(r"""vbs 'app.Acquisition.Horizontal.Maximize = "FixedSampleRate" '""")
             self.scope.write(r"""vbs 'app.Acquisition.Horizontal.SampleRate = "%s" '""" % samplerate)
             self.scope.write(r"""vbs 'app.Acquisition.Horizontal.AcquisitionDuration = "%s" '""" % duration)
-            self.scope.write(r"""vbs 'app.Acquisition.C3.VerOffset = "%s" '""" % voffset)
+            self.scope.write(r"""vbs 'app.Acquisition.%s.VerOffset = "%s" '""" % (channel, v_offset))
 
     def set_trigger(self, delay, level, channel='C1'):
         if self.scope is None:
-            self.open()
+            self.open(self.scope_ip)
         if self.scope:
             self.scope.write("{}:TRA ON".format(channel))
             self.scope.write("{}:TRCP DC".format(channel))
@@ -73,14 +74,14 @@ class Scope(object):
 
     def get_trigger(self):
         if self.scope is None:
-            self.open()
+            self.open(self.scope_ip)
         if self.scope:
             ret = self.scope.query("TRMD?")
             return ret.split()[1]
 
     def wait_for_trigger(self):
         if self.scope is None:
-            self.open()
+            self.open(self.scope_ip)
 
         if self.scope:
             for tries in range(10):
@@ -91,11 +92,11 @@ class Scope(object):
         logging.info("Trigger timout!")
         return False
 
-    def get_channel(self, samples, isshort, channel='C3'):
+    def get_channel(self, samples, is_short, channel='C3'):
         if self.scope is None:
-            self.open()
+            self.open(self.scope_ip)
         if self.scope:
-            if isshort:
+            if is_short:
                 self.scope.write('{0}:WF? DATA1'.format(channel))
                 trc = self.scope.read_raw()
                 hsh = trc.find(b'#', 0)
@@ -129,32 +130,31 @@ class Scope(object):
         return
 
 
-def scope_setup(trig_channel='C1', num_of_samples=200, sample_rate=500E6, isshort='False', vdiv=2.5E-3, trg_delay="0",
-                trg_level="1.65V", voffset='0'):
-    
-    xscale = 1 / sample_rate  
-    duration = xscale * num_of_samples  
-    
-    # TODO: The yscale variable is not being used here, unsure about what to do with it
-    if isshort:
-        yscale = vdiv / (65536 / 10.0)
-    else:
-        yscale = 1
+def scope_setup(channel='C3', trig_channel='C1', num_of_samples=200, sample_rate=500E6, is_short='False', v_div=2.5E-3, trg_delay="0",
+                trg_level="1.65V", v_offset='0'):
+    xscale = 1 / sample_rate
+    duration = xscale * num_of_samples
 
-    timebase = str(xscale * num_of_samples / 10) + "S"  
-    oscope = Scope()
-    oscope.setup(str(vdiv) + "V", timebase, str(sample_rate / 1E6) + "MS/s", str(duration) + "S", voffset)
-    oscope.set_trigger(trg_delay, trg_level, trig_channel)
-    return oscope
+    # TODO: The y_scale variable is not being used here, unsure about what to do with it
+    if is_short:
+        y_scale = v_div / (65536 / 10.0)
+    else:
+        y_scale = 1
+
+    timebase = str(xscale * num_of_samples / 10) + "S"
+    scope = LecroyScope()
+    scope.setup(str(v_div) + "V", timebase, str(sample_rate / 1E6) + "MS/s", str(duration) + "S", v_offset, channel)
+    scope.set_trigger(trg_delay, trg_level, trig_channel)
+    return scope
 
 
 def dut_setup(board="CW305", fpga_id='100t', bitfile=None):
     if board == "CW305":
         target = cw.target(None, cw.targets.CW305, fpga_id=fpga_id, force=True, bsfile=bitfile)
         target.pll.pll_enable_set(True)
-        target.pll.pll_outenable_set(False, 0)  
-        target.pll.pll_outenable_set(True, 1) 
-        target.pll.pll_outenable_set(False, 2)  
+        target.pll.pll_outenable_set(False, 0)
+        target.pll.pll_outenable_set(True, 1)
+        target.pll.pll_outenable_set(False, 2)
         target.pll.pll_outfreq_set(100E6, 1)
         return target
     elif board == "pico":
@@ -178,7 +178,7 @@ def dut_setup(board="CW305", fpga_id='100t', bitfile=None):
         try:
             ser = serial.Serial(serialPort, serialBaud, timeout=4)
             print('Connected!')
-        except:
+        except IOError:
             print("Failed to connect with " + str(serialPort) +
                   ' at ' + str(serialBaud) + ' BAUD.')
     return ser
@@ -191,13 +191,13 @@ def capture_cw305(oscope, target, num_of_samples=600, isshort=False, channel='C3
         return
 
     target.fpga_write(target.REG_CRYPT_KEY, key[::-1])
-    target.fpga_write(target.REG_CRYPT_TEXTIN, plain_text[::-1]) 
+    target.fpga_write(target.REG_CRYPT_TEXTIN, plain_text[::-1])
     target.usb_trigger_toggle()
 
     if oscope.wait_for_trigger() == False:
         return None, [0]
 
-    trc = oscope.get_channel(num_of_samples, isshort, channel)  
+    trc = oscope.get_channel(num_of_samples, isshort, channel)
 
     output = target.fpga_read(target.REG_CRYPT_CIPHEROUT, 16)
     return trc, output
@@ -213,6 +213,7 @@ def capture_nopt(oscope, num_of_samples=600, isshort=False, channel='C3'):
 
     trc = oscope.get_channel(num_of_samples, isshort, channel)
     return trc
+
 
 def capture_pico(oscope, ser, num_of_samples=600, isshort=False, channel='C3', plain_text=[0]):
     ser.write([82])
