@@ -184,23 +184,28 @@ def dut_setup(board="CW305", fpga_id='100t', bitfile=None):
     return ser
 
 
-def capture_cw305(oscope, target, num_of_samples=600, isshort=False, channel='C3', board="CW305", plain_text=[0],
-                  key=[0]):
-    if oscope.start_trigger() == False:
-        print("Triggering Error!")
-        return
+def capture_cw305(scope, target, num_of_samples=600, short=False, channel='C3', plain_text=None, key=None):
+    if key is None:
+        key = [0]
+    if plain_text is None:
+        plain_text = [0]
 
-    target.fpga_write(target.REG_CRYPT_KEY, key[::-1])
-    target.fpga_write(target.REG_CRYPT_TEXTIN, plain_text[::-1])
-    target.usb_trigger_toggle()
+    if scope.start_trigger():
+        target.fpga_write(target.REG_CRYPT_KEY, key[::-1])
+        target.fpga_write(target.REG_CRYPT_TEXTIN, plain_text[::-1])
+        target.usb_trigger_toggle()
 
-    if oscope.wait_for_trigger() == False:
-        return None, [0]
+        if scope.wait_for_trigger() is False:
+            return None, [0]
 
-    trc = oscope.get_channel(num_of_samples, isshort, channel)
+        trc = scope.get_channel(num_of_samples, short, channel)
 
-    output = target.fpga_read(target.REG_CRYPT_CIPHEROUT, 16)
-    return trc, output
+        output = target.fpga_read(target.REG_CRYPT_CIPHEROUT, 16)
+
+        return trc, output
+
+    else:
+        raise Exception("Trigger Error!")
 
 
 def capture_nopt(oscope, num_of_samples=600, isshort=False, channel='C3'):
