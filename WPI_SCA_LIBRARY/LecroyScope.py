@@ -133,18 +133,18 @@ class LecroyScope(object):
         print("Trigger timout!")
         return False
 
-    def get_channel(self, samples, is_short, channel='C3'):
+    def get_channel(self, samples, short, channel='C3'):
         """
         Get the measurement data from the Lecroy from specified channel
         :param samples: The number of samples to record
-        :param is_short:
+        :param short:
         :param channel: The channel to collect data from
         :return: The data from the scope
         """
         if self.scope is None:
             self.open(self.scope_ip)
         if self.scope:
-            if is_short:
+            if short:
                 self.scope.write('{0}:WF? DATA1'.format(channel))
                 trc = self.scope.read_raw()
                 hsh = trc.find(b'#', 0)
@@ -181,7 +181,7 @@ class LecroyScope(object):
         return
 
 
-def scope_setup(channel='C3', trig_channel='C1', num_of_samples=200, sample_rate=500E6, is_short=False, v_div=2.5E-3, trg_delay="0",
+def scope_setup(channel='C3', trig_channel='C1', num_of_samples=200, sample_rate=500E6, short=False, v_div=2.5E-3, trg_delay="0",
                 trg_level="1.65V", v_offset='0'):
     """
     Sets up a Lecroy Scope object for power trace collection
@@ -189,7 +189,7 @@ def scope_setup(channel='C3', trig_channel='C1', num_of_samples=200, sample_rate
     :param trig_channel: the trigger channel
     :param num_of_samples: the number of samples to capture
     :param sample_rate: the rate in which samples are captured
-    :param is_short:
+    :param short:
     :param v_div: the voltage scale per division
     :param trg_delay: the trigger delay
     :param trg_level: the trigger level
@@ -199,7 +199,7 @@ def scope_setup(channel='C3', trig_channel='C1', num_of_samples=200, sample_rate
     xscale = 1 / sample_rate
     duration = xscale * num_of_samples
 
-    if is_short:
+    if short:
         y_scale = v_div / (65536 / 10.0)
     else:
         y_scale = 1
