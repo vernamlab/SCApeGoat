@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'WPI SCA LIBRARY'
+project = 'SCApe Goat'
 copyright = 'Worcester Polytechnic Institute'
 author = 'Samuel Karkache'
 release = '0.1'
