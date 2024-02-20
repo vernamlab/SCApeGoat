@@ -7,11 +7,9 @@ import os
 import tqdm as tqdm
 
 
-# TODO: Implement changes in the Capture procedure in order to make them more generic
-
 class CWScope:
 
-    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0, simple_serial_version="1"):
+    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0, target_type=cw.targets.SimpleSerial):
         """
         Initializes a CW scope object
         :param firmware_name: The name of the compiled firmware that will be loaded on the CW device.
@@ -22,14 +20,7 @@ class CWScope:
         # setup scope
         self.scope = cw.scope()
         self.scope.default_setup()
-
-        # configure target
-        if simple_serial_version == "1":
-            self.target = cw.target(self.scope, cw.targets.SimpleSerial)
-        elif simple_serial_version == "2":
-            self.target = cw.target(self.scope, cw.targets.SimpleSerial2)
-        else:
-            raise Exception("Unknown Simple Serial Version: {}".format(simple_serial_version))
+        self.target = cw.target(self.scope, target_type)
 
         # configure scope parameters
         self.scope.gain.db = gain
@@ -46,7 +37,7 @@ class CWScope:
         self.scope.dis()
         self.target.dis()
 
-    # TODO: It would probably be better to return the waves, texts, and keys separately
+    # TODO: It would probably be better to return the waves, texts, and keys separately make more generic too
     def standard_capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
         """
         Capture traces from CW Device and return as an array. Ensure that the scope as been properly configured using
