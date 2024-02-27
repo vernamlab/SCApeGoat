@@ -1,8 +1,12 @@
+import os
 import time
 
 import h5py
 import numpy as np
 import trsfile
+
+from datetime import date
+import json
 
 sampleNumber = 509000
 
@@ -39,7 +43,25 @@ class HDF5FileClass:
 
         if fileInputType == "undefined":
             self.path = path
-            self.hdf5Object = h5py.File(path, 'w')
+
+            #create file structure
+            os.mkdir(path)
+
+            experimentsPath = f"{path}\\Experiments"
+            visulizationsPath = f"{path}\\Visualizations"
+            os.mkdir(experimentsPath)
+            os.mkdir(visulizationsPath)
+
+            self.JSONdata = {"fileName" : path,
+                             "dateCreated" : date.today().strftime('%Y-%m-%d'),
+                             "path" : os.path.abspath(path),
+                             "experiments" : []}
+            with open(f"{path}\\metadataHolder.json", 'w') as json_file:
+                json.dump(self.JSONdata, json_file, indent=4)
+
+            experimentsVizPath = f"{experimentsPath}\\Visualizations"
+            os.mkdir(experimentsVizPath)
+
             self.experiments = {}
             self.metadata = {}
         elif fileInputType == "trs":
@@ -82,11 +104,25 @@ class HDF5FileClass:
             self.metadata = {}'''
 
     def addExperiment(self, experimentName, existing=0, groupPath=0, definition=""):
-        self.experiments[experimentName] = ExperimentClass(experimentName, self.hdf5Object, existing, groupPath, definition = definition)
-        self.addMetadata(f'{experimentName}_experiment_description', definition)
+        self.experiments[experimentName] = ExperimentClass(experimentName, existing, groupPath, definition = definition, masterClass= self, jsonData=self.JSONdata)
+        self.metadata[f'{experimentName}_experiment_description'] = definition
+        experimentData = {
+            "experimentTitle" : experimentName,
+            "dateCreated" : date.today().strftime('%Y-%m-%d'),
+            "path" : f"{self.path}\\Experiments\\{experimentName}",
+            "datasets" : []
+        }
+        self.experiments[experimentName] = ExperimentClass(experimentName, existing, groupPath, definition=definition, masterClass=self, jsonData = experimentData)
+        os.mkdir(experimentData["path"])
+        self.JSONdata["experiments"].append(experimentData)
+        self.saveJSONdata()
 
     def getMetadata(self):
         return self.metadata
+
+    def saveJSONdata(self):
+        with open(f"{self.path}\\metadataHolder.json", 'w') as json_file:
+            json.dump(self.JSONdata, json_file, indent=4)
 
     def addMetadata(self, metadataName, metadataContents):
         self.metadata[metadataName] = metadataContents
@@ -105,23 +141,12 @@ class HDF5FileClass:
 
 
 class ExperimentClass:
-    def __init__(self, experimentName, hdf5Object, existing=0, groupPath=0, definition = ""):
-        self.hdf5Object = hdf5Object
+    def __init__(self, experimentName, existing=0, groupPath=0, definition = "", masterClass = "", jsonData = ""):
         self.dataset = {}
         self.metadata = {}
         self.definition = definition
-        if existing == 0:
-            self.groupPath = hdf5Object.create_group(experimentName)
-        else:
-            # set group path
-            self.groupPath = groupPath
-
-            for attIndex in list(self.groupPath.attrs.keys()):
-                self.metadata[attIndex] = self.groupPath.attrs[attIndex]
-            # create datasets from what is present
-            for datasetID in list(self.groupPath.keys()):
-                self.addDataset(datasetID, 0, 0, definition=self.groupPath.attrs[f'{datasetID}_dataset_description'],
-                                existing=1, datasetPathIn=self.groupPath[datasetID])
+        self.masterClass = masterClass
+        self.path = jsonData["path"]
 
     def prepareSnrWithLabels(self, tracesName, labelsName, size):
         tracesClass = self.dataset[tracesName]
@@ -189,12 +214,11 @@ class ExperimentClass:
             definitionReturn[key] = definition
         return definitionReturn
 
-    def addDataset(self, datasetName, datasetSize, chunksIn=(400, 110000), definition="", dtype='f', existing=0,
-                   datasetPathIn=0):
-        self.dataset[datasetName] = DatasetClass(datasetName, self.groupPath, datasetSize, chunksIn, definition, dtype,
-                                                 existing=existing, datasetPathIn=datasetPathIn)
-        if existing == 0:
-            self.addMetadata(f'{datasetName}_dataset_description', definition)
+    def addDataset(self, name, path, size, type):
+        array = np.zeros((size), dtype=type)
+        np.save(f"{self.path}\\{path}",array)
+        self.dataset[name] = DatasetClass(name, f"{self.path}\\{path}", size, type)
+
 
     def resizeDataset(self, datasetName, newDatasetSize):
         self.dataset[datasetName].resizeDataset(newDatasetSize)
@@ -206,27 +230,24 @@ class ExperimentClass:
 
 
 class DatasetClass:
-    def __init__(self, datasetName, groupObject, datasetSize, chunksIn=(100000, 1730), definition="", dtype='f',
-                 existing=0, datasetPathIn=0):
-        self.groupPath = groupObject
-        if existing == 0:
-            self.datasetPath = groupObject.create_dataset(datasetName, datasetSize, maxshape=(None, None),
-                                                          chunks=chunksIn, dtype=dtype)
-        else:
-            self.datasetPath = datasetPathIn
-        self.metadata = {}
-        self.definition = definition
-        self.datasetName = datasetName
+    def __init__(self, name, path, size, type):
+        self.name = name
+        self.path = path
+        self.size = size
+        self.type = type
 
     def addMetadata(self, metadataName, metadataContents):
         self.metadata[metadataName] = metadataContents
         self.datasetPath.attrs[metadataName] = metadataContents
 
     def addData(self, index, dataToAdd):
-        self.datasetPath[index] = dataToAdd
+        data = np.load(self.path)
+        data[index] = dataToAdd
+        np.save(self.path,data)
 
     def readData(self, index):
-        return self.datasetPath[index]
+        data = np.load(self.path)
+        return data[index]
 
     def resizeDataset(self, newDatasetSize):
         self.datasetPath.resize(newDatasetSize)
@@ -242,3 +263,159 @@ class DatasetClass:
         self.datasetName = newName
         experimentClass.handleDatasetRename(oldName, newName)
 
+class FileFormatParent:
+    def __init__(self, path, existing = False):
+        if not existing:
+            self.path = path
+
+            # create file structure
+            os.mkdir(path)
+
+            self.experimentsPath = f"{path}\\Experiments"
+            self.visulizationsPath = f"{path}\\Visualizations"
+
+            os.mkdir(self.experimentsPath)
+            os.mkdir(self.visulizationsPath)
+
+            self.JSONdata = {"fileName": path,
+                             "metadata" : {"dateCreated": date.today().strftime('%Y-%m-%d')},
+                             "path": os.path.abspath(path),
+                             "experiments": []}
+            with open(f"{path}\\metadataHolder.json", 'w') as json_file:
+                json.dump(self.JSONdata, json_file, indent=4)
+
+            self.experiments = {}
+            self.metadata = self.JSONdata['metadata']
+
+        if existing:
+            #open json file
+            with open(f"{path}\\metadataHolder.json", 'r') as json_file:
+                self.JSONdata = json.load(json_file)
+
+            self.path = path
+            self.experimentsPath = f"{path}\\Experiments"
+            self.visulizationsPath = f"{path}\\Visualizations"
+            self.experiments = {}
+            self.metadata = self.JSONdata["metadata"]
+
+            #read experiments
+            for experiment in self.JSONdata["experiments"]:
+                self.addExperiment(experiment["name"], experiment["path"], True, index = experiment["index"], experiment=experiment)
+
+
+
+
+    def updateJSON(self):
+        with open(f"{self.path}\\metadataHolder.json", 'w') as json_file:
+            json.dump(self.JSONdata, json_file, indent=4)
+
+    def updateMetadata(self, key, value):
+        #get rid of case sensitivity (filter to all be lowercase b4 entering)
+        self.metadata[key] = value
+        #TODO: update JSON var
+        self.updateJSON()
+
+    def readMetadata(self):
+        return self.metadata
+
+    def addExperiment(self, name, path, existing, index = 0, experiment = {}):
+        if not existing:
+            path = f'{self.experimentsPath}\\{path}'
+            #TODO: Add more preset metadata params (date/time etc...)
+            JsonToSave = {
+                "path" : path,
+                "name" : name,
+                "metadata" : {},
+                "datasets" : [],
+            }
+            self.JSONdata["experiments"].append(JsonToSave)
+            index = len(self.JSONdata["experiments"]) - 1
+            self.JSONdata["experiments"][index]["index"] = index
+
+            self.experiments[name] = ExperimentJsonClass(name, path, self, existing = False)
+            os.mkdir(path)
+            os.mkdir(f"{path}\\visualization")
+            self.updateJSON()
+
+        if existing:
+            self.experiments[name] = ExperimentJsonClass(name, path, self, existing=True, index=index, experiment=experiment)
+
+
+
+class ExperimentJsonClass:
+    def __init__(self, name, path, fileFormatParent, existing = False, index = 0, experiment = {}):
+        if not existing:
+            self.name = name
+            self.path = path
+            self.dataset = {}
+            self.metadata = {}
+            self.fileFormatParent = fileFormatParent
+            self.experimentIndex = index
+
+        if existing:
+            self.name = name
+            self.path = path
+            self.dataset = {}
+            self.metadata = experiment["metadata"]
+            self.fileFormatParent = fileFormatParent
+            self.experimentIndex = index
+
+            #create datasets
+            for dataset in experiment["datasets"]:
+                self.createDataset(dataset["name"], dataset["path"], existing=True, dataset=dataset)
+
+    def updateMetadata(self, key, value):
+        self.metadata[key] = value
+        self.fileFormatParent.JSONdata["experiments"][self.index]["metadata"][key] = value
+        self.fileFormatParent.updateJSON()
+    def readMetadata(self):
+        return self.metadata
+
+    def createDataset(self, name, path, existing = False, size = (10,10), type = 'int8', dataset = {}):
+        if not existing:
+            dataToAdd = {"name" : name,
+                         "path" : f'{self.path}\\{path}',
+                         "metadata" : {}}
+            self.fileFormatParent.JSONdata["experiments"][self.experimentIndex]["datasets"].append(dataToAdd)
+            index = len(self.fileFormatParent.JSONdata["experiments"][self.experimentIndex]["datasets"]) - 1
+
+            self.fileFormatParent.JSONdata["experiments"][self.experimentIndex]["datasets"][index]['index'] = index
+            self.fileFormatParent.updateJSON()
+
+            self.dataset[name] = DatasetJsonClass(name, f"{self.path}\\{path}", self.fileFormatParent, self, index, existing = False, size = size, type = type)
+
+        if existing:
+            self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, dataset["index"], existing=True, dataset = dataset)
+
+class DatasetJsonClass:
+    def __init__(self, name, path, fileFormatParent, experimentParent, index, existing = False, size = (10,10), type = 'int8', dataset = {}):
+        if not existing:
+            self.name = name
+            self.path = path
+            self.index = index
+            self.fileFormatParent = fileFormatParent
+            self.experimentParent = experimentParent
+            self.metadata = {}
+
+            array = np.zeros((size), dtype=type)
+            np.save(path, array)
+
+        if existing:
+            self.name = name
+            self.path = path
+            self.index = index
+            self.fileFormatParent = fileFormatParent
+            self.experimentParent = experimentParent
+            self.metadata = dataset["metadata"]
+
+    def readData(self, index):
+        data = np.load(self.path)
+        return data[index]
+
+    def readAll(self):
+        data = np.load(self.path)
+        return data[:]
+    def addData(self, index, dataToAdd):
+        data = np.load(self.path)
+        data[index] = dataToAdd
+        np.save(self.path,data)
