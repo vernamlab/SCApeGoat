@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import shutil
+
 import chipwhisperer as cw
 import cwtvla.ktp
 import numpy as np
@@ -41,7 +43,7 @@ class CWScope:
     def standard_capture_traces(self, num_traces: int,
                                 experiment_keys: list | np.ndarray = None,
                                 experiment_texts: list | np.ndarray = None,
-                                fixed_key: bool = False,
+                                fixed_key: bool = True,
                                 fixed_pt: bool = False) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
         """
         Capture procedure for ChipWhisperer devices. Will return a specified number of traces and the data associated
@@ -137,3 +139,33 @@ class CWScope:
                 rand_traces[i] = trace.wave
 
         return fixed_traces, rand_traces
+
+    def cw_to_file_format(self, num_traces: int, file_name: str = "", experiment_name: str = "", existing=False, experiment_keys: list | np.ndarray = None, experiment_texts: list | np.ndarray = None, fixed_key: bool = True, fixed_pt: bool = False):
+
+        traces, keys, plaintexts, ciphertexts = self.standard_capture_traces(num_traces, experiment_keys, experiment_texts, fixed_key, fixed_pt)
+
+        # create parent folder
+        file_parent = FileFormatParent(file_name, existing=existing)
+
+        # add experiment
+        file_parent.addExperiment(experiment_name, experiment_name, existing=existing)
+        exp = file_parent.experiments[experiment_name]
+
+        # create data sets for associated information
+        exp.createDataset(experiment_name + "Traces", experiment_name + "Traces.npy", existing=existing, size=(num_traces, len(traces[0])), type='uint8')
+        trace_data = exp.dataset[experiment_name + "Traces"]
+
+        exp.createDataset(experiment_name + "Plaintexts", experiment_name + "Plaintexts.npy", existing=existing, size=(num_traces, len(plaintexts[0])), type='uint8')
+        plaintext_data = exp.dataset[experiment_name + "Plaintexts"]
+
+        exp.createDataset(experiment_name + "Keys", experiment_name + "Keys.npy", existing=existing, size=(num_traces, len(keys[0])), type='uint8')
+        key_data = exp.dataset[experiment_name + "Keys"]
+
+        exp.createDataset(experiment_name + "Ciphertexts", experiment_name + "Ciphertexts.npy", existing=existing, size=(num_traces, len(ciphertexts[0])), type='uint8')
+        ciphertext_data = exp.dataset[experiment_name + "Ciphertexts"]
+
+        for i in range(num_traces):
+            trace_data.addData(index=i, dataToAdd=traces[i])
+            plaintext_data.addData(index=i, dataToAdd=plaintexts[i])
+            key_data.addData(index=i, dataToAdd=keys[i])
+            ciphertext_data.addData(index=i, dataToAdd=ciphertexts[i])
