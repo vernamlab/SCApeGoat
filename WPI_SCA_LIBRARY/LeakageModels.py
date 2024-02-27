@@ -1,14 +1,23 @@
+from __future__ import annotations
+
 import numpy as np
 
 
-def leakage_model_hamming_weight(num_traces, plaintexts, subkey_guess, target_byte):
+def leakage_model_hamming_weight(num_traces: int, plaintexts: list | np.ndarray, subkey_guess: any, target_byte: int) -> np.ndarray:
     """
-    Generates hypothetical leakage based on a provided leakage model. Useful when conducting pearson correlation metric.
+    Generates hypothetical leakage based on the hamming weight of the AES sbox.
+
     :param num_traces: The number of traces collected when measuring the observed leakage
+    :type num_traces: int
     :param plaintexts: The array of plaintexts used to collect the observed leakage
+    :type plaintexts: list | np.ndarray
     :param subkey_guess: the subkey guess
+    :type subkey_guess: any
     :param target_byte: the target byte of the key
+    :type target_byte: int
     :return: numpy array of the hypothetical leakage
+    :rtype: np.ndarray
+    :Authors: Samuel Karkache (swkarkche@wpi.edu)
     """
     leakage = np.empty(num_traces, dtype=object)
 
@@ -18,14 +27,22 @@ def leakage_model_hamming_weight(num_traces, plaintexts, subkey_guess, target_by
     return leakage
 
 
-def leakage_model_hamming_distance(num_traces, plaintexts, subkey_guess, target_byte):
+def leakage_model_hamming_distance(num_traces: int, plaintexts: list | np.ndarray, subkey_guess: any, target_byte: int) -> np.ndarray:
     """
-    Generates hypothetical leakage using the damming distance leakage model.
-    :param num_traces:
-    :param plaintexts:
-    :param subkey_guess:
-    :param target_byte:
-    :return:
+    Generates hypothetical leakage using the damming distance leakage model. In this implementation the reference state
+    is the output of the sbox at index 0.
+
+    :param num_traces: The number of traces collected when measuring the observed leakage
+    :type num_traces: int
+    :param plaintexts: The array of plaintexts used to collect the observed leakage
+    :type plaintexts: list | np.ndarray
+    :param subkey_guess: the subkey guess
+    :type subkey_guess: any
+    :param target_byte: the target byte of the key
+    :type target_byte: int
+    :return: numpy array of the hypothetical leakage
+    :rtype: np.ndarray
+    :Authors: Samuel Karkache (swkarkache@wpi.edu)
     """
     leakage = np.empty(num_traces, dtype=object)
 

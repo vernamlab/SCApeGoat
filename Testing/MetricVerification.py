@@ -1,5 +1,6 @@
 import csv
 import os.path
+import time
 
 import matplotlib.pyplot as plt
 import tqdm
@@ -67,7 +68,7 @@ def snr_verification():
 
         # add traces to labels
         for index, label in enumerate(labels):
-            sorted_labels[label].append(traces_set[index])  # we only want to look over this interval
+            sorted_labels[label].append(np.array(traces_set[index]))  # we only want to look over this interval
 
         return sorted_labels
 
@@ -85,7 +86,11 @@ def snr_verification():
 
         # compute SNR for each
         organizedSN2 = organize_labels_for_testing(snr2_labels, traces)
+        start = time.time()
         snr2 = signal_to_noise_ratio(organizedSN2)
+        end = time.time()
+
+        print(end - start)
 
         organizedSN3 = organize_labels_for_testing(snr3_labels, traces)
         snr3 = signal_to_noise_ratio(organizedSN3)
@@ -112,24 +117,24 @@ def t_test_verification():
         "unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
     unmasked_random = read_bin_file_traces(
         "unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    masked_fixed = read_bin_file_traces(
-        "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    masked_random = read_bin_file_traces(
-        "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    masked_fixed_2 = read_bin_file_traces(
-        "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    masked_random_2 = read_bin_file_traces(
-        "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    # masked_fixed = read_bin_file_traces(
+    #     "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    # masked_random = read_bin_file_traces(
+    #     "masked_sbox1\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
+    # masked_fixed_2 = read_bin_file_traces(
+    #     "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
+    # masked_random_2 = read_bin_file_traces(
+    #     "masked_sbox2\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
 
     # compute t-test for each dataset
     t, tmax = t_test_tvla(unmasked_fixed, unmasked_random)
-    t1, tmax1 = t_test_tvla(masked_fixed, masked_random)
-    t2, tmax2 = t_test_tvla(masked_fixed_2, masked_random_2)
+    # t1, tmax1 = t_test_tvla(masked_fixed, masked_random)
+    # t2, tmax2 = t_test_tvla(masked_fixed_2, masked_random_2)
 
     # plot t-test
     plt.plot(t[1000:1500], label="Unprotected Sbox", color='tab:blue')
-    plt.plot(t1[1000:1500], label="Masked Sbox 1", color='tab:green')
-    plt.plot(t2[1000:1500], label="Masked Sbox 2", color='tab:orange')
+    # plt.plot(t1[1000:1500], label="Masked Sbox 1", color='tab:green')
+    # plt.plot(t2[1000:1500], label="Masked Sbox 2", color='tab:orange')
 
     plt.title("T-test implementation using MetriSCA Example Traces")
     plt.xlabel("Sample")
@@ -143,8 +148,8 @@ def t_test_verification():
 
     # plot t-max
     plt.plot(tmax, label="Unprotected Sbox", color='tab:blue')
-    plt.plot(tmax1, label="Masked Sbox 1", color='tab:green')
-    plt.plot(tmax2, label="Masked Sbox 2", color='tab:orange')
+    # plt.plot(tmax1, label="Masked Sbox 1", color='tab:green')
+    # plt.plot(tmax2, label="Masked Sbox 2", color='tab:orange')
 
     plt.title("T-Max as a Function of the Number of Traces")
     plt.xlabel("Number of Traces")
@@ -165,8 +170,6 @@ def correlation_validation():
     texts = read_bin_file_keys_or_texts("unprotected_sbox\\single\\traces\\oscilloscope_traces\\plaintexts.bin",
                                         "Random")
     num_traces = 50000
-    num_samples = 3000
-
     leakage = np.empty(num_traces, dtype=object)
 
     colors = ['tab:purple', 'tab:green', 'tab:pink', 'tab:red', 'tab:orange', 'tab:blue']
@@ -174,7 +177,7 @@ def correlation_validation():
         for i in range(num_traces):
             leakage[i] = bin(Sbox[0] ^ Sbox[k ^ texts[i]]).count('1')
 
-        correlation = pearson_correlation(leakage, unmasked_random, num_traces, num_samples)
+        correlation = pearson_correlation(leakage, unmasked_random)
         plt.plot(correlation, label=k, color=colors[j])
 
     plt.legend(title="Key Guess")
@@ -205,7 +208,7 @@ def score_and_rank_verification():
         key_ranks[i] = []
 
     for i in trace_nums:
-        ranks = score_and_rank_subkey(key_candidates, 0, unmasked_random[:i], score_with_correlation, texts[:i], leakage_model_hamming_distance)
+        ranks = score_and_rank(key_candidates, 0, unmasked_random[:i], score_with_correlation, texts[:i], leakage_model_hamming_distance)
 
         for k in range(256):
             key_scores[k].append([key_and_score for key_and_score in ranks if key_and_score[0] == k][0][1])
@@ -256,7 +259,7 @@ def success_rate_verification():
 
     for t in range(1000, 100000 + 1000, 4500):
         for i in tqdm.tqdm(range(num_experiments), desc="Running Experiments for {} Traces".format(t)):
-            ranks = score_and_rank_subkey(key_candidates, i, unprotected_parallel[:t], score_with_correlation, texts[:t], leakage_model_hamming_distance)
+            ranks = score_and_rank(key_candidates, i, unprotected_parallel[:t], score_with_correlation, texts[:t], leakage_model_hamming_distance)
             experiment_ranks[i] = ranks
             experiment_keys[i] = 203
 
@@ -308,13 +311,13 @@ def guessing_entropy_validation():
 
     for t in trace_nums:
         for i in trange(num_experiments):
-            rank_unprotected = score_and_rank_subkey(key_candidates, 0, unprotected_sbox[:t], score_with_correlation, unprotected_texts[:t], leakage_model_hamming_distance)
+            rank_unprotected = score_and_rank(key_candidates, 0, unprotected_sbox[:t], score_with_correlation, unprotected_texts[:t], leakage_model_hamming_distance)
             experiment_ranks_unprotected[i] = rank_unprotected
 
-            rank_protected_1 = score_and_rank_subkey(key_candidates, 0, masked_sbox_1[:t], score_with_correlation, masked_texts_1[:t], leakage_model_hamming_distance)
+            rank_protected_1 = score_and_rank(key_candidates, 0, masked_sbox_1[:t], score_with_correlation, masked_texts_1[:t], leakage_model_hamming_distance)
             experiment_ranks_protected_1[i] = rank_protected_1
 
-            rank_protected_2 = score_and_rank_subkey(key_candidates, 0, masked_sbox_2[:t], score_with_correlation, masked_texts_2[:t], leakage_model_hamming_distance)
+            rank_protected_2 = score_and_rank(key_candidates, 0, masked_sbox_2[:t], score_with_correlation, masked_texts_2[:t], leakage_model_hamming_distance)
             experiment_ranks_protected_2[i] = rank_protected_2
 
             experiment_keys[i] = 203

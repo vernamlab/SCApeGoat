@@ -6,11 +6,10 @@ from WPI_SCA_LIBRARY.FileFormat import *
 import os
 import tqdm as tqdm
 
-# TODO: Implement changes in the Capture procedure in order to make them more generic
 
 class CWScope:
 
-    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0, simple_serial_version="1"):
+    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0, target_type=cw.targets.SimpleSerial):
         """
         Initializes a CW scope object
         :param firmware_name: The name of the compiled firmware that will be loaded on the CW device.
@@ -21,14 +20,7 @@ class CWScope:
         # setup scope
         self.scope = cw.scope()
         self.scope.default_setup()
-
-        # configure target
-        if simple_serial_version == "1":
-            self.target = cw.target(self.scope, cw.targets.SimpleSerial)
-        elif simple_serial_version == "2":
-            self.target = cw.target(self.scope, cw.targets.SimpleSerial2)
-        else:
-            raise Exception("Unknown Simple Serial Version: {}".format(simple_serial_version))
+        self.target = cw.target(self.scope, target_type)
 
         # configure scope parameters
         self.scope.gain.db = gain
@@ -45,7 +37,7 @@ class CWScope:
         self.scope.dis()
         self.target.dis()
 
-    # TODO: It would probably be better to return the waves, texts, and keys separately
+    # TODO: It would probably be better to return the waves, texts, and keys separately make more generic too
     def standard_capture_traces(self, num_traces, fixed_key=False, fixed_pt=False):
         """
         Capture traces from CW Device and return as an array. Ensure that the scope as been properly configured using
@@ -103,77 +95,3 @@ class CWScope:
                 rand_traces[i] = trace
 
         return fixed_traces, rand_traces
-
-    def arr_to_hdf5(self, file_name, experiment_name, traces, plaintexts, keys, num_traces):
-        """
-        Converts arrays/lists containing traces, pt, and keys to hdf5 file format
-
-        :param file_name: The name of the file that will be saved
-        :param experiment_name: The name of the experiment that will be associated with the trace collection
-        :param traces: a list of power traces
-        :param plaintexts: a list of plaintexts
-        :param keys: a list of keys
-        :param num_traces: the number of traces
-        :return: None (a file is generated in working directory)
-        """
-
-        # enforce that all lists have the same length
-        if len(traces) != len(plaintexts) or len(plaintexts) != len(keys) or len(plaintexts) != len(experiment_name):
-            raise Exception("Malformed trace, pt, key data")
-
-        # configure hdf5 file class
-        file_class = HDF5FileClass(file_name)
-        file_class.addExperiment(experiment_name)
-        experiment = file_class.experiments[experiment_name]
-
-        # add plaintext, trace, and label dataset to file
-        experiment.addDataset("plaintext", (num_traces, 16), definition="Plaintext Input To the Algorithm",
-                              dtype='uint8')
-        plaintext_dataset = experiment.dataset["plaintext"]
-
-        experiment.addDataset("keys", (num_traces, 16), definition="Key To the Algorithm", dtype='uint8')
-        key_dataset = experiment.dataset["keys"]
-
-        experiment.addDataset("traces", (num_traces, self.scope.adc.samples), definition="Traces", dtype='float64')
-        traces_dataset = experiment.dataset["traces"]
-
-        for i in range(num_traces):
-            plaintext_dataset.addData(i, traces[i])
-            traces_dataset.addData(i, plaintexts[i])
-            key_dataset.addData(i, keys[i])
-
-    def cw_to_hdf5(self, file_name, experiment_name, num_traces, fixed_key=False, fixed_pt=False):
-        """
-        Captures traces from the CW device and saves them and related metadata to an hdf5 file.
-
-        :param file_name: The name of the file that will be saved
-        :param experiment_name: The name of the experiment that will be associated with the trace collection
-        :param num_traces: The number of traces to capture
-        :param fixed_key: Whether to use a fixed key in trace capture
-        :param fixed_pt: Whether to use a fixed plaintext in trace capture
-        :return: None (a file is generated in working directory)
-        """
-
-        # capture traces
-        traces = self.standard_capture_traces(num_traces, fixed_key, fixed_pt)
-
-        # configure hdf5 file class
-        file_class = HDF5FileClass(file_name)
-        file_class.addExperiment(experiment_name)
-        experiment = file_class.experiments[experiment_name]
-
-        # add plaintext, trace, and label dataset to file
-        experiment.addDataset("plaintext", (num_traces, 16), definition="Plaintext Input To the Algorithm",
-                              dtype='uint8')
-        plaintext_dataset = experiment.dataset["plaintext"]
-
-        experiment.addDataset("keys", (num_traces, 16), definition="Key To the Algorithm", dtype='uint8')
-        key_dataset = experiment.dataset["keys"]
-
-        experiment.addDataset("traces", (num_traces, self.scope.adc.samples), definition="Traces", dtype='float64')
-        traces_dataset = experiment.dataset["traces"]
-
-        for i in range(len(traces)):
-            plaintext_dataset.addData(i, traces[i].textin)
-            traces_dataset.addData(i, traces[i].wave)
-            key_dataset.addData(i, traces[i].key)
