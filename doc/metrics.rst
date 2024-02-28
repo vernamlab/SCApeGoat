@@ -4,7 +4,7 @@ This API can be used to compute various different metrics relating to side-chann
 metrics will aid with assessing a systems security and identifying areas of interest in large trace sets.
 Each metric is a standalone function and requires minimal setup to utilize.
 
-.. py:function:: signal_to_noise_ratio(labels)
+.. py:function:: signal_to_noise_ratio(labels, visualize, visualization_path)
 
     Computes the signal-to-noise ratio of a trace set and associated labels. High magnitudes of the resulting SNR traces
     indicate cryptographic leakage at that sample.
@@ -13,6 +13,10 @@ Each metric is a standalone function and requires minimal setup to utilize.
                     labels[L] is a list of power traces, list[trace_0, trace_1, ..., trace_N], associated with label L.
                     For example, the label can be the output of the AES Sbox such that L = Sbox[key ^ text].
    :type labels: dict
+   :param visualize: Whether to visualize the result
+   :type visualize: bool
+   :param visualization_path: The path of where to save the visualization result, does not save if set to None
+   :type visualization_path: any
 
    :return: The SNR of the provided trace set
    :rtype: np.ndarray
@@ -20,7 +24,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
    :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
 
-.. py:function:: t_test(fixed_t, random_t)
+.. py:function:: t_test(fixed_t, random_t, visualize, visualization_path)
 
     Computes the t-statistic and t-max between fixed and random trace sets. T-statistic magnitudes above or below
     \|th\| = 4.5 indicate cryptographic vulnerabilities.
@@ -29,12 +33,16 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :type random_t: np.ndarray | list
     :param fixed_t: The fixed trace set
     :type fixed_t: np.ndarray | list
+    :param visualize: Whether to visualize the result
+    :type visualize: bool
+    :param visualization_paths: The paths to be used to save the t-statistic (first idx) and t-max visualizations (second idx)
+    :type visualization_paths: tuple
     :return: The t-statistic at each time sample and t-max at each trace as a tuple of numpy arrays
     :rtype: (np.ndarray, np.ndarray)
     :raises ValueError: if fixed_t and random_t do not have the same length
     :Authors: Dev Mehta (dmmehta2@wpi.edu), Samuel Karkache (swkarkache@wpi.edu)
 
-.. py:function:: pearson_correlation(predicted_leakage, observed_leakage)
+.. py:function:: pearson_correlation(predicted_leakage, observed_leakage, visualize, visualization_path)
 
     Computes the correlation between observed power traces and predicted power leakage corresponding to a
     key guess. The correlation when the predicted power leakage is modeled using the correct key guess has
@@ -44,6 +52,10 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :type predicted_leakage: np.ndarray | list
     :param observed_leakage: actual power traces collected from the cryptographic target
     :type observed_leakage: np.ndarray | list
+    :param visualize: Whether to visualize the result
+    :type visualize: bool
+    :param visualization_path: The path of where to save the visualization result, does not save if set to None
+    :type visualization_path: any
     :return: The correlation trace corresponding to the predicted leakage
     :rtype: np.ndarray
     :raises ValueError: if the predicted power leakage and the observed power leakage do not have the same length
