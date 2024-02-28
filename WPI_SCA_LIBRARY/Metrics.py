@@ -9,12 +9,13 @@ from __future__ import annotations
 import math
 import numpy as np
 import tqdm
+import matplotlib.pyplot as plt
 from tqdm import *
 from collections.abc import *
 from numbers import Number
 
 
-def signal_to_noise_ratio(labels: dict) -> np.ndarray:
+def signal_to_noise_ratio(labels: dict, visualize: bool = False, visualization_path: any = None) -> np.ndarray:
     """
     Computes the signal-to-noise ratio of a trace set and associated labels. High magnitudes of the resulting SNR traces
     indicate cryptographic leakage at that sample.
@@ -23,6 +24,8 @@ def signal_to_noise_ratio(labels: dict) -> np.ndarray:
                     labels[L] is a list of power traces, list[trace_0, trace_1, ..., trace_N], associated with label L.
                     For example, the label can be the output of the AES Sbox such that L = Sbox[key ^ text].
     :type labels: dict
+    :param visualize: Whether to visualize the result
+    :param visualization_path: The path of where to save the visualization result, does not save if set to None
     :return: The SNR of the provided trace set
     :rtype: np.ndarray
     :raises TypeError: if any value in labels.items() is not a np.ndarray or list type
@@ -42,6 +45,16 @@ def signal_to_noise_ratio(labels: dict) -> np.ndarray:
             raise TypeError("All items of the labels dict must be a list or numpy array")
 
     snr = np.divide(np.var(set_means, axis=0), np.mean(set_var, axis=0))
+
+    if visualize:
+        plt.plot(snr)
+        plt.title("Signal to Noise Ratio Over Samples 45400 to 46100 ASCAD Traces")
+        plt.ylabel("Amplitude")
+        plt.xlabel("Sample")
+        plt.grid()
+        if visualization_path is not None:
+            plt.savefig(visualization_path)
+        plt.show()
 
     return snr
 
