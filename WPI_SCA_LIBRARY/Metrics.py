@@ -151,7 +151,7 @@ def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list, visuali
     return welsh_t_outer, t_max_outer
 
 
-def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: np.ndarray | list) -> np.ndarray:
+def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: np.ndarray | list, visualize: bool = False, visualization_path: any = None) -> np.ndarray:
     """
     Computes the correlation between observed power traces and predicted power leakage corresponding to a
     key guess. The correlation when the predicted power leakage is modeled using the correct key guess has
@@ -193,7 +193,19 @@ def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: 
         bottom_sum_observed = np.add(bottom_sum_observed, np.square(observed_minus_mean))
         bottom_sum_predicted = np.add(bottom_sum_predicted, np.square(predicted_minus_mean))
 
-    return np.divide(top_sum_observed_predicted, np.sqrt(np.multiply(bottom_sum_observed, bottom_sum_predicted)))
+    correlation = np.divide(top_sum_observed_predicted, np.sqrt(np.multiply(bottom_sum_observed, bottom_sum_predicted)))
+
+    if visualize:
+        plt.plot(correlation)
+        plt.title("Pearson Correlation Coefficient")
+        plt.xlabel("Sample")
+        plt.ylabel("Correlation")
+        plt.grid()
+        if visualization_path is not None:
+            plt.savefig(visualization_path)
+        plt.show()
+
+    return correlation
 
 
 def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np.ndarray, score_fcn: Callable,
