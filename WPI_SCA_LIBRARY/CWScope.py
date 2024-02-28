@@ -12,10 +12,10 @@ import tqdm as tqdm
 
 class CWScope:
 
-    def __init__(self, firmware_name, gain=25, num_samples=5000, offset=0, target_type=cw.targets.SimpleSerial):
+    def __init__(self, firmware_path, gain=25, num_samples=5000, offset=0, target_type=cw.targets.SimpleSerial, target_programmer=cw.programmers.STM32FProgrammer):
         """
         Initializes a CW scope object
-        :param firmware_name: The name of the compiled firmware that will be loaded on the CW device.
+        :param firmware_path: The name of the compiled firmware that will be loaded on the CW device.
         :param gain: The gain of the CW scope
         :param num_samples: The number of samples to collect for each trace on the CW scope
         :param offset: The offset of the trace collection
@@ -31,9 +31,7 @@ class CWScope:
         self.scope.offset = offset
 
         # upload encryption algorithm firmware to the board
-        cw.program_target(self.scope, cw.programmers.STM32FProgrammer,
-                          os.path.dirname(os.path.abspath(__file__)) + "\\firmware\\{}".format(
-                              firmware_name))
+        cw.program_target(self.scope, target_programmer, firmware_path)
 
     def disconnect(self):
         """Disconnect CW Scope and Target"""
@@ -140,28 +138,28 @@ class CWScope:
 
         return fixed_traces, rand_traces
 
-    def cw_to_file_format(self, num_traces: int, file_name: str = "", experiment_name: str = "", existing=False, experiment_keys: list | np.ndarray = None, experiment_texts: list | np.ndarray = None, fixed_key: bool = True, fixed_pt: bool = False):
+    def cw_to_file_format(self, num_traces: int, file_name: str = "", experiment_name: str = "", file_existing: bool = False, experiment_existing: bool = False, experiment_keys: list | np.ndarray = None, experiment_texts: list | np.ndarray = None, fixed_key: bool = True, fixed_pt: bool = False):
 
         traces, keys, plaintexts, ciphertexts = self.standard_capture_traces(num_traces, experiment_keys, experiment_texts, fixed_key, fixed_pt)
 
         # create parent folder
-        file_parent = FileFormatParent(file_name, existing=existing)
+        file_parent = FileFormatParent(file_name, existing=file_existing)
 
         # add experiment
-        file_parent.addExperiment(experiment_name, experiment_name, existing=existing)
+        file_parent.addExperiment(experiment_name, experiment_name, existing=experiment_existing)
         exp = file_parent.experiments[experiment_name]
 
         # create data sets for associated information
-        exp.createDataset(experiment_name + "Traces", experiment_name + "Traces.npy", existing=existing, size=(num_traces, len(traces[0])), type='uint8')
+        exp.createDataset(experiment_name + "Traces", experiment_name + "Traces.npy", size=(num_traces, len(traces[0])), type='uint8')
         trace_data = exp.dataset[experiment_name + "Traces"]
 
-        exp.createDataset(experiment_name + "Plaintexts", experiment_name + "Plaintexts.npy", existing=existing, size=(num_traces, len(plaintexts[0])), type='uint8')
+        exp.createDataset(experiment_name + "Plaintexts", experiment_name + "Plaintexts.npy", size=(num_traces, len(plaintexts[0])), type='uint8')
         plaintext_data = exp.dataset[experiment_name + "Plaintexts"]
 
-        exp.createDataset(experiment_name + "Keys", experiment_name + "Keys.npy", existing=existing, size=(num_traces, len(keys[0])), type='uint8')
+        exp.createDataset(experiment_name + "Keys", experiment_name + "Keys.npy", size=(num_traces, len(keys[0])), type='uint8')
         key_data = exp.dataset[experiment_name + "Keys"]
 
-        exp.createDataset(experiment_name + "Ciphertexts", experiment_name + "Ciphertexts.npy", existing=existing, size=(num_traces, len(ciphertexts[0])), type='uint8')
+        exp.createDataset(experiment_name + "Ciphertexts", experiment_name + "Ciphertexts.npy", size=(num_traces, len(ciphertexts[0])), type='uint8')
         ciphertext_data = exp.dataset[experiment_name + "Ciphertexts"]
 
         for i in range(num_traces):
