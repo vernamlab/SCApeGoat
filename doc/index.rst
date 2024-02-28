@@ -18,7 +18,8 @@ Library Features
    :maxdepth: 3
 
    fileformat.rst
-   scope.rst
+   cwscope.rst
+   lecroyscope.rst
    metrics.rst
    leakagemodels.rst
    about_project.rst
