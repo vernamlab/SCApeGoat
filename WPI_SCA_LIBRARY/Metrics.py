@@ -25,7 +25,9 @@ def signal_to_noise_ratio(labels: dict, visualize: bool = False, visualization_p
                     For example, the label can be the output of the AES Sbox such that L = Sbox[key ^ text].
     :type labels: dict
     :param visualize: Whether to visualize the result
+    :type visualize: bool
     :param visualization_path: The path of where to save the visualization result, does not save if set to None
+    :type visualization_path: any
     :return: The SNR of the provided trace set
     :rtype: np.ndarray
     :raises TypeError: if any value in labels.items() is not a np.ndarray or list type
@@ -48,7 +50,7 @@ def signal_to_noise_ratio(labels: dict, visualize: bool = False, visualization_p
 
     if visualize:
         plt.plot(snr)
-        plt.title("Signal to Noise Ratio Over Samples 45400 to 46100 ASCAD Traces")
+        plt.title("Signal to Noise Ratio")
         plt.ylabel("Amplitude")
         plt.xlabel("Sample")
         plt.grid()
@@ -59,7 +61,7 @@ def signal_to_noise_ratio(labels: dict, visualize: bool = False, visualization_p
     return snr
 
 
-def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list) -> (np.ndarray, np.ndarray):
+def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list, visualize: bool = False, visualization_paths: tuple = None) -> (np.ndarray, np.ndarray):
     """
     Computes the t-statistic and t-max between fixed and random trace sets. T-statistic magnitudes above or below
     |th| = 4.5 indicate cryptographic vulnerabilities.
@@ -68,6 +70,10 @@ def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list) -> (np.
     :type random_t: np.ndarray | list
     :param fixed_t: The fixed trace set
     :type fixed_t: np.ndarray | list
+    :param visualize: Whether to visualize the result
+    :type visualize: bool
+    :param visualization_paths: The paths to be used to save the t-statistic (first idx) and t-max visualizations (second idx)
+    :type visualization_paths: tuple
     :return: The t-statistic at each time sample and t-max at each trace as a tuple of numpy arrays
     :rtype: (np.ndarray, np.ndarray)
     :raises ValueError: if fixed_t and random_t do not have the same length
@@ -120,6 +126,28 @@ def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list) -> (np.
         if i > 5:  # remove edge effects
             t_max_outer.append(max(abs(welsh_t_outer)))
 
+    if visualize:
+        plt.plot(welsh_t_outer)
+        plt.title("T-test Result")
+        plt.xlabel("Time Sample")
+        plt.ylabel("T-Statistic")
+        plt.axhline(y=-4.5, color='0', linestyle='--')
+        plt.axhline(y=4.5, color='0', linestyle='--')
+        plt.grid()
+        if visualization_paths is not None:
+            plt.savefig(visualization_paths[0])
+        plt.show()
+
+        plt.plot(t_max_outer)
+        plt.title("T-Max as a Function of the Number of Traces")
+        plt.xlabel("Number of Traces")
+        plt.ylabel("T-Max")
+        plt.axhline(y=4.5, color='0', linestyle='--')
+        plt.grid()
+        if visualization_paths is not None:
+            plt.savefig(visualization_paths[1])
+        plt.show()
+
     return welsh_t_outer, t_max_outer
 
 
@@ -133,6 +161,10 @@ def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: 
     :type predicted_leakage: np.ndarray | list
     :param observed_leakage: actual power traces collected from the cryptographic target
     :type observed_leakage: np.ndarray | list
+    :param visualize: Whether to visualize the result
+    :type visualize: bool
+    :param visualization_path: The path of where to save the visualization result, does not save if set to None
+    :type visualization_path: any
     :return: The correlation trace corresponding to the predicted leakage
     :rtype: np.ndarray
     :raises ValueError: if the predicted power leakage and the observed power leakage do not have the same length
