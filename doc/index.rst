@@ -12,11 +12,7 @@ exist a standardized interface for side-channel data collection, analysis, and d
 Therefore, this necessitates an accessible set of tools that allow for researchers and students alike to learn and contribute to
 the ever growing field of security analysis of side-channel attacks.
 
-Installation
-------------
-This set of side channel analysis tools was developed in Python and can be installed just like any Python library.
-
-Library Documentation
+Library Features
 ---------------------
 .. toctree::
    :maxdepth: 3
