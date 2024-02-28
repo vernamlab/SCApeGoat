@@ -1,0 +1,41 @@
+{
+    "fileName": "TestFile",
+    "metadata": {
+        "dateCreated": "2024-02-28"
+    },
+    "path": "C:\\Users\\samka\\PycharmProjects\\SCLA_API_MQP\\Testing\\TestFile",
+    "experiments": [
+        {
+            "path": "TestFile\\Experiments\\CWCapture1",
+            "name": "CWCapture1",
+            "metadata": {},
+            "datasets": [
+                {
+                    "name": "CWCapture1Traces",
+                    "path": "TestFile\\Experiments\\CWCapture1\\CWCapture1Traces.npy",
+                    "metadata": {},
+                    "index": 0
+                },
+                {
+                    "name": "CWCapture1Plaintexts",
+                    "path": "TestFile\\Experiments\\CWCapture1\\CWCapture1Plaintexts.npy",
+                    "metadata": {},
+                    "index": 1
+                },
+                {
+                    "name": "CWCapture1Keys",
+                    "path": "TestFile\\Experiments\\CWCapture1\\CWCapture1Keys.npy",
+                    "metadata": {},
+                    "index": 2
+                },
+                {
+                    "name": "CWCapture1Ciphertexts",
+                    "path": "TestFile\\Experiments\\CWCapture1\\CWCapture1Ciphertexts.npy",
+                    "metadata": {},
+                    "index": 3
+                }
+            ],
+            "index": 0
+        }
+    ]
+}
