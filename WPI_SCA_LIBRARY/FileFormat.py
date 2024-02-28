@@ -5,6 +5,8 @@ import h5py
 import numpy as np
 import trsfile
 
+from Metrics import *
+
 from datetime import date
 import json
 
@@ -132,6 +134,10 @@ class ExperimentJsonClass:
         if existing:
             self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, dataset["index"], existing=True, dataset = dataset)
 
+    def calculateSNR(self, labelDataset, tracesDataset):
+        labelDataset = self.dataset[labelDataset].readAll()
+        tracesDataset = self.dataset[tracesDataset].rallAll()
+
 class DatasetJsonClass:
     def __init__(self, name, path, fileFormatParent, experimentParent, index, existing = False, size = (10,10), type = 'int8', dataset = {}):
         if not existing:
@@ -140,7 +146,8 @@ class DatasetJsonClass:
             self.index = index
             self.fileFormatParent = fileFormatParent
             self.experimentParent = experimentParent
-            self.metadata = {}
+            self.metadata = self.fileFormatParent.JSONdata["experiments"][self.experimentParent.experimentIndex]["datasets"][self.index]["metadata"]
+            self.modifyMetadata("date_created", date.today().strftime('%Y-%m-%d'))
 
             array = np.zeros((size), dtype=type)
             np.save(path, array)
@@ -164,3 +171,11 @@ class DatasetJsonClass:
         data = np.load(self.path)
         data[index] = dataToAdd
         np.save(self.path,data)
+
+    def modifyMetadata(self, key, value):
+        self.metadata[key] = value
+        self.fileFormatParent.updateJSON()
+
+    def deleteMetadata(self, key):
+        self.metadata.pop(key)
+        self.fileFormatParent.updateJSON()
