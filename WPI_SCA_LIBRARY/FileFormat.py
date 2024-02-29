@@ -86,7 +86,7 @@ class FileFormatParent:
             index = len(self.JSONdata["experiments"]) - 1
             self.JSONdata["experiments"][index]["index"] = index
 
-            self.experiments[name] = ExperimentJsonClass(name, path, self, existing = False)
+            self.experiments[name] = ExperimentJsonClass(name, path, self, existing = False, index = index)
             os.mkdir(path)
             os.mkdir(f"{path}\\visualization")
             self.updateJSON()
