@@ -75,16 +75,28 @@ class CWScope:
             if len(experiment_texts) != len(experiment_keys):
                 raise TypeError("The length of the collection keys is not equal to the length of the collection of texts")
 
-        # init return values
-        traces = np.empty([num_traces], dtype=object)
-        keys = np.empty([num_traces], dtype=object)
-        texts = np.empty([num_traces], dtype=object)
-        ciphertexts = np.empty([num_traces], dtype=object)
-
         # standard ktp setup, can be bypassed if keys or texts array are None type
         ktp = cw.ktp.Basic()
         ktp.fixed_key = fixed_key
         ktp.fixed_text = fixed_pt
+
+        key_length = 0
+        if experiment_keys is not None:
+            key_length = len(experiment_keys[0])
+        else:
+            key_length = 16
+
+        text_length = 0
+        if experiment_texts is not None:
+            text_length = len(experiment_texts[0])
+        else:
+            text_length = 16
+
+        # init return values
+        traces = np.empty([num_traces, self.scope.adc.samples], dtype=object)
+        keys = np.empty([num_traces, key_length], dtype=object)
+        texts = np.empty([num_traces, text_length], dtype=object)
+        ciphertexts = np.empty([num_traces, text_length], dtype=object)
 
         for i in tqdm.tqdm(range(num_traces), desc="Capturing {} Traces".format(num_traces)):
 
@@ -120,8 +132,8 @@ class CWScope:
                     a method named `next_group_B()` that specifies
         :return: (fixed_traces, random_traces)
         """
-        rand_traces = np.empty([num_traces], dtype=object)
-        fixed_traces = np.empty([num_traces], dtype=object)
+        rand_traces = np.empty([num_traces, self.scope.adc.samples], dtype=object)
+        fixed_traces = np.empty([num_traces, self.scope.adc.samples], dtype=object)
 
         for i in tqdm.tqdm(range(num_traces), desc='Capturing Fixed and Random Trace Sets'):
             # capture trace from fixed group
@@ -150,7 +162,7 @@ class CWScope:
         exp = file_parent.experiments[experiment_name]
 
         # create data sets for associated information
-        exp.createDataset(experiment_name + "Traces", experiment_name + "Traces.npy", size=(num_traces, len(traces[0])), type='uint8')
+        exp.createDataset(experiment_name + "Traces", experiment_name + "Traces.npy", size=(num_traces, len(traces[0])), type='float32')
         trace_data = exp.dataset[experiment_name + "Traces"]
 
         exp.createDataset(experiment_name + "Plaintexts", experiment_name + "Plaintexts.npy", size=(num_traces, len(plaintexts[0])), type='uint8')
@@ -162,8 +174,7 @@ class CWScope:
         exp.createDataset(experiment_name + "Ciphertexts", experiment_name + "Ciphertexts.npy", size=(num_traces, len(ciphertexts[0])), type='uint8')
         ciphertext_data = exp.dataset[experiment_name + "Ciphertexts"]
 
-        for i in range(num_traces):
-            trace_data.addData(index=i, dataToAdd=traces[i])
-            plaintext_data.addData(index=i, dataToAdd=plaintexts[i])
-            key_data.addData(index=i, dataToAdd=keys[i])
-            ciphertext_data.addData(index=i, dataToAdd=ciphertexts[i])
+        trace_data.addData(index=range(num_traces), dataToAdd=traces)
+        plaintext_data.addData(index=range(num_traces), dataToAdd=plaintexts)
+        key_data.addData(index=range(num_traces), dataToAdd=keys)
+        ciphertext_data.addData(index=range(num_traces), dataToAdd=ciphertexts)

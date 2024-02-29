@@ -13,25 +13,33 @@
                 {
                     "name": "CWCapture1Traces",
                     "path": "TestFile\\Experiments\\CWCapture1\\CWCapture1Traces.npy",
-                    "metadata": {},
+                    "metadata": {
+                        "date_created": "2024-02-28"
+                    },
                     "index": 0
                 },
                 {
                     "name": "CWCapture1Plaintexts",
                     "path": "TestFile\\Experiments\\CWCapture1\\CWCapture1Plaintexts.npy",
-                    "metadata": {},
+                    "metadata": {
+                        "date_created": "2024-02-28"
+                    },
                     "index": 1
                 },
                 {
                     "name": "CWCapture1Keys",
                     "path": "TestFile\\Experiments\\CWCapture1\\CWCapture1Keys.npy",
-                    "metadata": {},
+                    "metadata": {
+                        "date_created": "2024-02-28"
+                    },
                     "index": 2
                 },
                 {
                     "name": "CWCapture1Ciphertexts",
                     "path": "TestFile\\Experiments\\CWCapture1\\CWCapture1Ciphertexts.npy",
-                    "metadata": {},
+                    "metadata": {
+                        "date_created": "2024-02-28"
+                    },
                     "index": 3
                 }
             ],
