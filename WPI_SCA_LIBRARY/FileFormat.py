@@ -129,10 +129,25 @@ class ExperimentJsonClass:
             self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, dataset["index"], existing=True, dataset = dataset)
 
     def calculateSNR(self, labelsDataset, tracesDataset, visualise = False, saveData = False, saveGraph = False):
+        if labelsDataset not in self.dataset:
+            raise ValueError(f"{labelsDataset} is not a valid key")
+
+        if tracesDataset not in self.dataset:
+            raise ValueError(f"{tracesDataset} is not a valid key")
+
 
         #sort labels
         labels = self.dataset[labelsDataset].readAll()
         traces_set = self.dataset[tracesDataset].readAll()
+
+        if len(labels) != len(traces_set):
+            raise ValueError(f"Length of {labelsDataset} is {len(labels)} \n "
+                             f"Length of {tracesDataset} is {len(traces_set)} \n"
+                             f"The two arrays must be of equal length")
+
+        if len(labels[0]) != 1:
+            raise ValueError(f"The width of labels must be 1, currently the width"
+                             f" of {labelsDataset} is {len(labels[0])}")
 
         labelsUnique = np.unique(labels)
 
