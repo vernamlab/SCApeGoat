@@ -53,7 +53,6 @@ class FileFormatParent:
     def updateMetadata(self, key, value):
         #get rid of case sensitivity (filter to all be lowercase b4 entering)
         self.metadata[key] = value
-        #TODO: update JSON var
         self.updateJSON()
 
     def readMetadata(self):
@@ -62,7 +61,6 @@ class FileFormatParent:
     def addExperiment(self, name, path, existing, index = 0, experiment = {}):
         if not existing:
             path = f'{self.experimentsPath}\\{path}'
-            #TODO: Add more preset metadata params (date/time etc...)
             JsonToSave = {
                 "path" : path,
                 "name" : name,
@@ -164,7 +162,11 @@ class ExperimentJsonClass:
 
         print(sorted_labels)
         #calc results
-        results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\SNR_{labelsDataset}_{tracesDataset}")
+        path = ""
+        if saveGraph:
+            path = f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\SNR_{labelsDataset}_{tracesDataset}"
+
+        results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=path)
 
         return results
 
