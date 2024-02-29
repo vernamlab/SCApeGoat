@@ -157,20 +157,20 @@ class CWScope:
 
         # add experiment
         file_parent.addExperiment(experiment_name, experiment_name, existing=experiment_existing)
-        exp = file_parent.experiments[experiment_name]
+        exp = file_parent.getExperiment(experiment_name)
 
         # create data sets for associated information
         exp.createDataset(experiment_name + "Traces", experiment_name + "Traces", size=(num_traces, len(traces[0])), type='float32')
-        trace_data = exp.dataset[experiment_name + "Traces"]
+        trace_data = exp.getDataset(experiment_name + "Traces")
 
         exp.createDataset(experiment_name + "Plaintexts", experiment_name + "Plaintexts", size=(num_traces, len(plaintexts[0])), type='uint8')
-        plaintext_data = exp.dataset[experiment_name + "Plaintexts"]
+        plaintext_data = exp.getDataset(experiment_name + "Plaintexts")
 
         exp.createDataset(experiment_name + "Keys", experiment_name + "Keys", size=(num_traces, len(keys[0])), type='uint8')
-        key_data = exp.dataset[experiment_name + "Keys"]
+        key_data = exp.getDataset(experiment_name + "Keys")
 
         exp.createDataset(experiment_name + "Ciphertexts", experiment_name + "Ciphertexts", size=(num_traces, len(ciphertexts[0])), type='uint8')
-        ciphertext_data = exp.dataset[experiment_name + "Ciphertexts"]
+        ciphertext_data = exp.getDataset(experiment_name + "Ciphertexts")
 
         trace_data.addData(index=range(num_traces), dataToAdd=traces)
         plaintext_data.addData(index=range(num_traces), dataToAdd=plaintexts)

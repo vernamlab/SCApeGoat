@@ -149,7 +149,7 @@ class ExperimentJsonClass:
     def calculateSNR(self, labelsDataset, tracesDataset, visualise = False, saveData = False, saveGraph = False):
 
         labelsDataset = sanatiseInput(labelsDataset)
-        tracesDataset = tracesDataset(tracesDataset)
+        tracesDataset = sanatiseInput(tracesDataset)
 
         if labelsDataset not in self.dataset:
             raise ValueError(f"{labelsDataset} is not a valid key")
