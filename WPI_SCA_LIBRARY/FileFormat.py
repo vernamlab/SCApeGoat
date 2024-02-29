@@ -146,7 +146,7 @@ class ExperimentJsonClass:
         if existing:
             self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, dataset["index"], existing=True, dataset = dataset)
 
-    def calculateSNR(self, labelsDataset, tracesDataset, visualise = False, saveData = False, saveGraph = False):
+    def calculateSNR(self, labelsDataset, tracesDataset, visualise=False, saveData=False, saveGraph=False):
 
         labelsDataset = sanatiseInput(labelsDataset)
         tracesDataset = sanatiseInput(tracesDataset)
@@ -183,13 +183,35 @@ class ExperimentJsonClass:
             label = int(label)
             sorted_labels[label].append(np.array(traces_set[index]))
 
-        path = ""
+        path = None
         if saveGraph:
-            path = f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\SNR_{labelsDataset}_{tracesDataset}"
+            path = f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\SNR_{labelsDataset}_{tracesDataset}"  # TODO : We need to find a way to prevent this from overwriting other graphs
 
         results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=path)
 
         return results
+
+    def calculate_t_test(self, fixed_dataset, random_dataset, visualize=False, save_data=False, save_graph=False):
+        random_dataset = sanatiseInput(random_dataset)
+        fixed_dataset = sanatiseInput(fixed_dataset)
+
+        if random_dataset not in self.dataset:
+            raise ValueError(f"{random_dataset} not found as a dataset in experiment {self.name}")
+
+        if fixed_dataset not in self.dataset:
+            raise ValueError(f"{fixed_dataset} not found as a dataset in experiment {self.name}")
+
+        rand = self.dataset[random_dataset].readAll()
+        fixed = self.dataset[fixed_dataset].readAll()
+
+        path = None
+        if save_graph:
+            path = (f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\t_test_{random_dataset}_{fixed_dataset}",  # TODO : We need to find a way to prevent this from overwriting other graphs
+                    f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\t_max_{random_dataset}_{fixed_dataset}")
+
+        t, t_max = t_test_tvla(fixed, rand, visualize=visualize, visualization_paths=path)
+
+        return t, t_max
 
     def getDataset(self, datasetName):
         datasetName = sanatiseInput(datasetName)
