@@ -5,6 +5,12 @@ Date: 2024-28-02
 Description: File Format API for side-channel analysis experiments. Includes SNR, t-test, correlation, score and rank, and success rate and guessing entropy.
 """
 
+"""
+Filler Functions for file format metric wrappers
+Dynamic Typing on Dataset input
+Save metric output as a dataset
+"""
+
 import os
 import numpy as np
 from datetime import date
@@ -88,7 +94,9 @@ class FileFormatParent:
         if existing:
             self.experiments[name] = ExperimentJsonClass(name, path, self, existing=True, index=index, experiment=experiment)
 
-
+    def getExperiment(self, experimentName):
+        experimentName = sanatiseInput(experimentName)
+        return self.experiments[experimentName]
 
 class ExperimentJsonClass:
     def __init__(self, name, path, fileFormatParent, existing = False, index = 0, experiment = {}):
@@ -139,6 +147,7 @@ class ExperimentJsonClass:
             self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, dataset["index"], existing=True, dataset = dataset)
 
     def calculateSNR(self, labelsDataset, tracesDataset, visualise = False, saveData = False, saveGraph = False):
+
         labelsDataset = sanatiseInput(labelsDataset)
         tracesDataset = tracesDataset(tracesDataset)
 
@@ -184,6 +193,10 @@ class ExperimentJsonClass:
         results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=path)
 
         return results
+
+    def getDataset(self, datasetName):
+        datasetName = sanatiseInput(datasetName)
+        return self.dataset[datasetName]
 
 class DatasetJsonClass:
     def __init__(self, name, path, fileFormatParent, experimentParent, index, existing = False, size = (10,10), type = 'int8', dataset = {}):
