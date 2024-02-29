@@ -183,9 +183,6 @@ class ExperimentJsonClass:
             label = int(label)
             sorted_labels[label].append(np.array(traces_set[index]))
 
-
-        print(sorted_labels)
-        #calc results
         path = ""
         if saveGraph:
             path = f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\SNR_{labelsDataset}_{tracesDataset}"
