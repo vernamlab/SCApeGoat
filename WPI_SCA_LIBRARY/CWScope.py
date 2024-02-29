@@ -80,13 +80,11 @@ class CWScope:
         ktp.fixed_key = fixed_key
         ktp.fixed_text = fixed_pt
 
-        key_length = 0
         if experiment_keys is not None:
             key_length = len(experiment_keys[0])
         else:
             key_length = 16
 
-        text_length = 0
         if experiment_texts is not None:
             text_length = len(experiment_texts[0])
         else:
@@ -162,16 +160,16 @@ class CWScope:
         exp = file_parent.experiments[experiment_name]
 
         # create data sets for associated information
-        exp.createDataset(experiment_name + "Traces", experiment_name + "Traces.npy", size=(num_traces, len(traces[0])), type='float32')
+        exp.createDataset(experiment_name + "Traces", experiment_name + "Traces", size=(num_traces, len(traces[0])), type='float32')
         trace_data = exp.dataset[experiment_name + "Traces"]
 
-        exp.createDataset(experiment_name + "Plaintexts", experiment_name + "Plaintexts.npy", size=(num_traces, len(plaintexts[0])), type='uint8')
+        exp.createDataset(experiment_name + "Plaintexts", experiment_name + "Plaintexts", size=(num_traces, len(plaintexts[0])), type='uint8')
         plaintext_data = exp.dataset[experiment_name + "Plaintexts"]
 
-        exp.createDataset(experiment_name + "Keys", experiment_name + "Keys.npy", size=(num_traces, len(keys[0])), type='uint8')
+        exp.createDataset(experiment_name + "Keys", experiment_name + "Keys", size=(num_traces, len(keys[0])), type='uint8')
         key_data = exp.dataset[experiment_name + "Keys"]
 
-        exp.createDataset(experiment_name + "Ciphertexts", experiment_name + "Ciphertexts.npy", size=(num_traces, len(ciphertexts[0])), type='uint8')
+        exp.createDataset(experiment_name + "Ciphertexts", experiment_name + "Ciphertexts", size=(num_traces, len(ciphertexts[0])), type='uint8')
         ciphertext_data = exp.dataset[experiment_name + "Ciphertexts"]
 
         trace_data.addData(index=range(num_traces), dataToAdd=traces)
