@@ -189,6 +189,9 @@ class ExperimentJsonClass:
 
         results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=path)
 
+        if saveData:
+            self.createDataset(f"SNR_{labelsDataset}_{tracesDataset}_results",f"SNR_{labelsDataset}_{tracesDataset}_results",size = results.shape, type = results.dtype)
+
         return results
 
     def calculate_t_test(self, fixed_dataset, random_dataset, visualize=False, save_data=False, save_graph=False):
