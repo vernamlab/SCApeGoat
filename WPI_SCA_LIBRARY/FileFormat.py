@@ -2,6 +2,7 @@ import os
 import numpy as np
 from datetime import date
 import json
+from WPI_SCA_LIBRARY.Metrics import *
 
 class FileFormatParent:
     def __init__(self, path, existing = False):
@@ -114,7 +115,7 @@ class ExperimentJsonClass:
     def createDataset(self, name, path, existing = False, size = (10,10), type = 'int8', dataset = {}):
         if not existing:
             dataToAdd = {"name" : name,
-                         "path" : f'{self.path}\\{path}',
+                         "path" : f'{self.path}\\{path}.npy',
                          "metadata" : {}}
             self.fileFormatParent.JSONdata["experiments"][self.experimentIndex]["datasets"].append(dataToAdd)
             index = len(self.fileFormatParent.JSONdata["experiments"][self.experimentIndex]["datasets"]) - 1
@@ -122,14 +123,35 @@ class ExperimentJsonClass:
             self.fileFormatParent.JSONdata["experiments"][self.experimentIndex]["datasets"][index]['index'] = index
             self.fileFormatParent.updateJSON()
 
-            self.dataset[name] = DatasetJsonClass(name, f"{self.path}\\{path}", self.fileFormatParent, self, index, existing = False, size = size, type = type)
+            self.dataset[name] = DatasetJsonClass(name, f"{self.path}\\{path}.npy", self.fileFormatParent, self, index, existing = False, size = size, type = type)
 
         if existing:
             self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, dataset["index"], existing=True, dataset = dataset)
 
-    def calculateSNR(self, labelDataset, tracesDataset):
-        labelDataset = self.dataset[labelDataset].readAll()
-        tracesDataset = self.dataset[tracesDataset].rallAll()
+    def calculateSNR(self, labelsDataset, tracesDataset, visualise = False, saveData = False, saveGraph = False):
+
+        #sort labels
+        labels = self.dataset[labelsDataset].readAll()
+        traces_set = self.dataset[tracesDataset].readAll()
+
+        labelsUnique = np.unique(labels)
+
+        # initialize the dictionary
+        sorted_labels = {}
+        for i in labelsUnique:
+            sorted_labels[i] = []
+
+        # add traces to labels
+        for index, label in enumerate(labels):
+            label = int(label)
+            sorted_labels[label].append(np.array(traces_set[index]))
+
+
+        print(sorted_labels)
+        #calc results
+        results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\SNR_{labelsDataset}_{tracesDataset}")
+
+        return results
 
 class DatasetJsonClass:
     def __init__(self, name, path, fileFormatParent, experimentParent, index, existing = False, size = (10,10), type = 'int8', dataset = {}):
