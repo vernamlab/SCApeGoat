@@ -1,3 +1,10 @@
+"""
+File: FileFormat.py
+Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
+Date: 2024-28-02
+Description: File Format API for side-channel analysis experiments. Includes SNR, t-test, correlation, score and rank, and success rate and guessing entropy.
+"""
+
 import os
 import numpy as np
 from datetime import date
@@ -18,7 +25,7 @@ class FileFormatParent:
             os.mkdir(self.experimentsPath)
             os.mkdir(self.visulizationsPath)
 
-            self.JSONdata = {"fileName": path,
+            self.JSONdata = {"fileName": sanatiseInput(path),
                              "metadata" : {"dateCreated": date.today().strftime('%Y-%m-%d')},
                              "path": os.path.abspath(path),
                              "experiments": []}
@@ -52,6 +59,7 @@ class FileFormatParent:
 
     def updateMetadata(self, key, value):
         #get rid of case sensitivity (filter to all be lowercase b4 entering)
+        key = sanatiseInput(key)
         self.metadata[key] = value
         self.updateJSON()
 
@@ -59,6 +67,7 @@ class FileFormatParent:
         return self.metadata
 
     def addExperiment(self, name, path, existing, index = 0, experiment = {}):
+        name = sanatiseInput(name)
         if not existing:
             path = f'{self.experimentsPath}\\{path}'
             JsonToSave = {
@@ -83,6 +92,7 @@ class FileFormatParent:
 
 class ExperimentJsonClass:
     def __init__(self, name, path, fileFormatParent, existing = False, index = 0, experiment = {}):
+        name = sanatiseInput(name)
         if not existing:
             self.name = name
             self.path = path
@@ -104,6 +114,7 @@ class ExperimentJsonClass:
                 self.createDataset(dataset["name"], dataset["path"], existing=True, dataset=dataset)
 
     def updateMetadata(self, key, value):
+        key = sanatiseInput(key)
         self.metadata[key] = value
         self.fileFormatParent.JSONdata["experiments"][self.index]["metadata"][key] = value
         self.fileFormatParent.updateJSON()
@@ -111,6 +122,7 @@ class ExperimentJsonClass:
         return self.metadata
 
     def createDataset(self, name, path, existing = False, size = (10,10), type = 'int8', dataset = {}):
+        name = sanatiseInput(name)
         if not existing:
             dataToAdd = {"name" : name,
                          "path" : f'{self.path}\\{path}.npy',
@@ -127,6 +139,9 @@ class ExperimentJsonClass:
             self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, dataset["index"], existing=True, dataset = dataset)
 
     def calculateSNR(self, labelsDataset, tracesDataset, visualise = False, saveData = False, saveGraph = False):
+        labelsDataset = sanatiseInput(labelsDataset)
+        tracesDataset = tracesDataset(tracesDataset)
+
         if labelsDataset not in self.dataset:
             raise ValueError(f"{labelsDataset} is not a valid key")
 
@@ -172,6 +187,7 @@ class ExperimentJsonClass:
 
 class DatasetJsonClass:
     def __init__(self, name, path, fileFormatParent, experimentParent, index, existing = False, size = (10,10), type = 'int8', dataset = {}):
+        name = sanatiseInput(name)
         if not existing:
             self.name = name
             self.path = path
@@ -205,9 +221,15 @@ class DatasetJsonClass:
         np.save(self.path,data)
 
     def modifyMetadata(self, key, value):
+        key = sanatiseInput(key)
         self.metadata[key] = value
         self.fileFormatParent.updateJSON()
 
     def deleteMetadata(self, key):
         self.metadata.pop(key)
         self.fileFormatParent.updateJSON()
+
+def sanatiseInput(inputString: str):
+    if type(inputString) != str:
+        raise ValueError("The input to this function must be of type string")
+    return inputString.lower()
