@@ -50,7 +50,8 @@ class FileFormatParent:
             self.metadata = self.json_data["metadata"]
 
             for experiment in self.json_data["experiments"]:
-                self.add_experiment(experiment["name"], experiment["path"], True, index=experiment["index"],
+                self.add_experiment(name=experiment.get('name'), path=experiment.get('path'), existing=True,
+                                    index=experiment.get('index'),
                                     experiment=experiment)
 
     def update_json(self):
@@ -113,7 +114,8 @@ class FileFormatParent:
             self.update_json()
 
         else:
-            self.experiments[name] = ExperimentJsonClass(name, path, self, existing=True, index=index, experiment=experiment)
+            self.experiments[name] = ExperimentJsonClass(name, path, self, existing=True, index=index,
+                                                         experiment=experiment)
 
         return self.experiments[name]
 
@@ -183,7 +185,7 @@ class ExperimentJsonClass:
             self.fileFormatParent.update_json()
 
             self.dataset[name] = DatasetJsonClass(name, f"{self.path}\\{path}.npy", self.fileFormatParent, self, index,
-                                                  existing=False, size=size, type=datatype)
+                                                  existing=False, size=size, datatype=datatype)
 
         if existing:
             self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, dataset["index"],
@@ -235,7 +237,8 @@ class ExperimentJsonClass:
 
         if save_data:
             self.create_dataset(f"SNR_{labels_dataset}_{traces_dataset}_results",
-                               f"SNR_{labels_dataset}_{traces_dataset}_results", size=results.shape, datatype=results.dtype)
+                                f"SNR_{labels_dataset}_{traces_dataset}_results", size=results.shape,
+                                datatype=results.dtype)
 
         return results
 
@@ -270,7 +273,10 @@ class ExperimentJsonClass:
 
 class DatasetJsonClass:
     def __init__(self, name, path, file_format_parent, experiment_parent, index, existing=False, size=(10, 10),
-                 type='int8', dataset={}):
+                 datatype='int8', dataset=None):
+        if dataset is None:
+            dataset = {}
+
         name = sanitize_input(name)
         if not existing:
             self.name = name
@@ -284,7 +290,7 @@ class DatasetJsonClass:
                     self.index]["metadata"]
             self.modify_metadata("date_created", date.today().strftime('%Y-%m-%d'))
 
-            array = np.zeros(size, dtype=type)
+            array = np.zeros(size, dtype=datatype)
             np.save(path, array)
 
         if existing:
@@ -319,6 +325,6 @@ class DatasetJsonClass:
 
 
 def sanitize_input(input_string: str):
-    if type(input_string) != str:
+    if type(input_string) is not str:
         raise ValueError("The input to this function must be of type string")
     return input_string.lower()
