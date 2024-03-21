@@ -38,7 +38,7 @@ def read_bin_file_keys_or_texts(bin_file, set_type="Random"):
 
 def read_bin_file_traces(bin_file, num_traces=50000, num_samples=3000):
     with open(os.path.dirname(__file__) + "\\ExampleData\\MetriSCA\\" + bin_file, "rb") as file:
-        traces = np.empty(num_traces, dtype=object)
+        traces = np.empty((num_traces, num_samples), dtype=object)
 
         for i in tqdm.tqdm(range(num_traces), desc="Reading Traces from .bin file"):
             traces[i] = np.array([int(i) for i in file.read(num_samples)])
