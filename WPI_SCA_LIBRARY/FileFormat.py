@@ -157,7 +157,7 @@ class ExperimentJsonClass:
     def update_metadata(self, key, value):
         key = sanitize_input(key)
         self.metadata[key] = value
-        self.fileFormatParent.json_data["experiments"][self.index]["metadata"][key] = value
+        self.fileFormatParent.json_data["experiments"][self.experimentIndex]["metadata"][key] = value
         self.fileFormatParent.update_json()
 
     def read_metadata(self):
