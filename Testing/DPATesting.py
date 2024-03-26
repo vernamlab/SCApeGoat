@@ -68,8 +68,9 @@ def calculate_DPA(traces, IV, order = 1, key_guess = 0, window_size_fma = 5, win
 
         return cpaoutput, guess_corr, guess
 
-
+    final_cpaoutput = []
     if order == 2:
+        traces = traces[:,0:4000]
         if num_of_traces != 0:
             fma = calculate_window_averages(traces, window_size = window_size_fma)
             traces = np.array(fma[0:num_of_traces])
@@ -78,51 +79,64 @@ def calculate_DPA(traces, IV, order = 1, key_guess = 0, window_size_fma = 5, win
             traces = np.array(fma)
             num_of_traces = traces.shape[0]
 
-        size = 0
-        for i in range(0, int(traces[0, :].size / window_size_dpa)):
-            max_local_CPA_list = []
-            traces_devide = traces[:, i * window_size_dpa:i * window_size_dpa + window_size_dpa]
-            length_vector = traces_devide[0, :].size
+        length_vector = traces.shape[1]
+        # length_vector = 33
+        P = np.zeros((num_of_traces, int((length_vector - 1) * length_vector / 2)))
 
-            P = np.zeros((num_of_traces, int((length_vector - 1) * length_vector / 2)))
-            cpaoutput = np.zeros((num_of_traces, int((length_vector - 1) * length_vector / 2)))
-            correlation = np.zeros((num_of_traces, int((length_vector - 1) * length_vector / 2)))
+        e = 0
+        s = 0
+        for i in range(length_vector):
+            e = s + length_vector - i - 1
+            P[:, s:e] = np.abs(np.subtract(traces[:, i + 1:], traces[:, i].reshape(-1, 1)))
+            s = e
 
-            e = 0
-            s = 0
-            for i in range(length_vector):
-                e = s + length_vector - i - 1
-                P[:, s:e] = np.abs(np.subtract(traces_devide[:, i + 1:], traces_devide[:, i].reshape(-1, 1)))
-                s = e
+        dpa_trace = P
+        maxcpa = [0] * 1
+        # dpa_trace = dpa_project.waves[:]
+        num_trace = len(dpa_trace)
+        # dpa_trace1 = np.array(IV_project.waves[0:num_trace])
+        # dpa_trace = dpa_trace1[:,7000:8000]
+        # dpa_trace = P
+        # dpa_trace = np.array(dpa_project.waves[0:num_trace])
 
-            maxcpa = [0] * 1
-            dpa_trace = P
+        # we don't need to redo the mean and std dev calculations
+        # for each key guess
+        t_bar = mean(dpa_trace)
+        o_t = std_dev(dpa_trace, t_bar)
+        kguess = 0  # for us the key guess doesn't matter as we are not guessing
 
-            # we don't need to redo the mean and std dev calculations
-            # for each key guess
-            t_bar = mean(dpa_trace)
-            o_t = std_dev(dpa_trace, t_bar)
-            kguess = 0  # for us the key guess doesn't matter as we are not guessing
+        # for kguess in tnrange(0, 256):
+        #     hws = np.array([[HW[aes_internal(textin[0],kguess)] for textin in textin_array]]).transpose()
 
-            hws = np.array([[intermediate_value(textout) for textout in IV[0:num_of_traces]]]).transpose()
-            hws_bar = mean(hws)
-            # hws_bar = mean(out[:,5])
-            o_hws = std_dev(hws, hws_bar)
-            correlation = cov(dpa_trace, t_bar, hws, hws_bar)
-            cpaoutput = correlation / (o_t * o_hws)
+        # hws = np.array([[intermediate_value(textout)for textout in dpa_project.textouts[0:num_trace]]]).transpose()
+        hws = np.array([[intermediate_value(textout) for textout in IV[0:num_trace]]]).transpose()
+        hws_bar = mean(hws)
+        # hws_bar = mean(out[:,5])
+        o_hws = std_dev(hws, hws_bar)
+        correlation = cov(dpa_trace, t_bar, hws, hws_bar)
+        cpaoutput = correlation / (o_t * o_hws)
+        # maxcpa[kguess] = max(abs(cpaoutput))
+        maxcpa[kguess] = max(abs(cpaoutput))
 
-            maxcpa[kguess] = max(abs(cpaoutput))
+        # wrong key
+        # hws_not = np.array([[intermediate_value_not(textout)for textout in dpa_project.textouts[0:num_trace]]]).transpose()
+        # hws_bar_not = mean(hws_not)
+        # o_hws_not = std_dev(hws_not, hws_bar_not)
+        # correlation_not = cov(dpa_trace, t_bar, hws_not, hws_bar_not)
+        # cpaoutput_not = correlation/(o_t*o_hws_not)
+        # maxcpa[1] = max(abs(cpaoutput_not))
 
-            guess = np.argmax(maxcpa)
-            guess_corr = max(maxcpa)
-            max_local_CPA_list.append(guess_corr)
+        guess = np.argmax(maxcpa)
+        guess_corr = max(maxcpa)
+
 
         return cpaoutput, guess_corr, guess
 
 traces = np.load("TestFile//Experiments//CWCapture1//CWCapture1Traces.npy")
 ciphertext = np.load("TestFile//Experiments//CWCapture1//CWCapture1Ciphertexts.npy")
+plaintext = np.load("TestFile//Experiments//CWCapture1//CWCapture1Plaintexts.npy")
 
-cpaoutput, guess_corr, guess = calculate_DPA(traces, ciphertext, order=2, num_of_traces=100)
+cpaoutput, guess_corr, guess = calculate_DPA(traces, plaintext, order=2, window_size_dpa=20, num_of_traces=100)
 print(traces.shape)
 print(cpaoutput.shape)
 
