@@ -13,25 +13,40 @@ Description: File Format API for side-channel analysis experiments.
 
 
 class FileFormatParent:
-    def __init__(self, name, existing=False):
+    def __init__(self, name, path=None, existing=False):
         """
         Initialize FileFormatParent class.
         :param name: Relative path to base file
         :type name: str
+        :param path: Absolute path to where you want to save the file. Leaving black will put it into current directory
+        :type path: str
         :param existing: Whether the file exists
         :type existing: bool
         """
         if not existing:
-            self.path = name
-            self.experiments_path = f"{name}\\Experiments"
-            self.visualizations_path = f"{name}\\Visualizations"
-            os.mkdir(name)
-            os.mkdir(self.experiments_path)
-            os.mkdir(self.visualizations_path)
+            if path is None:
+                self.path = name
+            else:
+                self.path = path
+
+            self.experiments_path = f"{self.path}\\Experiments"
+            self.visualizations_path = f"{self.path}\\Visualizations"
+
+            try:
+                os.mkdir(self.path)
+                os.mkdir(self.experiments_path)
+                os.mkdir(self.visualizations_path)
+            except FileExistsError:
+                raise FileExistsError("A File named {} already exists at {}".format(name, self.path))
+
+            if path is None:
+                abs_path = os.path.abspath(name)
+            else:
+                abs_path = self.path
 
             self.json_data = {"fileName": sanitize_input(name),
                               "metadata": {"dateCreated": date.today().strftime('%Y-%m-%d')},
-                              "path": os.path.abspath(name),
+                              "path": abs_path,
                               "experiments": []}
 
             with open(f"{name}\\metadataHolder.json", 'w') as json_file:
@@ -40,12 +55,21 @@ class FileFormatParent:
             self.experiments = {}
             self.metadata = self.json_data['metadata']
         else:
-            with open(f"{name}\\metadataHolder.json", 'r') as json_file:
+            self.name = name
+
+            with open(f"{path}\\metadataHolder.json", 'r') as json_file:
                 self.json_data = json.load(json_file)
 
-            self.path = name
-            self.experiments_path = f"{name}\\Experiments"
-            self.visualizations_path = f"{name}\\Visualizations"
+            path_from_json = self.json_data["path"]
+
+            if path_from_json != path and path is not None:
+                self.path = path
+                self.json_data["path"] = path
+                self.update_json()
+
+            self.path = self.json_data["path"]
+            self.experiments_path = f"{self.path}\\Experiments"
+            self.visualizations_path = f"{self.path}\\Visualizations"
             self.experiments = {}
             self.metadata = self.json_data["metadata"]
 
