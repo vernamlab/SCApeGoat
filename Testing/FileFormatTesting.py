@@ -13,11 +13,12 @@ from WPI_SCA_LIBRARY.FileFormat import *
 #
 # dataset_2 = experiment_1.create_dataset(name="fixed", size=(50000, 3000), datatype='float32')
 # dataset_2.add_data(data_to_add=fixed)
+
+# file = FileFormatParent("AnotherFile", "C:\\Users\\samka\\PycharmProjects\\SCLA_API_MQP\\Testing\\AnotherFile", existing=True)
+# print(file.get_experiment("Experiment1").get_dataset("fixed").read_all()[0])
+
+# file = FileFormatParent("AnotherFile", "C:\\Users\\samka\\PycharmProjects\\SCLA_API_MQP\\AnotherFile", existing=True)
 #
-# dataset_1.read_all()
-
-file = FileFormatParent("AnotherFile", "C:\\Users\\samka\\PycharmProjects\\SCLA_API_MQP\\AnotherFile", existing=True)
-
-print(file.get_experiment("Experiment1").get_dataset("fixed").read_all()[0])
+# print(file.get_experiment("Experiment1").get_dataset("fixed").read_all()[0])
 
 

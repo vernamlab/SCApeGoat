@@ -13,7 +13,7 @@ Description: File Format API for side-channel analysis experiments.
 
 
 class FileFormatParent:
-    def __init__(self, name, path=None, existing=False):
+    def __init__(self, name, path, existing=False):
         """
         Initialize FileFormatParent class.
         :param name: Relative path to base file
@@ -24,11 +24,7 @@ class FileFormatParent:
         :type existing: bool
         """
         if not existing:
-            if path is None:
-                self.path = name
-            else:
-                self.path = path
-
+            self.path = path
             self.experiments_path = f"{self.path}\\Experiments"
             self.visualizations_path = f"{self.path}\\Visualizations"
 
@@ -39,35 +35,32 @@ class FileFormatParent:
             except FileExistsError:
                 raise FileExistsError("A File named {} already exists at {}".format(name, self.path))
 
-            if path is None:
-                abs_path = os.path.abspath(name)
-            else:
-                abs_path = self.path
+            self.json_data = {
+                "fileName": sanitize_input(name),
+                "metadata": {"dateCreated": date.today().strftime('%Y-%m-%d')},
+                "path": self.path,
+                "experiments": []
+            }
 
-            self.json_data = {"fileName": sanitize_input(name),
-                              "metadata": {"dateCreated": date.today().strftime('%Y-%m-%d')},
-                              "path": abs_path,
-                              "experiments": []}
-
-            with open(f"{name}\\metadataHolder.json", 'w') as json_file:
+            with open(f"{self.path}\\metadataHolder.json", 'w') as json_file:
                 json.dump(self.json_data, json_file, indent=4)
 
             self.experiments = {}
             self.metadata = self.json_data['metadata']
-        else:
-            self.name = name
 
+        else:
             with open(f"{path}\\metadataHolder.json", 'r') as json_file:
                 self.json_data = json.load(json_file)
-
             path_from_json = self.json_data["path"]
 
-            if path_from_json != path and path is not None:
+            # check if file has been moved
+            if path_from_json != path:
                 self.path = path
                 self.json_data["path"] = path
                 self.update_json()
+            else:
+                self.path = path_from_json
 
-            self.path = self.json_data["path"]
             self.experiments_path = f"{self.path}\\Experiments"
             self.visualizations_path = f"{self.path}\\Visualizations"
             self.experiments = {}
@@ -106,7 +99,6 @@ class FileFormatParent:
         """
         Add a new experiment to the file.
         :param name: The name of the experiment
-        :param path: The path of the experiment
         :param existing: Whether the experiment already exists
         :param index: Index to put the experiment in
         :param experiment: TODO: Idk what this is...
@@ -118,9 +110,9 @@ class FileFormatParent:
 
         if not existing:
             if path is None:
-                path = f'{self.experiments_path}\\{name}'
+                path = f'\\Experiments\\{name}'
             else:
-                path = f'{self.experiments_path}\\{path}'
+                path = f'\\Experiments\\{path}'
 
             json_to_save = {
                 "path": path,
@@ -133,13 +125,13 @@ class FileFormatParent:
             self.json_data["experiments"][index]["index"] = index
 
             self.experiments[name] = ExperimentJsonClass(name, path, self, existing=False, index=index)
-            os.mkdir(path)
-            os.mkdir(f"{path}\\visualization")
+            os.mkdir(self.path + path)
+            os.mkdir(f"{self.path + path}\\visualization")
             self.update_json()
 
         else:
-            self.experiments[name] = ExperimentJsonClass(name, path, self, existing=True, index=index,
-                                                         experiment=experiment)
+            self.experiments[name] = (
+                ExperimentJsonClass(name, path, self, existing=True, index=index, experiment=experiment))
 
         return self.experiments[name]
 
@@ -178,7 +170,7 @@ class ExperimentJsonClass:
             self.experimentIndex = index
 
             for dataset in experiment["datasets"]:
-                self.create_dataset(dataset["name"], dataset["path"], existing=True, dataset=dataset)
+                self.create_dataset(dataset["name"], existing=True, dataset=dataset)
 
     def update_metadata(self, key, value):
         key = sanitize_input(key)
@@ -189,17 +181,17 @@ class ExperimentJsonClass:
     def read_metadata(self):
         return self.metadata
 
-    def create_dataset(self, name, path=None, existing=False, size=(10, 10), datatype='int8', dataset=None):
+    def create_dataset(self, name, existing=False, size=(10, 10), datatype='int8', dataset=None):
+
         if dataset is None:
             dataset = {}
-        if path is None:
-            path = name
 
         name = sanitize_input(name)
+        path = f'\\{name}.npy'
 
         if not existing:
             dataToAdd = {"name": name,
-                         "path": f'{self.path}\\{path}.npy',
+                         "path": path,
                          "metadata": {}}
 
             self.fileFormatParent.json_data["experiments"][self.experimentIndex]["datasets"].append(dataToAdd)
@@ -208,7 +200,7 @@ class ExperimentJsonClass:
             self.fileFormatParent.json_data["experiments"][self.experimentIndex]["datasets"][index]['index'] = index
             self.fileFormatParent.update_json()
 
-            self.dataset[name] = DatasetJsonClass(name, f"{self.path}\\{path}.npy", self.fileFormatParent, self, index,
+            self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, index,
                                                   existing=False, size=size, datatype=datatype)
 
         if existing:
@@ -260,9 +252,7 @@ class ExperimentJsonClass:
         results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=path)
 
         if save_data:
-            self.create_dataset(f"SNR_{labels_dataset}_{traces_dataset}_results",
-                                f"SNR_{labels_dataset}_{traces_dataset}_results", size=results.shape,
-                                datatype=results.dtype)
+            self.create_dataset(f"SNR_{labels_dataset}_{traces_dataset}_results", size=results.shape, datatype=results.dtype)
 
         return results
 
@@ -315,7 +305,7 @@ class DatasetJsonClass:
             self.modify_metadata("date_created", date.today().strftime('%Y-%m-%d'))
 
             array = np.zeros(size, dtype=datatype)
-            np.save(path, array)
+            np.save(self.fileFormatParent.path + self.experimentParent.path + self.path, array)
 
         if existing:
             self.name = name
@@ -326,17 +316,17 @@ class DatasetJsonClass:
             self.metadata = dataset["metadata"]
 
     def read_data(self, index):
-        data = np.load(self.path)
+        data = np.load(self.fileFormatParent.path + self.experimentParent.path + self.path)
         return data[index]
 
     def read_all(self):
-        data = np.load(self.path)
+        data = np.load(self.fileFormatParent.path + self.experimentParent.path + self.path)
         return data[:]
 
     def add_data(self, data_to_add):
-        data = np.load(self.path)
+        data = np.load(self.fileFormatParent.path + self.experimentParent.path + self.path)
         data[:self.size[0], :self.size[1]] = data_to_add
-        np.save(self.path, data)
+        np.save(self.fileFormatParent.path + self.experimentParent.path + self.path, data)
 
     def modify_metadata(self, key, value):
         key = sanitize_input(key)
