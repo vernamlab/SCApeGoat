@@ -12,7 +12,7 @@ Description: File Format API for side-channel analysis experiments.
 """
 
 
-class FileFormatParent:
+class FileParent:
     def __init__(self, name, path, existing=False):
         """
         Initialize FileFormatParent class.
@@ -124,14 +124,14 @@ class FileFormatParent:
             index = len(self.json_data["experiments"]) - 1
             self.json_data["experiments"][index]["index"] = index
 
-            self.experiments[name] = ExperimentJsonClass(name, path, self, existing=False, index=index)
+            self.experiments[name] = Experiment(name, path, self, existing=False, index=index)
             os.mkdir(self.path + path)
             os.mkdir(f"{self.path + path}\\visualization")
             self.update_json()
 
         else:
             self.experiments[name] = (
-                ExperimentJsonClass(name, path, self, existing=True, index=index, experiment=experiment))
+                Experiment(name, path, self, existing=True, index=index, experiment=experiment))
 
         return self.experiments[name]
 
@@ -145,7 +145,7 @@ class FileFormatParent:
         return self.experiments[experiment_name]
 
 
-class ExperimentJsonClass:
+class Experiment:
     def __init__(self, name, path, file_format_parent, existing=False, index=0, experiment=None):
 
         if experiment is None:
@@ -200,12 +200,12 @@ class ExperimentJsonClass:
             self.fileFormatParent.json_data["experiments"][self.experimentIndex]["datasets"][index]['index'] = index
             self.fileFormatParent.update_json()
 
-            self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, index,
-                                                  existing=False, size=size, datatype=datatype)
+            self.dataset[name] = Dataset(name, path, self.fileFormatParent, self, index,
+                                         existing=False, size=size, datatype=datatype)
 
         if existing:
-            self.dataset[name] = DatasetJsonClass(name, path, self.fileFormatParent, self, dataset["index"],
-                                                  existing=True, dataset=dataset)
+            self.dataset[name] = Dataset(name, path, self.fileFormatParent, self, dataset["index"],
+                                         existing=True, dataset=dataset)
 
         return self.dataset[name]
 
@@ -285,7 +285,7 @@ class ExperimentJsonClass:
         return self.dataset[dataset_name]
 
 
-class DatasetJsonClass:
+class Dataset:
     def __init__(self, name, path, file_format_parent, experiment_parent, index, existing=False, size=(10, 10),
                  datatype='int8', dataset=None):
         if dataset is None:

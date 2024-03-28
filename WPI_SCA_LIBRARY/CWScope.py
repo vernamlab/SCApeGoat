@@ -153,7 +153,7 @@ class CWScope:
         traces, keys, plaintexts, ciphertexts = self.standard_capture_traces(num_traces, experiment_keys, experiment_texts, fixed_key, fixed_pt)
 
         # create parent folder
-        file_parent = FileFormatParent(file_name, existing=file_existing)
+        file_parent = FileParent(file_name, existing=file_existing)
 
         # add experiment
         file_parent.addExperiment(experiment_name, experiment_name, existing=experiment_existing) # TODO: NEED TO FIX THE INTEGRATION WITH THE FILE FORMAT AFTER CHANGES
