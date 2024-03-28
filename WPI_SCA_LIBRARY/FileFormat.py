@@ -1,7 +1,8 @@
 import json
 import os
 from datetime import date
-
+import re
+import warnings
 from WPI_SCA_LIBRARY.Metrics import *
 
 """
@@ -33,7 +34,15 @@ class FileParent:
                 os.mkdir(self.experiments_path)
                 os.mkdir(self.visualizations_path)
             except FileExistsError:
-                raise FileExistsError("A File named {} already exists at {}".format(name, self.path))
+                if bool(re.match(r'.*-\d$', name)):
+                    ver_num = int(name[len(name) - 1]) + 1
+                    new_name = name[:-1] + str(ver_num)
+                    new_path = path[:-1] + str(ver_num)
+                else:
+                    new_name = name + "-1"
+                    new_path = path + "-1"
+                FileParent(new_name, new_path, existing)
+                return
 
             self.json_data = {
                 "fileName": sanitize_input(name),
