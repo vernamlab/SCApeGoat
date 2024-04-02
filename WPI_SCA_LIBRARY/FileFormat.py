@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from datetime import date
 import re
 import warnings
@@ -65,6 +66,7 @@ class FileParent:
             self.metadata = self.json_data['metadata']
 
         else:
+            self.name = name
             with open(f"{path}\\metadataHolder.json", 'r') as json_file:
                 self.json_data = json.load(json_file)
             path_from_json = self.json_data["path"]
@@ -159,6 +161,18 @@ class FileParent:
         """
         experiment_name = sanitize_input(experiment_name)
         return self.experiments[experiment_name]
+
+    def delete_file(self):
+        """
+        Deletes the entire file. Confirmation required.
+        """
+        res = sanitize_input(input("You are about to delete file {}. Do you want to proceed? [Y/N]: ".format(self.name)))
+
+        if res == "y" or res == "yes":
+            print("Deleting file {}".format(self.name))
+            shutil.rmtree(self.path)
+        else:
+            print("Deletion of file {} cancelled.".format(self.name))
 
 
 class Experiment:
