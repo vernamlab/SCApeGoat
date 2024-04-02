@@ -25,24 +25,31 @@ class FileParent:
         :type existing: bool
         """
         if not existing:
+            self.name = name
             self.path = path
             self.experiments_path = f"{self.path}\\Experiments"
             self.visualizations_path = f"{self.path}\\Visualizations"
 
-            try:
-                os.mkdir(self.path)
-                os.mkdir(self.experiments_path)
-                os.mkdir(self.visualizations_path)
-            except FileExistsError:
-                if bool(re.match(r'.*-\d$', name)):
-                    ver_num = int(name[len(name) - 1]) + 1
-                    new_name = name[:-1] + str(ver_num)
-                    new_path = path[:-1] + str(ver_num)
-                else:
-                    new_name = name + "-1"
-                    new_path = path + "-1"
-                FileParent(new_name, new_path, existing)
-                return
+            dir_created = False
+
+            while not dir_created:
+                try:
+                    os.mkdir(self.path)
+                    os.mkdir(self.experiments_path)
+                    os.mkdir(self.visualizations_path)
+                    dir_created = True
+                except FileExistsError:
+                    if bool(re.match(r'.*-\d$', self.name)):
+                        ver_num = int(self.name[len(self.name) - 1]) + 1
+                        new_name = self.name[:-1] + str(ver_num)
+                        new_path = self.path[:-1] + str(ver_num)
+                    else:
+                        new_name = self.name + "-1"
+                        new_path = self.path + "-1"
+                    self.name = new_name
+                    self.path = new_path
+                    self.experiments_path = f"{self.path}\\Experiments"
+                    self.visualizations_path = f"{self.path}\\Visualizations"
 
             self.json_data = {
                 "fileName": sanitize_input(name),
