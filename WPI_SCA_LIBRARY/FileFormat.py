@@ -185,7 +185,7 @@ class FileParent:
         experiment_name = sanitize_input(experiment_name)
         res = sanitize_input(input(
             "You are about to delete {} in file {}. Do you want to proceed? [Y/N]: ".format(experiment_name,
-                                                                                                self.name)))
+                                                                                            self.name)))
 
         if res == "y" or res == "yes":
             print("Deleting experiment {}".format(experiment_name))
@@ -271,6 +271,35 @@ class Experiment:
     def get_dataset(self, dataset_name):
         dataset_name = sanitize_input(dataset_name)
         return self.dataset[dataset_name]
+
+    def delete_dataset(self, dataset_name):
+        """
+        Deletes a dataset and all of its contents
+        :param dataset_name: The name of the experiment to be deleted
+        """
+        dataset_name = sanitize_input(dataset_name)
+        #res = sanitize_input(input(
+        #    "You are about to delete {} in experiment {}. Do you want to proceed? [Y/N]: ".format(dataset_name,
+        #                                                                                          self.name)))
+        res = "y"
+        if res == "y" or res == "yes":
+            print("Deleting dataset {}".format(dataset_name))
+            os.remove(self.fileFormatParent.path + self.path + "\\" + dataset_name + ".npy")
+            self.dataset.pop(dataset_name)
+
+            for experiment_json in self.fileFormatParent.json_data["experiments"]:
+                if experiment_json["name"] == self.name:
+                    for dataset in experiment_json["datasets"]:
+                        if dataset["name"] == dataset_name:
+                            experiment_json["datasets"].remove(dataset)
+
+            with open(f"{self.fileFormatParent.path}\\metadataHolder.json", 'w') as json_file:
+                json.dump(self.fileFormatParent.json_data, json_file, indent=4)
+
+
+
+        else:
+            print("Deletion of experiment {} cancelled.".format(dataset_name))
 
     def calculate_snr(self, labels_dataset, traces_dataset, visualise=False, save_data=False, save_graph=False):
 
