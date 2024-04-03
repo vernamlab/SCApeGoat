@@ -15,5 +15,3 @@ dataset_1.add_data(data_to_add=random)
 
 dataset_2 = experiment_1.create_dataset(name="fixed", size=(50000, 3000), datatype='float32')
 dataset_2.add_data(data_to_add=fixed)
-
-experiment_1.delete_dataset(dataset_name="random")

@@ -278,10 +278,9 @@ class Experiment:
         :param dataset_name: The name of the experiment to be deleted
         """
         dataset_name = sanitize_input(dataset_name)
-        #res = sanitize_input(input(
-        #    "You are about to delete {} in experiment {}. Do you want to proceed? [Y/N]: ".format(dataset_name,
-        #                                                                                          self.name)))
-        res = "y"
+        res = sanitize_input(input(
+           "You are about to delete {} in experiment {}. Do you want to proceed? [Y/N]: ".format(dataset_name,
+                                                                                                 self.name)))
         if res == "y" or res == "yes":
             print("Deleting dataset {}".format(dataset_name))
             os.remove(self.fileFormatParent.path + self.path + "\\" + dataset_name + ".npy")
