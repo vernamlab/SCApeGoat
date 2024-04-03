@@ -279,8 +279,8 @@ class Experiment:
         """
         dataset_name = sanitize_input(dataset_name)
         res = sanitize_input(input(
-           "You are about to delete {} in experiment {}. Do you want to proceed? [Y/N]: ".format(dataset_name,
-                                                                                                 self.name)))
+            "You are about to delete {} in experiment {}. Do you want to proceed? [Y/N]: ".format(dataset_name,
+                                                                                                  self.name)))
         if res == "y" or res == "yes":
             print("Deleting dataset {}".format(dataset_name))
             os.remove(self.fileFormatParent.path + self.path + "\\" + dataset_name + ".npy")
@@ -294,8 +294,6 @@ class Experiment:
 
             with open(f"{self.fileFormatParent.path}\\metadataHolder.json", 'w') as json_file:
                 json.dump(self.fileFormatParent.json_data, json_file, indent=4)
-
-
 
         else:
             print("Deletion of experiment {} cancelled.".format(dataset_name))
