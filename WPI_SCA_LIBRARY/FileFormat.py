@@ -86,9 +86,17 @@ class FileParent:
             self.metadata = self.json_data["metadata"]
 
             for experiment in self.json_data["experiments"]:
-                self.add_experiment(name=experiment.get('name'), path=experiment.get('path'), existing=True,
-                                    index=experiment.get('index'),
-                                    experiment=experiment)
+                if os.path.exists(self.path + experiment["path"]):
+                    self.add_experiment(name=experiment.get('name'), path=experiment.get('path'), existing=True,
+                                        index=experiment.get('index'),
+                                        experiment=experiment)
+                else:
+                    for experiment_json in self.json_data["experiments"]:
+                        if experiment_json["name"] == experiment["name"]:
+                            self.json_data["experiments"].remove(experiment_json)
+
+                    with open(f"{self.path}\\metadataHolder.json", 'w') as json_file:
+                        json.dump(self.json_data, json_file, indent=4)
 
     def update_json(self):
         """
