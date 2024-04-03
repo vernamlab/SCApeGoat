@@ -235,7 +235,18 @@ class Experiment:
             self.experimentIndex = index
 
             for dataset in experiment["datasets"]:
-                self.create_dataset(dataset["name"], existing=True, dataset=dataset)
+                if os.path.exists(self.fileFormatParent.path + self.path + dataset["path"]):
+                    self.create_dataset(dataset["name"], existing=True, dataset=dataset)
+                else:
+                    for experiment_json in self.fileFormatParent.json_data["experiments"]:
+                        if experiment_json["name"] == self.name:
+
+                            for _dataset in experiment_json["datasets"]:
+                                if dataset["name"] == _dataset["name"]:
+                                    experiment_json["datasets"].remove(dataset)
+
+                    with open(f"{self.fileFormatParent.path}\\metadataHolder.json", 'w') as json_file:
+                        json.dump(self.fileFormatParent.json_data, json_file, indent=4)
 
     def update_metadata(self, key, value):
         key = sanitize_input(key)
