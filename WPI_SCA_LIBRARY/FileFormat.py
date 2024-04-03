@@ -3,7 +3,6 @@ import os
 import shutil
 from datetime import date
 import re
-import warnings
 from WPI_SCA_LIBRARY.Metrics import *
 
 """
@@ -17,13 +16,15 @@ Description: File Format API for side-channel analysis experiments.
 class FileParent:
     def __init__(self, name, path, existing=False):
         """
-        Initialize FileFormatParent class.
-        :param name: Relative path to base file
+        Initialize FileFormatParent class. Creates the basic file structure including JSON metadata holder. If the file
+        already exists it simply returns a reference to that file.
+        :param name: Name of file
         :type name: str
-        :param path: Absolute path to where you want to save the file. Leaving black will put it into current directory
+        :param path: Absolute path to where you want to save the file. Leaving black will put it into current directory.
         :type path: str
         :param existing: Whether the file exists
         :type existing: bool
+        :return: FileParent object corresponding to the specified file.
         """
         if not existing:
             self.name = name
@@ -116,6 +117,7 @@ class FileParent:
     def add_experiment(self, name, path=None, existing=False, index=0, experiment=None):
         """
         Add a new experiment to the file.
+        :param path:
         :param name: The name of the experiment
         :param existing: Whether the experiment already exists
         :param index: Index to put the experiment in
@@ -166,13 +168,38 @@ class FileParent:
         """
         Deletes the entire file. Confirmation required.
         """
-        res = sanitize_input(input("You are about to delete file {}. Do you want to proceed? [Y/N]: ".format(self.name)))
+        res = sanitize_input(
+            input("You are about to delete file {}. Do you want to proceed? [Y/N]: ".format(self.name)))
 
         if res == "y" or res == "yes":
             print("Deleting file {}".format(self.name))
             shutil.rmtree(self.path)
         else:
             print("Deletion of file {} cancelled.".format(self.name))
+
+    def delete_experiment(self, experiment_name):
+        """
+        Deletes an experiment and all of its contents
+        :param experiment_name: The name of the experiment to be deleted
+        """
+        experiment_name = sanitize_input(experiment_name)
+        res = sanitize_input(input(
+            "You are about to delete {} in file {}. Do you want to proceed? [Y/N]: ".format(experiment_name,
+                                                                                                self.name)))
+
+        if res == "y" or res == "yes":
+            print("Deleting experiment {}".format(experiment_name))
+
+            shutil.rmtree(self.path + self.experiments[experiment_name].path)
+            self.experiments.pop(experiment_name)
+            for experiment_json in self.json_data["experiments"]:
+                if experiment_json["name"] == experiment_name:
+                    self.json_data["experiments"].remove(experiment_json)
+
+            with open(f"{self.path}\\metadataHolder.json", 'w') as json_file:
+                json.dump(self.json_data, json_file, indent=4)
+        else:
+            print("Deletion of experiment {} cancelled.".format(experiment_name))
 
 
 class Experiment:
@@ -220,9 +247,11 @@ class Experiment:
         path = f'\\{name}.npy'
 
         if not existing:
-            dataToAdd = {"name": name,
-                         "path": path,
-                         "metadata": {}}
+            dataToAdd = {
+                "name": name,
+                "path": path,
+                "metadata": {}
+            }
 
             self.fileFormatParent.json_data["experiments"][self.experimentIndex]["datasets"].append(dataToAdd)
             index = len(self.fileFormatParent.json_data["experiments"][self.experimentIndex]["datasets"]) - 1
@@ -238,6 +267,10 @@ class Experiment:
                                          existing=True, dataset=dataset)
 
         return self.dataset[name]
+
+    def get_dataset(self, dataset_name):
+        dataset_name = sanitize_input(dataset_name)
+        return self.dataset[dataset_name]
 
     def calculate_snr(self, labels_dataset, traces_dataset, visualise=False, save_data=False, save_graph=False):
 
@@ -282,7 +315,8 @@ class Experiment:
         results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=path)
 
         if save_data:
-            self.create_dataset(f"SNR_{labels_dataset}_{traces_dataset}_results", size=results.shape, datatype=results.dtype)
+            self.create_dataset(f"SNR_{labels_dataset}_{traces_dataset}_results", size=results.shape,
+                                datatype=results.dtype)
 
         return results
 
@@ -309,10 +343,6 @@ class Experiment:
         t, t_max = t_test_tvla(fixed, rand, visualize=visualize, visualization_paths=path)
 
         return t, t_max
-
-    def get_dataset(self, dataset_name):
-        dataset_name = sanitize_input(dataset_name)
-        return self.dataset[dataset_name]
 
 
 class Dataset:
