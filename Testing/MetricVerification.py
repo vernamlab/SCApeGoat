@@ -9,6 +9,7 @@ from WPI_SCA_LIBRARY.Metrics import *
 from WPI_SCA_LIBRARY.CWScope import *
 from WPI_SCA_LIBRARY.LeakageModels import *
 import numpy as np
+import h5py
 
 
 def read_csv_traces(csv_file, num_traces):
