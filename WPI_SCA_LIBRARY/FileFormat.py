@@ -87,7 +87,7 @@ class FileParent:
 
             for experiment in self.json_data["experiments"]:
                 if os.path.exists(self.path + experiment["path"]):
-                    self.add_experiment(name=experiment.get('name'), path=experiment.get('path'), existing=True,
+                    self.add_experiment(name=experiment.get('name'), existing=True,
                                         index=experiment.get('index'),
                                         experiment=experiment)
                 else:
@@ -122,26 +122,21 @@ class FileParent:
         """
         return self.metadata
 
-    def add_experiment(self, name, path=None, existing=False, index=0, experiment=None):
+    def add_experiment(self, name, existing=False, index=0, experiment=None):
         """
         Add a new experiment to the file.
-        :param path:
         :param name: The name of the experiment
         :param existing: Whether the experiment already exists
         :param index: Index to put the experiment in
-        :param experiment: TODO: Idk what this is...
+        :param experiment: JSON experiment to add. LEAVE AS NONE.
         """
         if experiment is None:
             experiment = {}
 
         name = sanitize_input(name)
+        path = f'\\Experiments\\{name}'
 
         if not existing:
-            if path is None:
-                path = f'\\Experiments\\{name}'
-            else:
-                path = f'\\Experiments\\{path}'
-
             json_to_save = {
                 "path": path,
                 "name": name,
