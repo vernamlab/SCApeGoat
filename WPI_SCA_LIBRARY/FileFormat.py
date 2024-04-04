@@ -28,7 +28,10 @@ class FileParent:
         """
         if not existing:
             self.name = name
-            self.path = path
+            if path[-2:] == "\\":
+                self.path = path + name
+            else:
+                self.path = path + "\\" + name
             self.experiments_path = f"{self.path}\\Experiments"
             self.visualizations_path = f"{self.path}\\Visualizations"
 
@@ -270,7 +273,7 @@ class Experiment:
         """
         dataset = self.add_dataset_internal(name, existing=False, size=size, datatype=datatype, dataset=None)
         dataset.add_data(data_to_add)
-        return self.add_dataset_internal(name, existing=False, size=size, datatype=datatype, dataset=None)
+        return dataset
 
     def add_dataset_internal(self, name, existing=False, size=(10, 10), datatype='int8', dataset=None):
 
@@ -331,6 +334,9 @@ class Experiment:
 
         else:
             print("Deletion of experiment {} cancelled.".format(dataset_name))
+
+    def get_visualization_path(self): # TODO: make sure this works
+        return self.fileFormatParent.path + self.path + "\\" + "visualization"
 
     def calculate_snr(self, labels_dataset, traces_dataset, visualise=False, save_data=False, save_graph=False):
 
