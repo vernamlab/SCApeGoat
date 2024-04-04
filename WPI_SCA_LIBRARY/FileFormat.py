@@ -12,6 +12,8 @@ Date: 2024-28-02
 Description: File Format API for side-channel analysis experiments.
 """
 
+# TODO: When making any directory if an error happens before stuff can be added we should undo everything
+
 
 class FileParent:
     def __init__(self, name, path, existing=False):
@@ -28,7 +30,7 @@ class FileParent:
         """
         if not existing:
             self.name = name
-            if path[-2:] == "\\":
+            if path[-1:] == "\\":
                 self.path = path + name
             else:
                 self.path = path + "\\" + name
@@ -260,22 +262,19 @@ class Experiment:
     def read_metadata(self):
         return self.metadata
 
-    def add_dataset(self, name, data_to_add, size, datatype='float32'):
+    def add_dataset(self, name, data_to_add, datatype):
         """
         Adds a dataset to an experiment.
+        :param datatype: Datatype of the dataset
         :param data_to_add: The data to be added as a list or Numpy array.
         :param name: The name of the dataset.
-        :param size: The dimensions of the dataset. For example 5000 traces at 1500 samples
-                     per-trace would be (5000, 1000)
-        :param datatype: The datatype you wish to store the data as. These correspond to NumPy binary datatypes. Defaults
-                         as Float32 but can be configured.
         :return: The newly created dataset
         """
-        dataset = self.add_dataset_internal(name, existing=False, size=size, datatype=datatype, dataset=None)
-        dataset.add_data(data_to_add)
+        dataset = self.add_dataset_internal(name, existing=False, dataset=None)
+        dataset.add_data(data_to_add, datatype)
         return dataset
 
-    def add_dataset_internal(self, name, existing=False, size=(10, 10), datatype='int8', dataset=None):
+    def add_dataset_internal(self, name, existing=False, dataset=None):
 
         if dataset is None:
             dataset = {}
@@ -296,12 +295,10 @@ class Experiment:
             self.fileFormatParent.json_data["experiments"][self.experimentIndex]["datasets"][index]['index'] = index
             self.fileFormatParent.update_json()
 
-            self.dataset[name] = Dataset(name, path, self.fileFormatParent, self, index,
-                                         existing=False, size=size, datatype=datatype)
+            self.dataset[name] = Dataset(name, path, self.fileFormatParent, self, index, existing=False)
 
         if existing:
-            self.dataset[name] = Dataset(name, path, self.fileFormatParent, self, dataset["index"],
-                                         existing=True, dataset=dataset)
+            self.dataset[name] = Dataset(name, path, self.fileFormatParent, self, dataset["index"], existing=True, dataset=dataset)
 
         return self.dataset[name]
 
@@ -338,6 +335,7 @@ class Experiment:
     def get_visualization_path(self): # TODO: make sure this works
         return self.fileFormatParent.path + self.path + "\\" + "visualization"
 
+    # TODO: Needs rework, particularly for label creation
     def calculate_snr(self, labels_dataset, traces_dataset, visualise=False, save_data=False, save_graph=False):
 
         labels_dataset = sanitize_input(labels_dataset)
@@ -381,8 +379,7 @@ class Experiment:
         results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=path)
 
         if save_data:
-            self.add_dataset_internal(f"SNR_{labels_dataset}_{traces_dataset}_results", size=results.shape,
-                                      datatype=results.dtype)
+            self.add_dataset_internal(f"SNR_{labels_dataset}_{traces_dataset}_results")
 
         return results
 
@@ -412,15 +409,13 @@ class Experiment:
 
 
 class Dataset:
-    def __init__(self, name, path, file_format_parent, experiment_parent, index, existing=False, size=(10, 10),
-                 datatype='int8', dataset=None):
+    def __init__(self, name, path, file_format_parent, experiment_parent, index, existing=False, dataset=None):
         if dataset is None:
             dataset = {}
 
         name = sanitize_input(name)
         if not existing:
             self.name = name
-            self.size = size
             self.path = path
             self.index = index
             self.fileFormatParent = file_format_parent
@@ -429,9 +424,6 @@ class Dataset:
                 self.fileFormatParent.json_data["experiments"][self.experimentParent.experimentIndex]["datasets"][
                     self.index]["metadata"]
             self.modify_metadata("date_created", date.today().strftime('%Y-%m-%d'))
-
-            array = np.zeros(size, dtype=datatype)
-            np.save(self.fileFormatParent.path + self.experimentParent.path + self.path, array)
 
         if existing:
             self.name = name
@@ -449,10 +441,9 @@ class Dataset:
         data = np.load(self.fileFormatParent.path + self.experimentParent.path + self.path)
         return data[:]
 
-    def add_data(self, data_to_add):
-        data = np.load(self.fileFormatParent.path + self.experimentParent.path + self.path)
-        data[:self.size[0], :self.size[1]] = data_to_add
-        np.save(self.fileFormatParent.path + self.experimentParent.path + self.path, data)
+    def add_data(self, data_to_add, datatype):
+        data_to_add = np.array(data_to_add, dtype=datatype)
+        np.save(self.fileFormatParent.path + self.experimentParent.path + self.path, data_to_add)
 
     def modify_metadata(self, key, value):
         key = sanitize_input(key)
