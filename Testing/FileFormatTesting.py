@@ -8,9 +8,7 @@ random = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_tr
 file = FileParent("AnotherFile", "C:\\Users\\samka\\PycharmProjects\\MQP\\SCLA_API_MQP\\AnotherFile", existing=False)
 
 experiment_1 = file.add_experiment(name="Experiment1")
-dataset_1 = experiment_1.create_dataset(name="random", size=(50000, 3000), datatype='float32')
-dataset_1.add_data(data_to_add=random)
+dataset_1 = experiment_1.add_dataset(name="random", data_to_add=random, size=(50000, 3000), datatype='float32')
 
 experiment_2 = file.add_experiment(name="Experiment2")
-dataset_2 = experiment_2.create_dataset(name="fixed", size=(50000, 3000), datatype='float32')
-dataset_2.add_data(data_to_add=fixed)
+dataset_2 = experiment_2.add_dataset(name="fixed", data_to_add=fixed, size=(50000, 3000), datatype='float32')

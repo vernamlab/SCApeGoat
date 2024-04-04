@@ -236,7 +236,7 @@ class Experiment:
 
             for dataset in experiment["datasets"]:
                 if os.path.exists(self.fileFormatParent.path + self.path + dataset["path"]):
-                    self.create_dataset(dataset["name"], existing=True, dataset=dataset)
+                    self.add_dataset_internal(dataset["name"], existing=True, dataset=dataset)
                 else:
                     for experiment_json in self.fileFormatParent.json_data["experiments"]:
                         if experiment_json["name"] == self.name:
@@ -257,7 +257,22 @@ class Experiment:
     def read_metadata(self):
         return self.metadata
 
-    def create_dataset(self, name, existing=False, size=(10, 10), datatype='int8', dataset=None):
+    def add_dataset(self, name, data_to_add, size, datatype='float32'):
+        """
+        Adds a dataset to an experiment.
+        :param data_to_add: The data to be added as a list or Numpy array.
+        :param name: The name of the dataset.
+        :param size: The dimensions of the dataset. For example 5000 traces at 1500 samples
+                     per-trace would be (5000, 1000)
+        :param datatype: The datatype you wish to store the data as. These correspond to NumPy binary datatypes. Defaults
+                         as Float32 but can be configured.
+        :return: The newly created dataset
+        """
+        dataset = self.add_dataset_internal(name, existing=False, size=size, datatype=datatype, dataset=None)
+        dataset.add_data(data_to_add)
+        return self.add_dataset_internal(name, existing=False, size=size, datatype=datatype, dataset=None)
+
+    def add_dataset_internal(self, name, existing=False, size=(10, 10), datatype='int8', dataset=None):
 
         if dataset is None:
             dataset = {}
@@ -360,8 +375,8 @@ class Experiment:
         results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=path)
 
         if save_data:
-            self.create_dataset(f"SNR_{labels_dataset}_{traces_dataset}_results", size=results.shape,
-                                datatype=results.dtype)
+            self.add_dataset_internal(f"SNR_{labels_dataset}_{traces_dataset}_results", size=results.shape,
+                                      datatype=results.dtype)
 
         return results
 
