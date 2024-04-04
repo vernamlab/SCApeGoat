@@ -87,9 +87,9 @@ class FileParent:
 
             for experiment in self.json_data["experiments"]:
                 if os.path.exists(self.path + experiment["path"]):
-                    self.add_experiment(name=experiment.get('name'), existing=True,
-                                        index=experiment.get('index'),
-                                        experiment=experiment)
+                    self.add_experiment_internal(name=experiment.get('name'), existing=True,
+                                                 index=experiment.get('index'),
+                                                 experiment=experiment)
                 else:
                     for experiment_json in self.json_data["experiments"]:
                         if experiment_json["name"] == experiment["name"]:
@@ -122,13 +122,19 @@ class FileParent:
         """
         return self.metadata
 
-    def add_experiment(self, name, existing=False, index=0, experiment=None):
+    def add_experiment(self, name):
         """
-        Add a new experiment to the file.
-        :param name: The name of the experiment
-        :param existing: Whether the experiment already exists
-        :param index: Index to put the experiment in
-        :param experiment: JSON experiment to add. LEAVE AS NONE.
+        Adds a new experiment to the file
+        :param name: The experiment name
+        :return: The newly added experiment class.
+        :rtype: Experiment
+        """
+        return self.add_experiment_internal(name, existing=False, index=0, experiment=None)
+
+    def add_experiment_internal(self, name, existing=False, index=0, experiment=None):
+        """
+        Internal Function for adding experiments used when getting a reference to an existing file. Call add_experiment
+        to add a new experiment instead of this.
         """
         if experiment is None:
             experiment = {}
@@ -144,10 +150,9 @@ class FileParent:
                 "datasets": [],
             }
             self.json_data["experiments"].append(json_to_save)
-            index = len(self.json_data["experiments"]) - 1
-            self.json_data["experiments"][index]["index"] = index
-
-            self.experiments[name] = Experiment(name, path, self, existing=False, index=index)
+            idx = len(self.json_data["experiments"]) - 1
+            self.json_data["experiments"][idx]["index"] = idx
+            self.experiments[name] = Experiment(name, path, self, existing=False, index=idx)
             os.mkdir(self.path + path)
             os.mkdir(f"{self.path + path}\\visualization")
             self.update_json()
