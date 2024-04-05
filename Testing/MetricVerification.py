@@ -160,7 +160,7 @@ def t_test_verification():
     plt.grid()
     plt.show()
 
-
+t_test_verification()
 def correlation_validation():
     """
     Verifies Correlation with MetriSCA traces. Uses hamming distance leakage model. There is no figure to reference

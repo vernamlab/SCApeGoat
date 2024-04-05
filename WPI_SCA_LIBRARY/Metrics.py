@@ -110,12 +110,14 @@ def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list, visuali
             new_sf = sf_old + (new_tf - mf_old) * (new_tf - new_mf)
             new_sr = sr_old + (new_tr - mr_old) * (new_tr - new_mr)
 
-            new_stdf = np.sqrt(np.array(new_sf / n))
-            new_stdr = np.sqrt(np.array(new_sr / n))
+            new_stdf = np.sqrt(np.array(new_sf / n, dtype=np.float64))
+            new_stdr = np.sqrt(np.array(new_sr / n, dtype=np.float64))
 
-            with np.errstate(divide='ignore', invalid='ignore'):  # we get divide by zero warnings for first ~5 traces
+            try:
                 welsh_t = np.array(new_mr - new_mf) / np.sqrt(
-                    np.array((new_stdr ** 2)) / (n + 1) + np.array((new_stdf ** 2)) / (n + 1))
+                        np.array((new_stdr ** 2)) / (n + 1) + np.array((new_stdf ** 2)) / (n + 1))
+            except ZeroDivisionError:
+                welsh_t = 0
 
             return welsh_t, new_mr, new_mf, new_sf, new_sr
 

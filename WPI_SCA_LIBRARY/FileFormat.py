@@ -423,7 +423,7 @@ class Dataset:
             self.metadata = \
                 self.fileFormatParent.json_data["experiments"][self.experimentParent.experimentIndex]["datasets"][
                     self.index]["metadata"]
-            self.modify_metadata("date_created", date.today().strftime('%Y-%m-%d'))
+            self.update_metadata("date_created", date.today().strftime('%Y-%m-%d'))
 
         if existing:
             self.name = name
@@ -445,7 +445,7 @@ class Dataset:
         data_to_add = np.array(data_to_add, dtype=datatype)
         np.save(self.fileFormatParent.path + self.experimentParent.path + self.path, data_to_add)
 
-    def modify_metadata(self, key, value):
+    def update_metadata(self, key, value):
         key = sanitize_input(key)
         self.metadata[key] = value
         self.fileFormatParent.update_json()
