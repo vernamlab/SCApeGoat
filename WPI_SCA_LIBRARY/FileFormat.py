@@ -73,6 +73,10 @@ class FileParent:
 
         else:
             self.name = name
+            if path[-1:] == "\\":
+                path = path + name
+            else:
+                path = path + "\\" + name
             with open(f"{path}\\metadataHolder.json", 'r') as json_file:
                 self.json_data = json.load(json_file)
             path_from_json = self.json_data["path"]
@@ -213,6 +217,26 @@ class FileParent:
                 json.dump(self.json_data, json_file, indent=4)
         else:
             print("Deletion of experiment {} cancelled.".format(experiment_name))
+
+    def query_experiments_with_metadata(self, key, value):
+        """
+        Get all experiments in the file with specific metadata.
+        :param key: the key of the metadata you are searching
+        :param value: The value of the metadata you are searching for. Providing "*" will return all experiments that have
+                      metadata with the given key.
+        :return: A list of experiments having the key value pair supplied
+        """
+        experiments = []
+
+        for exp in self.experiments.values():
+            try:
+                res = exp.metadata[key]
+                if value == res or value == "*":
+                    experiments.append(exp)
+            except KeyError:
+                continue
+        return experiments
+
 
 
 class Experiment:
