@@ -12,6 +12,7 @@ Date: 2024-28-02
 Description: File Format API for side-channel analysis experiments.
 """
 
+
 # TODO: When making any directory if an error happens before stuff can be added we should undo everything
 
 
@@ -238,7 +239,6 @@ class FileParent:
         return experiments
 
 
-
 class Experiment:
     def __init__(self, name, path, file_format_parent, existing=False, index=0, experiment=None):
 
@@ -322,7 +322,8 @@ class Experiment:
             self.dataset[name] = Dataset(name, path, self.fileFormatParent, self, index, existing=False)
 
         if existing:
-            self.dataset[name] = Dataset(name, path, self.fileFormatParent, self, dataset["index"], existing=True, dataset=dataset)
+            self.dataset[name] = Dataset(name, path, self.fileFormatParent, self, dataset["index"], existing=True,
+                                         dataset=dataset)
 
         return self.dataset[name]
 
@@ -356,7 +357,25 @@ class Experiment:
         else:
             print("Deletion of experiment {} cancelled.".format(dataset_name))
 
-    def get_visualization_path(self): # TODO: make sure this works
+    def query_datasets_with_metadata(self, key, value):
+        """
+        Queries datasets with using the associated metadata.
+        :param key: The key of the metadata you are querying
+        :param value: The value of the metadata you are querying. Providing "*" will return all with the specified key
+                      and any value.
+        :return: A list of datasets with the provided metadata.
+        """
+        datasets = []
+        for dset in self.dataset.values():
+            try:
+                res = dset.metadata[key]
+                if res == value or value == "*":
+                    datasets.append(dset)
+            except KeyError:
+                continue
+        return datasets
+
+    def get_visualization_path(self):  # TODO: make sure this works
         return self.fileFormatParent.path + self.path + "\\" + "visualization"
 
     # TODO: Needs rework, particularly for label creation
@@ -432,7 +451,7 @@ class Experiment:
         return t, t_max
 
 
-class Dataset: # TODO: Possibly implement a system of saving datasets that have the same name similar to what we do with the files
+class Dataset:  # TODO: Possibly implement a system of saving datasets that have the same name similar to what we do with the files
     def __init__(self, name, path, file_format_parent, experiment_parent, index, existing=False, dataset=None):
         if dataset is None:
             dataset = {}
