@@ -408,7 +408,7 @@ class Experiment:
         return t, t_max
 
 
-class Dataset:
+class Dataset: # TODO: Possibly implement a system of saving datasets that have the same name similar to what we do with the files
     def __init__(self, name, path, file_format_parent, experiment_parent, index, existing=False, dataset=None):
         if dataset is None:
             dataset = {}
