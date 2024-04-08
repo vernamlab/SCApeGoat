@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import json
 import os
+import re
 import shutil
 from datetime import date
-import re
+
 from WPI_SCA_LIBRARY.Metrics import *
 
 """
@@ -17,7 +20,7 @@ Description: File Format API for side-channel analysis experiments.
 
 
 class FileParent:
-    def __init__(self, name, path, existing=False):
+    def __init__(self, name: str, path: str, existing: bool = False):
         """
         Initialize FileFormatParent class. Creates the basic file structure including JSON metadata holder. If the file
         already exists it simply returns a reference to that file.
@@ -108,14 +111,14 @@ class FileParent:
                     with open(f"{self.path}\\metadataHolder.json", 'w') as json_file:
                         json.dump(self.json_data, json_file, indent=4)
 
-    def update_json(self):
+    def update_json(self) -> None:
         """
         Dump new json data. Do not call this, call update metadata instead.
         """
         with open(f"{self.path}\\metadataHolder.json", 'w') as json_file:
             json.dump(self.json_data, json_file, indent=4)
 
-    def update_metadata(self, key, value):
+    def update_metadata(self, key: str, value: str) -> None:
         """
         Update file JSON metadata with key value pair
         :param key: metadata key
@@ -125,14 +128,14 @@ class FileParent:
         self.metadata[key] = value
         self.update_json()
 
-    def read_metadata(self):
+    def read_metadata(self) -> dict:
         """
         Read JSON metadata from file
         :return: The JSON metadata
         """
         return self.metadata
 
-    def add_experiment(self, name):
+    def add_experiment(self, name: str) -> 'Experiment':
         """
         Adds a new experiment to the file
         :param name: The experiment name
@@ -141,7 +144,7 @@ class FileParent:
         """
         return self.add_experiment_internal(name, existing=False, index=0, experiment=None)
 
-    def add_experiment_internal(self, name, existing=False, index=0, experiment=None):
+    def add_experiment_internal(self, name: str, existing: bool = False, index: int = 0, experiment: dict = None) -> 'Experiment':
         """
         Internal Function for adding experiments used when getting a reference to an existing file. Call add_experiment
         to add a new experiment instead of this.
@@ -173,7 +176,7 @@ class FileParent:
 
         return self.experiments[name]
 
-    def get_experiment(self, experiment_name):
+    def get_experiment(self, experiment_name: str) -> 'Experiment':
         """
         Get an experiment from the file
         :param experiment_name: The name of the experiment
@@ -182,7 +185,7 @@ class FileParent:
         experiment_name = sanitize_input(experiment_name)
         return self.experiments[experiment_name]
 
-    def delete_file(self):
+    def delete_file(self) -> None:
         """
         Deletes the entire file. Confirmation required.
         """
@@ -195,7 +198,7 @@ class FileParent:
         else:
             print("Deletion of file {} cancelled.".format(self.name))
 
-    def delete_experiment(self, experiment_name):
+    def delete_experiment(self, experiment_name: str) -> None:
         """
         Deletes an experiment and all of its contents
         :param experiment_name: The name of the experiment to be deleted
@@ -219,7 +222,7 @@ class FileParent:
         else:
             print("Deletion of experiment {} cancelled.".format(experiment_name))
 
-    def query_experiments_with_metadata(self, key, value, regex=False):
+    def query_experiments_with_metadata(self, key: str, value: str, regex: bool = False) -> list['Experiment']:
         """
         Get all experiments in the file with specific metadata.
         :param key: the key of the metadata you are searching
@@ -245,7 +248,7 @@ class FileParent:
 
 
 class Experiment:
-    def __init__(self, name, path, file_format_parent, existing=False, index=0, experiment=None):
+    def __init__(self, name: str, path: str, file_format_parent: FileParent, existing: bool = False, index: int = 0, experiment: dict = None):
 
         if experiment is None:
             experiment = {}
@@ -282,16 +285,16 @@ class Experiment:
                     with open(f"{self.fileFormatParent.path}\\metadataHolder.json", 'w') as json_file:
                         json.dump(self.fileFormatParent.json_data, json_file, indent=4)
 
-    def update_metadata(self, key, value):
+    def update_metadata(self, key: str, value: str) -> None:
         key = sanitize_input(key)
         self.metadata[key] = value
         self.fileFormatParent.json_data["experiments"][self.experimentIndex]["metadata"][key] = value
         self.fileFormatParent.update_json()
 
-    def read_metadata(self):
+    def read_metadata(self) -> None:
         return self.metadata
 
-    def add_dataset(self, name, data_to_add, datatype):
+    def add_dataset(self, name: str, data_to_add: np.ndarray | list, datatype: any) -> 'Dataset':
         """
         Adds a dataset to an experiment.
         :param datatype: Datatype of the dataset
@@ -303,7 +306,7 @@ class Experiment:
         dataset.add_data(data_to_add, datatype)
         return dataset
 
-    def add_dataset_internal(self, name, existing=False, dataset=None):
+    def add_dataset_internal(self, name: str, existing: bool = False, dataset: dict = None) -> 'Dataset':
 
         if dataset is None:
             dataset = {}
@@ -332,11 +335,11 @@ class Experiment:
 
         return self.dataset[name]
 
-    def get_dataset(self, dataset_name):
+    def get_dataset(self, dataset_name: str) -> 'Dataset':
         dataset_name = sanitize_input(dataset_name)
         return self.dataset[dataset_name]
 
-    def delete_dataset(self, dataset_name):
+    def delete_dataset(self, dataset_name: str) -> None:
         """
         Deletes a dataset and all of its contents
         :param dataset_name: The name of the experiment to be deleted
@@ -362,7 +365,7 @@ class Experiment:
         else:
             print("Deletion of experiment {} cancelled.".format(dataset_name))
 
-    def query_datasets_with_metadata(self, key, value, regex=False):
+    def query_datasets_with_metadata(self, key: str, value: str, regex: bool = False) -> list['Dataset']:
         """
         Queries datasets with using the associated metadata.
         :param key: The key of the metadata you are querying
@@ -385,7 +388,7 @@ class Experiment:
                 continue
         return datasets
 
-    def get_visualization_path(self):  # TODO: make sure this works
+    def get_visualization_path(self) -> str:  # TODO: make sure this works
         return self.fileFormatParent.path + self.path + "\\" + "visualization"
 
     # TODO: Needs rework, particularly for label creation
@@ -462,7 +465,7 @@ class Experiment:
 
 
 class Dataset:  # TODO: Possibly implement a system of saving datasets that have the same name similar to what we do with the files
-    def __init__(self, name, path, file_format_parent, experiment_parent, index, existing=False, dataset=None):
+    def __init__(self, name: str, path: str, file_format_parent: FileParent, experiment_parent: Experiment, index: int, existing: bool = False, dataset: dict = None):
         if dataset is None:
             dataset = {}
 
@@ -486,29 +489,29 @@ class Dataset:  # TODO: Possibly implement a system of saving datasets that have
             self.experimentParent = experiment_parent
             self.metadata = dataset["metadata"]
 
-    def read_data(self, index):
+    def read_data(self, start: int, end: int) -> np.ndarray:
         data = np.load(self.fileFormatParent.path + self.experimentParent.path + self.path)
-        return data[index]
+        return data[start:end]
 
-    def read_all(self):
+    def read_all(self) -> np.ndarray:
         data = np.load(self.fileFormatParent.path + self.experimentParent.path + self.path)
         return data[:]
 
-    def add_data(self, data_to_add, datatype):
+    def add_data(self, data_to_add: np.ndarray, datatype: any) -> None:
         data_to_add = np.array(data_to_add, dtype=datatype)
         np.save(self.fileFormatParent.path + self.experimentParent.path + self.path, data_to_add)
 
-    def update_metadata(self, key, value):
+    def update_metadata(self, key: str, value: str) -> None:
         key = sanitize_input(key)
         self.metadata[key] = value
         self.fileFormatParent.update_json()
 
-    def delete_metadata(self, key):
+    def delete_metadata(self, key: str) -> None:
         self.metadata.pop(key)
         self.fileFormatParent.update_json()
 
 
-def sanitize_input(input_string: str):
+def sanitize_input(input_string: str) -> str:
     if type(input_string) is not str:
         raise ValueError("The input to this function must be of type string")
     return input_string.lower()
