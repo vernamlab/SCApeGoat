@@ -219,12 +219,13 @@ class FileParent:
         else:
             print("Deletion of experiment {} cancelled.".format(experiment_name))
 
-    def query_experiments_with_metadata(self, key, value):
+    def query_experiments_with_metadata(self, key, value, regex=False):
         """
         Get all experiments in the file with specific metadata.
         :param key: the key of the metadata you are searching
         :param value: The value of the metadata you are searching for. Providing "*" will return all experiments that have
                       metadata with the given key.
+        :param regex: Whether the value is a regular expression
         :return: A list of experiments having the key value pair supplied
         """
         experiments = []
@@ -232,8 +233,12 @@ class FileParent:
         for exp in self.experiments.values():
             try:
                 res = exp.metadata[key]
-                if value == res or value == "*":
-                    experiments.append(exp)
+                if not regex:
+                    if value == res or value == "*":
+                        experiments.append(exp)
+                else:
+                    if bool(re.match(value, res)):
+                        experiments.append(exp)
             except KeyError:
                 continue
         return experiments
@@ -357,20 +362,25 @@ class Experiment:
         else:
             print("Deletion of experiment {} cancelled.".format(dataset_name))
 
-    def query_datasets_with_metadata(self, key, value):
+    def query_datasets_with_metadata(self, key, value, regex=False):
         """
         Queries datasets with using the associated metadata.
         :param key: The key of the metadata you are querying
         :param value: The value of the metadata you are querying. Providing "*" will return all with the specified key
                       and any value.
+        :param regex: Whether the provided value is a regular expression.
         :return: A list of datasets with the provided metadata.
         """
         datasets = []
         for dset in self.dataset.values():
             try:
                 res = dset.metadata[key]
-                if res == value or value == "*":
-                    datasets.append(dset)
+                if not regex:
+                    if res == value or value == "*":
+                        datasets.append(dset)
+                else:
+                    if bool(re.match(value, res)):
+                        datasets.append(dset)
             except KeyError:
                 continue
         return datasets
