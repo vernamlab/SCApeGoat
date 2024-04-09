@@ -96,7 +96,7 @@ class FileParent:
 
             for experiment in self.json_data["experiments"]:
                 if os.path.exists(self.path + experiment["path"]):
-                    self.add_experiment_internal(name=experiment.get('name'), existing=True,
+                    self.add_experiment_internal(exp_name=experiment.get('name'), existing=True,
                                                  index=experiment.get('index'),
                                                  experiment=experiment)
                 else:
@@ -140,7 +140,7 @@ class FileParent:
         """
         return self.add_experiment_internal(name, existing=False, index=0, experiment=None)
 
-    def add_experiment_internal(self, name: str, existing: bool = False, index: int = 0, experiment: dict = None) -> 'Experiment':
+    def add_experiment_internal(self, exp_name: str, existing: bool = False, index: int = 0, experiment: dict = None) -> 'Experiment':
         """
         Internal Function for adding experiments used when getting a reference to an existing file. Call add_experiment
         to add a new experiment instead of this.
@@ -148,29 +148,45 @@ class FileParent:
         if experiment is None:
             experiment = {}
 
-        name = sanitize_input(name)
-        path = f'\\Experiments\\{name}'
+        exp_name = sanitize_input(exp_name)
+        exp_path = f'\\Experiments\\{exp_name}'
 
         if not existing:
+            dir_created = False
+            while not dir_created:
+                try:
+                    os.mkdir(self.path + exp_path)
+                    os.mkdir(f"{self.path + exp_path}\\visualization")
+                    dir_created = True
+                except FileExistsError:
+                    if bool(re.match(r'.*-\d$', exp_name)):
+                        ver_num = int(exp_name[len(exp_name) - 1]) + 1
+                        new_name = exp_name[:-1] + str(ver_num)
+                        new_path = exp_path[:-1] + str(ver_num)
+                    else:
+                        new_name = exp_name + "-1"
+                        new_path = exp_path + "-1"
+                    exp_name = new_name
+                    exp_path = new_path
+
             json_to_save = {
-                "path": path,
-                "name": name,
+                "name": exp_name,
+                "path": exp_path,
                 "metadata": {},
                 "datasets": [],
             }
+
             self.json_data["experiments"].append(json_to_save)
             idx = len(self.json_data["experiments"]) - 1
             self.json_data["experiments"][idx]["index"] = idx
-            self.experiments[name] = Experiment(name, path, self, existing=False, index=idx)
-            os.mkdir(self.path + path)
-            os.mkdir(f"{self.path + path}\\visualization")
+            self.experiments[exp_name] = Experiment(exp_name, exp_path, self, existing=False, index=idx)
             self.update_json()
 
         else:
-            self.experiments[name] = (
-                Experiment(name, path, self, existing=True, index=index, experiment=experiment))
+            self.experiments[exp_name] = (
+                Experiment(exp_name, exp_path, self, existing=True, index=index, experiment=experiment))
 
-        return self.experiments[name]
+        return self.experiments[exp_name]
 
     def get_experiment(self, experiment_name: str) -> 'Experiment':
         """
