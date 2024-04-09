@@ -4,7 +4,7 @@ This API can be used to compute various different metrics relating to side-chann
 metrics will aid with assessing a systems security and identifying areas of interest in large trace sets.
 Each metric is a standalone function and requires minimal setup to utilize.
 
-.. py:function:: signal_to_noise_ratio(labels, visualize, visualization_path)
+.. py:function:: signal_to_noise_ratio(labels: dict, visualize: bool = False, visualization_path: any = None) -> np.ndarray:
 
     Computes the signal-to-noise ratio of a trace set and associated labels. High magnitudes of the resulting SNR traces
     indicate cryptographic leakage at that sample.
@@ -49,7 +49,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :return: A list containing all intermediate values
     :rtype: np.ndarray
 
-.. py:function:: t_test(fixed_t, random_t, visualize, visualization_path)
+.. py:function:: t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list, visualize: bool = False, visualization_paths: tuple = None) -> (np.ndarray, np.ndarray):
 
     Computes the t-statistic and t-max between fixed and random trace sets. T-statistic magnitudes above or below
     \|th\| = 4.5 indicate cryptographic vulnerabilities.
@@ -67,7 +67,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :raises ValueError: if fixed_t and random_t do not have the same length
     :Authors: Dev Mehta (dmmehta2@wpi.edu), Samuel Karkache (swkarkache@wpi.edu)
 
-.. py:function:: pearson_correlation(predicted_leakage, observed_leakage, visualize, visualization_path)
+.. py:function:: pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: np.ndarray | list, visualize: bool = False, visualization_path: any = None) -> np.ndarray:
 
     Computes the correlation between observed power traces and predicted power leakage corresponding to a
     key guess. The correlation when the predicted power leakage is modeled using the correct key guess has
@@ -87,7 +87,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :Authors: Samuel Karkache (swkarkache@wpi.edu)
 
 
-.. py:function:: score_and_rank(key_candidates, partitions, traces, score_fcn, *args)
+.. py:function:: score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np.ndarray, score_fcn: Callable, *args: any) -> np.ndarray:
 
     Scores and ranks a set of key candidates based on how likely they are to be the actual key.
 
@@ -112,7 +112,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :Authors: Samuel Karkache (swkarkache@wpi.edu)
 
 
-.. py:function:: score_with_correlation(traces, key_guess, target_byte, plaintexts, leakage_model)
+.. py:function:: score_with_correlation(traces: list | np.ndarray, key_guess: any, target_byte: int, plaintexts: list | np.ndarray, leakage_model: Callable) -> Number:
 
     Scoring function that assigns a key guess a score based on the max value of the pearson correlation.
 
@@ -132,7 +132,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :Authors: Samuel Karkache (swkarkache@wpi.edu)
 
 
-.. py:function:: success_rate_guessing_entropy(correct_keys, experiment_ranks, order, num_experiments)
+.. py:function:: success_rate_guessing_entropy(correct_keys: list | np.ndarray, experiment_ranks: list | np.ndarray, order: int, num_experiments: int) -> (Number, Number):
 
     Computes the success rate and guessing entropy based on computed key ranks.
 
