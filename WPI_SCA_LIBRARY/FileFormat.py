@@ -483,6 +483,12 @@ class Experiment:
 
         return t, t_max
 
+    def calculate_correlation(self, predicted_dataset_name, observed_dataset_name, visualize=False, save_data=False, save_graph=False):
+
+        predicted = self.get_dataset(predicted_dataset_name).read_all()
+        observed = self.get_dataset(observed_dataset_name).read_all()
+
+        correlation = pearson_correlation(predicted, observed)
 
 class Dataset:
     def __init__(self, name: str, path: str, file_format_parent: FileParent, experiment_parent: Experiment, index: int,
