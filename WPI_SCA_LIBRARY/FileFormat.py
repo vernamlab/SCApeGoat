@@ -39,7 +39,6 @@ class FileParent:
             else:
                 self.path = path + "\\" + name
             self.experiments_path = f"{self.path}\\Experiments"
-            self.visualizations_path = f"{self.path}\\Visualizations"
 
             dir_created = False
 
@@ -47,7 +46,6 @@ class FileParent:
                 try:
                     os.mkdir(self.path)
                     os.mkdir(self.experiments_path)
-                    os.mkdir(self.visualizations_path)
                     dir_created = True
                 except FileExistsError:
                     if bool(re.match(r'.*-\d$', self.name)):
@@ -60,7 +58,6 @@ class FileParent:
                     self.name = new_name
                     self.path = new_path
                     self.experiments_path = f"{self.path}\\Experiments"
-                    self.visualizations_path = f"{self.path}\\Visualizations"
 
             self.json_data = {
                 "fileName": sanitize_input(name),
@@ -94,7 +91,6 @@ class FileParent:
                 self.path = path_from_json
 
             self.experiments_path = f"{self.path}\\Experiments"
-            self.visualizations_path = f"{self.path}\\Visualizations"
             self.experiments = {}
             self.metadata = self.json_data["metadata"]
 
