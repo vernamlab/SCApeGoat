@@ -97,6 +97,8 @@ Each metric is a standalone function and requires minimal setup to utilize.
     :type target_byte: int
     :param traces: The set of power traces that will be used for scoring
     :type traces: numpy.ndarray | list
+    :param multi_threaded: Whether to multithread the operator or not
+    :type multi_threaded: bool
     :param score_fcn: Callback to the scoring function used to score each key candidate. The score with correlation scoring
                     function is pre-defined and can be used. NOTE: User defined scoring functions must be in the form
                     score_fcn(traces, key_guess, target_byte, ...) to work with this metric. Your scoring function does not
@@ -109,7 +111,7 @@ Each metric is a standalone function and requires minimal setup to utilize.
                     numpy array `ranks` was returned from the metric, ranks[0][0] is the highest ranked key candidate and
                     ranks[0][1] is the score of the highest ranked key candidate.
     :rtype: numpy.ndarray
-    :Authors: Samuel Karkache (swkarkache@wpi.edu)
+    :Authors: Samuel Karkache (swkarkache@wpi.edu), Amit Virchandbhai Prajapati (aprajapati@wpi.edu)
 
 
 .. py:function:: score_with_correlation(traces: list | np.ndarray, key_guess: any, target_byte: int, plaintexts: list | np.ndarray, leakage_model: Callable) -> Number:
