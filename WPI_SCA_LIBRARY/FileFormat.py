@@ -384,10 +384,8 @@ class Experiment:
                 continue
         return datasets
 
-    def get_visualization_path(self) -> str:  # TODO: make sure this works
-        return self.fileFormatParent.path + self.path + "\\" + "visualization"
 
-    # TODO: Needs rework, particularly for label creation
+    # TODO: Needs rework
     def calculate_snr(self, labels_dataset, traces_dataset, visualise=False, save_data=False, save_graph=False):
 
         labels_dataset = sanitize_input(labels_dataset)
@@ -435,6 +433,7 @@ class Experiment:
 
         return results
 
+    # TODO: Needs rework
     def calculate_t_test(self, fixed_dataset, random_dataset, visualize=False, save_data=False, save_graph=False):
         random_dataset = sanitize_input(random_dataset)
         fixed_dataset = sanitize_input(fixed_dataset)
