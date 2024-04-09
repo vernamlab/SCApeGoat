@@ -140,7 +140,8 @@ class FileParent:
         """
         return self.add_experiment_internal(name, existing=False, index=0, experiment=None)
 
-    def add_experiment_internal(self, exp_name: str, existing: bool = False, index: int = 0, experiment: dict = None) -> 'Experiment':
+    def add_experiment_internal(self, exp_name: str, existing: bool = False, index: int = 0,
+                                experiment: dict = None) -> 'Experiment':
         """
         Internal Function for adding experiments used when getting a reference to an existing file. Call add_experiment
         to add a new experiment instead of this.
@@ -260,7 +261,8 @@ class FileParent:
 
 
 class Experiment:
-    def __init__(self, name: str, path: str, file_format_parent: FileParent, existing: bool = False, index: int = 0, experiment: dict = None):
+    def __init__(self, name: str, path: str, file_format_parent: FileParent, existing: bool = False, index: int = 0,
+                 experiment: dict = None):
 
         if experiment is None:
             experiment = {}
@@ -324,6 +326,14 @@ class Experiment:
             dataset = {}
 
         name = sanitize_input(name)
+
+        while name in self.dataset:
+            if bool(re.match(r'.*-\d$', name)):
+                ver_num = int(name[len(name) - 1]) + 1
+                name = name[:-1] + str(ver_num)
+            else:
+                name = name + "-1"
+
         path = f'\\{name}.npy'
 
         if not existing:
@@ -400,7 +410,6 @@ class Experiment:
                 continue
         return datasets
 
-
     # TODO: Needs rework
     def calculate_snr(self, labels_dataset, traces_dataset, visualise=False, save_data=False, save_graph=False):
 
@@ -475,8 +484,9 @@ class Experiment:
         return t, t_max
 
 
-class Dataset:  # TODO: Possibly implement a system of saving datasets that have the same name similar to what we do with the files
-    def __init__(self, name: str, path: str, file_format_parent: FileParent, experiment_parent: Experiment, index: int, existing: bool = False, dataset: dict = None):
+class Dataset:
+    def __init__(self, name: str, path: str, file_format_parent: FileParent, experiment_parent: Experiment, index: int,
+                 existing: bool = False, dataset: dict = None):
         if dataset is None:
             dataset = {}
 
