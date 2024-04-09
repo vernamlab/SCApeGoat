@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from tqdm import *
 from collections.abc import *
 from numbers import Number
+from WPI_SCA_LIBRARY.LeakageModels import Sbox
 
 
 def signal_to_noise_ratio(labels: dict, visualize: bool = False, visualization_path: any = None) -> np.ndarray:
@@ -61,7 +62,46 @@ def signal_to_noise_ratio(labels: dict, visualize: bool = False, visualization_p
     return snr
 
 
-def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list, visualize: bool = False, visualization_paths: tuple = None) -> (np.ndarray, np.ndarray):
+def organize_snr_label(traces: np.ndarray | list, intermediate_fnc: Callable, *args: any) -> dict:
+    """
+    Organizes label dictionary for SNR metric
+    :param traces: The trace set to be used in label organization
+    :type traces: np.ndarray | list
+    :param intermediate_fnc: A callback function used to generate np array of possible labels
+    :type intermediate_fnc: Callable
+    :param args: Additional arguments needed for intermediate_func
+    :return: The labels dictionary organized
+    :rtype: dict
+    :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
+    """
+    intermediate_values = intermediate_fnc(*args)
+    labelsUnique = np.unique(intermediate_values)
+
+    sorted_labels = {}
+    for i in labelsUnique:
+        sorted_labels[i] = []
+
+    for index, label in enumerate(intermediate_values):
+        sorted_labels[label].append(np.array(traces[index]))
+
+    return sorted_labels
+
+
+def unmasked_sbox_output_intermediate(keys: np.ndarray | list, plaintexts: np.ndarray) -> np.ndarray:
+    """
+    Unmasked sbox intermediate output for AES
+    :param keys:
+    :type keys: np.ndarray | list
+    :param plaintexts:
+    :type plaintexts: np.ndarray | list
+    :return:
+    :rtype: np.ndarray
+    """
+    return Sbox[keys ^ plaintexts]
+
+
+def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list, visualize: bool = False,
+                visualization_paths: tuple = None) -> (np.ndarray, np.ndarray):
     """
     Computes the t-statistic and t-max between fixed and random trace sets. T-statistic magnitudes above or below
     |th| = 4.5 indicate cryptographic vulnerabilities.
@@ -115,7 +155,7 @@ def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list, visuali
 
             try:
                 welsh_t = np.array(new_mr - new_mf) / np.sqrt(
-                        np.array((new_stdr ** 2)) / (n + 1) + np.array((new_stdf ** 2)) / (n + 1))
+                    np.array((new_stdr ** 2)) / (n + 1) + np.array((new_stdf ** 2)) / (n + 1))
             except ZeroDivisionError:
                 welsh_t = 0
 
@@ -153,7 +193,8 @@ def t_test_tvla(fixed_t: np.ndarray | list, random_t: np.ndarray | list, visuali
     return welsh_t_outer, t_max_outer
 
 
-def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: np.ndarray | list, visualize: bool = False, visualization_path: any = None) -> np.ndarray:
+def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: np.ndarray | list,
+                        visualize: bool = False, visualization_path: any = None) -> np.ndarray:
     """
     Computes the correlation between observed power traces and predicted power leakage corresponding to a
     key guess. The correlation when the predicted power leakage is modeled using the correct key guess has

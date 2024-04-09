@@ -81,19 +81,16 @@ def snr_verification():
         plaintexts = metadata['plaintext'][:, 2]
         rout = metadata['masks'][:, 15]
 
-        # We will use the SNR2 and SNR3 processing for metric verification
-        snr2_labels = Sbox[keys ^ plaintexts] ^ rout
-        snr3_labels = rout
+        def snr2_intermediate(keys, plaintexts, rout):
+            return Sbox[keys ^ plaintexts] ^ rout
 
-        # compute SNR for each
-        organizedSN2 = organize_labels_for_testing(snr2_labels, traces)
-        start = time.time()
+        def snr3_intermediate(rout):
+            return rout
+
+        organizedSN2 = organize_snr_label(traces, snr2_intermediate, keys, plaintexts, rout)
+        organizedSN3 = organize_snr_label(traces, snr3_intermediate, rout)
+
         snr2 = signal_to_noise_ratio(organizedSN2)
-        end = time.time()
-
-        print(end - start)
-
-        organizedSN3 = organize_labels_for_testing(snr3_labels, traces)
         snr3 = signal_to_noise_ratio(organizedSN3)
 
         # plot result
