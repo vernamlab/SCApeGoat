@@ -2,7 +2,7 @@ Custom File Format
 ==================
 
 
-.. class::FileParent
+.. py:class:: FileParent
     The base directory for
 
 .. py:method:: __init__
