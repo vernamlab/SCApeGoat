@@ -95,7 +95,6 @@ def calculate_second_order_dpa_mem_efficient(traces, IV, window_width):
     num_of_traces = traces.shape[0]
     P_normal_width = int((num_of_samples - 1) * num_of_samples / 2)
 
-    #TODO: remember last one needs to go to end
     num_of_iterations = math.floor(P_normal_width / num_of_samples)
 
     #predefine
@@ -138,7 +137,6 @@ def calculate_second_order_dpa_mem_efficient(traces, IV, window_width):
                     current_partition_index = current_partition_index + window_width
 
 
-
         #solve for cpa output
         dpa_trace = P
 
@@ -151,5 +149,56 @@ def calculate_second_order_dpa_mem_efficient(traces, IV, window_width):
         o_hws = std_dev(hws, hws_bar)
         correlation = cov(dpa_trace, t_bar, hws, hws_bar)
         cpaoutput[i * window_width: (i * window_width) + window_width] = correlation / (o_t * o_hws)
+
+    #final run through
+    start_index = window_width * num_of_iterations
+    num_to_add = P_normal_width - start_index
+    current_num_in_P = 0
+    P = np.zeros((num_of_traces, num_to_add))
+
+    if(num_to_add > 0):
+        while current_num_in_P < num_to_add:
+
+            if current_partition_index == 0:
+                sub_array = np.abs(np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
+                length_sub_array = sub_array.shape[1]
+
+                if length_sub_array + current_num_in_P <= num_to_add:
+                    P[:, current_num_in_P: current_num_in_P + length_sub_array] = sub_array
+                    current_num_in_P = current_num_in_P + length_sub_array
+                    current_P_index = current_P_index + 1
+                else:
+                    number_to_add = num_to_add - current_num_in_P
+                    P[:, current_num_in_P: num_to_add] = sub_array[:, 0:number_to_add]
+                    current_num_in_P = num_to_add
+                    current_partition_index = number_to_add
+            else:
+                sub_array = np.abs(np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
+                length_sub_array = sub_array.shape[1]
+                num_left_to_add = length_sub_array - current_partition_index
+
+                if num_left_to_add <= num_to_add:
+                    P[:, current_num_in_P: num_left_to_add] = sub_array[:,current_partition_index:]
+                    current_num_in_P = current_num_in_P + num_left_to_add
+                    current_P_index = current_P_index + 1
+                    current_partition_index = 0
+
+                else:
+                    P[:] = sub_array[:,current_partition_index:current_partition_index+num_to_add]
+                    current_num_in_P = num_to_add
+                    current_partition_index = current_partition_index + num_to_add
+
+        dpa_trace = P
+
+        t_bar = np.mean(dpa_trace)
+        o_t = std_dev(dpa_trace, t_bar)
+        hws = np.array([[intermediate_value(textout) for textout in IV[0:num_of_traces]]]).transpose()
+        hws_bar = np.mean(hws)
+        # hws_bar = mean(out[:,5])
+        o_hws = std_dev(hws, hws_bar)
+        correlation = cov(dpa_trace, t_bar, hws, hws_bar)
+        cpaoutput[start_index :] = correlation / (o_t * o_hws)
+
+
 
     return cpaoutput
