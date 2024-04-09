@@ -1,4 +1,4 @@
-Custom File Format
+Custom File Framework
 ==================
 The file framework is split into three separate classes.
 
