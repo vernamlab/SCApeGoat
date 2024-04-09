@@ -24,6 +24,31 @@ Each metric is a standalone function and requires minimal setup to utilize.
 
    :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
 
+.. py:function:: organize_snr_label(traces: np.ndarray | list, intermediate_fcn: Callable, *args: any) -> dict:
+
+    Organizes label dictionary for SNR metric using a specified intermediate function.
+
+    :param traces: The trace set to be used in label organization
+    :type traces: np.ndarray | list
+    :param intermediate_fcn: A callback function used to generate np array of possible labels. Custom functions can be defined
+                                by the user as long as they return an np.ndarray
+    :type intermediate_fcn: Callable
+    :param *args: Additional arguments needed for intermediate_func
+    :return: The labels dictionary organized
+    :rtype: dict
+    :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
+
+.. py:function:: unmasked_sbox_output_intermediate(keys: np.ndarray | list, plaintexts: np.ndarray) -> np.ndarray:
+
+    Unmasked sbox intermediate output for AES. Can be used with the `organize_snr_label` as the intermediate_fcn
+
+    :param keys: The set of keys used to calculate sbox output
+    :type keys: np.ndarray | list
+    :param plaintexts: The plaintexts used to calculate sbox output
+    :type plaintexts: np.ndarray | list
+    :return: A list containing all intermediate values
+    :rtype: np.ndarray
+
 .. py:function:: t_test(fixed_t, random_t, visualize, visualization_path)
 
     Computes the t-statistic and t-max between fixed and random trace sets. T-statistic magnitudes above or below

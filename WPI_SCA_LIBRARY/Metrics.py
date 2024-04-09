@@ -62,19 +62,19 @@ def signal_to_noise_ratio(labels: dict, visualize: bool = False, visualization_p
     return snr
 
 
-def organize_snr_label(traces: np.ndarray | list, intermediate_fnc: Callable, *args: any) -> dict:
+def organize_snr_label(traces: np.ndarray | list, intermediate_fcn: Callable, *args: any) -> dict:
     """
     Organizes label dictionary for SNR metric
     :param traces: The trace set to be used in label organization
     :type traces: np.ndarray | list
-    :param intermediate_fnc: A callback function used to generate np array of possible labels
-    :type intermediate_fnc: Callable
+    :param intermediate_fcn: A callback function used to generate np array of possible labels
+    :type intermediate_fcn: Callable
     :param args: Additional arguments needed for intermediate_func
     :return: The labels dictionary organized
     :rtype: dict
     :Authors: Samuel Karkache (swkarkache@wpi.edu), Trey Marcantonio (tmmarcantonio@wpi.edu)
     """
-    intermediate_values = intermediate_fnc(*args)
+    intermediate_values = intermediate_fcn(*args)
     labelsUnique = np.unique(intermediate_values)
 
     sorted_labels = {}
@@ -90,11 +90,11 @@ def organize_snr_label(traces: np.ndarray | list, intermediate_fnc: Callable, *a
 def unmasked_sbox_output_intermediate(keys: np.ndarray | list, plaintexts: np.ndarray) -> np.ndarray:
     """
     Unmasked sbox intermediate output for AES
-    :param keys:
+    :param keys: The set of keys used to calculate sbox output
     :type keys: np.ndarray | list
-    :param plaintexts:
+    :param plaintexts: The plaintexts used to calculate sbox output
     :type plaintexts: np.ndarray | list
-    :return:
+    :return: A list containing all intermediate values
     :rtype: np.ndarray
     """
     return Sbox[keys ^ plaintexts]
