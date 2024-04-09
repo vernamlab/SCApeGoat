@@ -9,4 +9,5 @@ The file framework is split into three separate classes.
     .. method:: __init__
 
     .. method:: add_experiment(self, name: str)
+
         Add Experiment to file

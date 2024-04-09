@@ -10,4 +10,5 @@ The ChipWhisperer scope interface documentation
     .. method:: __init__
 
     .. method:: disconnect(self)
+
         Disconnect from...
