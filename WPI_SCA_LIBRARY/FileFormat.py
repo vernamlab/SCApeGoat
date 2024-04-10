@@ -18,9 +18,6 @@ Description: File Format API for side-channel analysis experiments.
 """
 
 
-# TODO: When making any directory if an error happens before stuff can be added we should undo everything
-
-
 class FileParent:
     def __init__(self, name: str, path: str, existing: bool = False):
         """
@@ -463,28 +460,65 @@ class Experiment:
 
         return snr
 
-    # TODO: Needs rework
-    def calculate_t_test(self, fixed_dataset, random_dataset, visualize=False, save_data=False, save_graph=False):
-        random_dataset = sanitize_input(random_dataset)
-        fixed_dataset = sanitize_input(fixed_dataset)
+    def calculate_t_test(self, fixed_dataset: str, random_dataset: str, visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> (np.ndarray, np.ndarray):
+        """
+        Integrated t-test metric with file format.
+        :param fixed_dataset: The name of the fixed traces dataset
+        :type fixed_dataset: str
+        :param random_dataset: The name of the random traces dataset
+        :type random_dataset: str
+        :param visualize: Whether to visualize the t-test values
+        :type visualize: bool
+        :param save_data: Whether to save the t-test values as a dataset
+        :type save_data: bool
+        :param save_graph: Whether to save the t-test graph to the visualization directory
+        :type save_graph: bool
+        :return: Tuple containing t-statistic and t-max NumPy arrays
+        :rtype: (np.ndarray, np.ndarray)
+        """
 
-        if random_dataset not in self.dataset:
-            raise ValueError(f"{random_dataset} not found as a dataset in experiment {self.name}")
+        rand = self.dataset[sanitize_input(random_dataset)].read_all()
+        fixed = self.dataset[sanitize_input(fixed_dataset)].read_all()
 
-        if fixed_dataset not in self.dataset:
-            raise ValueError(f"{fixed_dataset} not found as a dataset in experiment {self.name}")
-
-        rand = self.dataset[random_dataset].read_all()
-        fixed = self.dataset[fixed_dataset].read_all()
-
-        path = None
         if save_graph:
-            path = (
-                f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\t_test_{random_dataset}_{fixed_dataset}",
-                # TODO : We need to find a way to prevent this from overwriting other graphs
-                f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\t_max_{random_dataset}_{fixed_dataset}")
+            path_created_t = False
+            t_name = f"t_test_{random_dataset}_{fixed_dataset}"
+            t_path = self.get_visualization_path() + t_name
+
+            while not path_created_t:
+                if os.path.exists(self.get_visualization_path() + t_name + ".png"):
+                    if bool(re.match(r'.*-\d$', t_name)):
+                        ver_num = int(t_name[len(t_name) - 1]) + 1
+                        t_name = t_name[:-1] + str(ver_num)
+                    else:
+                        t_name = t_name + "-1"
+                else:
+                    t_path = self.get_visualization_path() + t_name + ".png"
+                    path_created_t = True
+
+            path_created_max = False
+            t_max_name = f"t_max_{random_dataset}_{fixed_dataset}"
+            t_max_path = self.get_visualization_path() + t_max_name
+
+            while not path_created_max:
+                if os.path.exists(self.get_visualization_path() + t_max_name + ".png"):
+                    if bool(re.match(r'.*-\d$', t_max_name)):
+                        ver_num = int(t_max_name[len(t_max_name) - 1]) + 1
+                        t_max_name = t_max_name[:-1] + str(ver_num)
+                    else:
+                        t_max_name = t_max_name + "-1"
+                else:
+                    t_max_path = self.get_visualization_path() + t_max_name + ".png"
+                    path_created_max = True
+            path = (t_path, t_max_path)
+        else:
+            path = None
 
         t, t_max = t_test_tvla(fixed, rand, visualize=visualize, visualization_paths=path)
+
+        if save_data:
+            self.add_dataset(f"t_test_{random_dataset}_{fixed_dataset}", t, datatype="float32")
+            self.add_dataset(f"t_max_{random_dataset}_{fixed_dataset}", t_max, datatype="float32")
 
         return t, t_max
 
