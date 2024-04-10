@@ -58,21 +58,6 @@ def snr_verification():
     Computes SNR with ASCAD Traces. Reference Figure 3 in https://eprint.iacr.org/2018/053.pdf
     """
 
-    def organize_labels_for_testing(labels, traces_set):
-        # find unique labels
-        labelsUnique = np.unique(labels)
-
-        # initialize the dictionary
-        sorted_labels = {}
-        for i in labelsUnique:
-            sorted_labels[i] = []
-
-        # add traces to labels
-        for index, label in enumerate(labels):
-            sorted_labels[label].append(np.array(traces_set[index]))  # we only want to look over this interval
-
-        return sorted_labels
-
     with h5py.File(os.path.dirname(__file__) + "\\ExampleData\\ASCAD\\ATMega8515_raw_traces.h5", "r") as file:
         # obtain data from HDF5 file
         metadata = np.array(file['metadata'][:10000])
@@ -184,6 +169,8 @@ def correlation_validation():
     plt.ylabel("Correlation")
     plt.grid()
     plt.show()
+
+correlation_validation()
 
 
 def score_and_rank_verification():

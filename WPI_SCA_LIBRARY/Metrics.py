@@ -237,7 +237,7 @@ def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: 
         bottom_sum_observed = np.add(bottom_sum_observed, np.square(observed_minus_mean))
         bottom_sum_predicted = np.add(bottom_sum_predicted, np.square(predicted_minus_mean))
 
-    correlation = np.divide(top_sum_observed_predicted, np.sqrt(np.multiply(bottom_sum_observed, bottom_sum_predicted)))
+    correlation = np.divide(top_sum_observed_predicted, np.sqrt(np.array(np.multiply(bottom_sum_observed, bottom_sum_predicted), dtype=np.float64)))
 
     if visualize:
         plt.plot(correlation)
