@@ -6,6 +6,8 @@ import re
 import shutil
 from datetime import date
 
+import numpy as np
+
 from WPI_SCA_LIBRARY.Metrics import *
 
 """
@@ -410,53 +412,56 @@ class Experiment:
                 continue
         return datasets
 
-    # TODO: Needs rework
-    def calculate_snr(self, labels_dataset, traces_dataset, visualise=False, save_data=False, save_graph=False):
+    def get_visualization_path(self):
+        return self.fileFormatParent.path + self.path + "\\" + "visualization" + "\\"
 
-        labels_dataset = sanitize_input(labels_dataset)
+    def calculate_snr(self, traces_dataset: str, intermediate_fcn: Callable, *args: any,  visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> np.ndarray:
+        """
+        Integrated SNR metric with file format
+        :param traces_dataset: The name of the traces dataset
+        :type traces_dataset: str
+        :param intermediate_fcn: The intermediate function used to calculate SNR labels
+        :type intermediate_fcn: Callable
+        :param visualize: Whether to visualize the SNR values
+        :type visualize: bool
+        :param save_data: Whether to save the SNR values as a dataset
+        :type save_data: bool
+        :param save_graph: Whether to save the SNR graph to the visualization directory
+        :type save_graph: bool
+        :return: The SNR trace
+        :rtype: np.ndarray
+        """
+
         traces_dataset = sanitize_input(traces_dataset)
+        args = tuple(self.dataset[sanitize_input(x)].read_all() for x in args)
 
-        if labels_dataset not in self.dataset:
-            raise ValueError(f"{labels_dataset} is not a valid key")
+        traces = self.dataset[traces_dataset].read_all()
+        labels = organize_snr_label(traces, intermediate_fcn, *args)
 
-        if traces_dataset not in self.dataset:
-            raise ValueError(f"{traces_dataset} is not a valid key")
-
-        # sort labels
-        labels = self.dataset[labels_dataset].read_all()
-        traces_set = self.dataset[traces_dataset].read_all()
-
-        if len(labels) != len(traces_set):
-            raise ValueError(f"Length of {labels_dataset} is {len(labels)} \n "
-                             f"Length of {traces_dataset} is {len(traces_set)} \n"
-                             f"The two arrays must be of equal length")
-
-        if len(labels[0]) != 1:
-            raise ValueError(f"The width of labels must be 1, currently the width"
-                             f" of {labels_dataset} is {len(labels[0])}")
-
-        labelsUnique = np.unique(labels)
-
-        # initialize the dictionary
-        sorted_labels = {}
-        for i in labelsUnique:
-            sorted_labels[i] = []
-
-        # add traces to labels
-        for index, label in enumerate(labels):
-            label = int(label)
-            sorted_labels[label].append(np.array(traces_set[index]))
-
-        path = None
         if save_graph:
-            path = f"{self.fileFormatParent.path}\\Experiments\\{self.name}\\visualization\\SNR_{labels_dataset}_{traces_dataset}"  # TODO : We need to find a way to prevent this from overwriting other graphs
+            path_created = False
+            image_name = "{}_snr".format(traces_dataset)
+            path = self.get_visualization_path() + image_name
 
-        results = signal_to_noise_ratio(sorted_labels, visualise, visualization_path=path)
+            while not path_created:
+                if os.path.exists(self.get_visualization_path() + image_name + ".png"):
+                    if bool(re.match(r'.*-\d$', image_name)):
+                        ver_num = int(image_name[len(image_name) - 1]) + 1
+                        image_name = image_name[:-1] + str(ver_num)
+                    else:
+                        image_name = image_name + "-1"
+                else:
+                    path = self.get_visualization_path() + image_name + ".png"
+                    path_created = True
+        else:
+            path = None
+
+        snr = signal_to_noise_ratio(labels, visualize=visualize, visualization_path=path)
 
         if save_data:
-            self.add_dataset_internal(f"SNR_{labels_dataset}_{traces_dataset}_results")
+            self.add_dataset("{}_snr".format(traces_dataset), snr, "float32")
 
-        return results
+        return snr
 
     # TODO: Needs rework
     def calculate_t_test(self, fixed_dataset, random_dataset, visualize=False, save_data=False, save_graph=False):
