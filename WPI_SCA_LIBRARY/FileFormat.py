@@ -522,12 +522,51 @@ class Experiment:
 
         return t, t_max
 
-    def calculate_correlation(self, predicted_dataset_name, observed_dataset_name, visualize=False, save_data=False, save_graph=False):
+    def calculate_correlation(self, predicted_dataset_name: str, observed_dataset_name: str, visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> np.ndarray:
+        """
+        Integrated correlation metric with file format.
+        :param predicted_dataset_name: The name of the dataset containing the predicted leakage generated via some leakage model
+        :type predicted_dataset_name: str
+        :param observed_dataset_name: The name of the dataset containing the observed leakage
+        :type observed_dataset_name: str
+        :param visualize: Whether to visualize the correlation values
+        :type visualize: bool
+        :param save_data: Whether to save the correlation values as a dataset
+        :type save_data: bool
+        :param save_graph: Whether to save the correlation graph to the visualization directory
+        :type save_graph: bool
+        :return: The correlation trace
+        :rtype: np.ndarray
+        """
 
         predicted = self.get_dataset(predicted_dataset_name).read_all()
         observed = self.get_dataset(observed_dataset_name).read_all()
 
-        correlation = pearson_correlation(predicted, observed)
+        if save_graph:
+            path_created = False
+            image_name = f"corr_{predicted_dataset_name}_{observed_dataset_name}"
+            path = self.get_visualization_path() + image_name
+
+            while not path_created:
+                if os.path.exists(self.get_visualization_path() + image_name + ".png"):
+                    if bool(re.match(r'.*-\d$', image_name)):
+                        ver_num = int(image_name[len(image_name) - 1]) + 1
+                        image_name = image_name[:-1] + str(ver_num)
+                    else:
+                        image_name = image_name + "-1"
+                else:
+                    path = self.get_visualization_path() + image_name + ".png"
+                    path_created = True
+        else:
+            path = None
+
+        corr = pearson_correlation(predicted, observed, visualize=visualize, visualization_path=path)
+
+        if save_data:
+            self.add_dataset(f"corr_{predicted_dataset_name}_{observed_dataset_name}", corr, datatype="float32")
+
+        return corr
+
 
 class Dataset:
     def __init__(self, name: str, path: str, file_format_parent: FileParent, experiment_parent: Experiment, index: int,
