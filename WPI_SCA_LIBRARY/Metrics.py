@@ -252,7 +252,7 @@ def pearson_correlation(predicted_leakage: np.ndarray | list, observed_leakage: 
     return correlation
 
 
-def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np.ndarray, multi_threaded: bool, score_fcn: Callable,
+def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np.ndarray, score_fcn: Callable,
                    *args: any) -> np.ndarray:
     """
     Scores and ranks a set of key candidates based on how likely they are to be the actual key.
@@ -263,8 +263,6 @@ def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np
     :type target_byte: int
     :param traces: The set of power traces that will be used for scoring
     :type traces: numpy.ndarray | list
-    :param multi_threaded: Whether to multithread the operator or not
-    :type multi_threaded: bool
     :param score_fcn: Callback to the scoring function used to score each key candidate. The score with correlation scoring
                     function is pre-defined and can be used. NOTE: User defined scoring functions must be in the form
                     score_fcn(traces, key_guess, target_byte, ...) to work with this metric. Your scoring function does not
@@ -277,40 +275,20 @@ def score_and_rank(key_candidates: Iterable, target_byte: int, traces: list | np
                     numpy array `ranks` was returned from the metric, ranks[0][0] is the highest ranked key candidate and
                     ranks[0][1] is the score of the highest ranked key candidate.
     :rtype: numpy.ndarray
-    :Authors: Samuel Karkache (swkarkache@wpi.edu), Amit Virchandbhai Prajapati (aprajapati@wpi.edu)
+    :Authors: Samuel Karkache (swkarkache@wpi.edu)
     """
 
     dtype = [('key', int), ('score', 'float64')]
+    key_scores = np.array([], dtype=dtype)
 
-    if not multi_threaded:
+    for k in key_candidates:
+        score_k = score_fcn(traces, k, target_byte, *args)
+        key_score = np.array([(k, score_k)], dtype=dtype)
+        key_scores = np.append(key_scores, key_score)
 
-        key_scores = np.array([], dtype=dtype)
+    key_ranks = np.sort(key_scores, order='score')[::-1]
 
-        for k in key_candidates:
-            score_k = score_fcn(traces, k, target_byte, *args)
-            key_score = np.array([(k, score_k)], dtype=dtype)
-            key_scores = np.append(key_scores, key_score)
-
-        key_ranks = np.sort(key_scores, order='score')[::-1]
-
-        return key_ranks
-
-    else:
-        def score_key(worker_args):
-            k_worker, t_worker, tb_worker, score_fcn_worker, additonal_args = worker_args
-            score_k_worker = score_fcn(t_worker, k_worker, tb_worker, *additonal_args)
-            return k, score_k_worker
-
-        num_processes = mp.cpu_count()
-        pool = mp.Pool(processes=num_processes)
-        results = pool.map(score_key, [(k, traces, target_byte, score_fcn, args) for k in key_candidates])
-        pool.close()
-        pool.join()
-
-        key_scores = np.array(results, dtype=dtype)
-        key_ranks = np.sort(key_scores, order='score')[::-1]
-
-        return key_ranks
+    return key_ranks
 
 
 def score_with_correlation(traces: list | np.ndarray, key_guess: any, target_byte: int, plaintexts: list | np.ndarray,

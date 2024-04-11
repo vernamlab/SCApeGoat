@@ -170,8 +170,6 @@ def correlation_validation():
     plt.grid()
     plt.show()
 
-correlation_validation()
-
 
 def score_and_rank_verification():
     """
