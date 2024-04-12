@@ -1,4 +1,4 @@
-Oscilloscope Interface
+ChipWhisperer Scope Interface
 ======================
 
 Researchers at WPI and across the country use ChipWhisperer devices to conduct
@@ -53,3 +53,44 @@ higher-level API calls
         :raises TypeError: if the length of the specified experiment keys and experiment texts are not equal to each other or the number of traces
                             to be collected.
         :Authors: Samuel Karkache (swkarkache@wpi.edu)
+
+    .. method::(self, num_traces: int, group_a_keys: np.ndarray = None, group_a_texts: np.ndarray = None, group_b_keys: np.ndarray = None, group_b_texts: np.ndarray = None, ktp: any = cwtvla.ktp.FixedVRandomText()) -> (np.ndarray, np.ndarray):
+
+        Captures fixed and random trace set needed for TVLA.
+
+        :param num_traces: The number of traces to capture for each set
+        :type num_traces: int
+        :param group_a_keys: An array of keys for group A
+        :type group_a_keys: np.ndarray
+        :param group_a_texts: An array of texts for group A
+        :type group_a_texts: np.ndarray
+        :param group_b_keys: An array of keys for group B
+        :type group_b_keys: np.ndarray
+        :param group_b_texts: An array of texts for group B
+        :type group_b_texts: np.ndarray
+        :param ktp: the key text pair algorithm, defaults to cwtvla.ktp.FixedVRandomText(). To use a custom ktp, you would
+                    need to provide a class that has methods named `next_group_A()` that specifies the fixed text/key and
+                    a method named `next_group_B()` that specifies
+        :return: A tuple containing the fixed and random traces
+        :rtype: (np.ndarray, np.ndarray)
+        :Authors: Samuel Karkache (swkarkache@wpi.edu)
+
+    .. method::cw_to_file_framework(self, num_traces: int,  file_parent: FileParent, experiment_name: str, keys: np.ndarray = None, texts: np.ndarray = None, fixed_key: bool = True, fixed_pt: bool = False) -> None:
+
+        Captures traces on a ChipWhisperer device and saves them directly to the custom file framework.
+
+        :param num_traces: The number of traces to capture
+        :type num_traces: int
+        :param file_parent: The FileParent object to save the file to
+        :type file_parent: FileParent
+        :param experiment_name: The name of the experiment
+        :type experiment_name: str
+        :param keys: The keys for the experiment
+        :type keys: np.ndarray
+        :param texts: The plaintexts for the experiment
+        :param texts: np.ndarray
+        :param fixed_key: Whether the key should be fixed (assuming the keys and texts parameters are None)
+        :type fixed_key: bool
+        :param fixed_pt: Whether the plaintext should be fixed (assuming the keys and texts parameters are None)
+        :type fixed_pt: bool
+        :return: None
