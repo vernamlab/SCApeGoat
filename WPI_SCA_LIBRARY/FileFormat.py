@@ -110,7 +110,7 @@ class FileParent:
         with open(f"{self.path}\\metadataHolder.json", 'w') as json_file:
             json.dump(self.json_data, json_file, indent=4)
 
-    def update_metadata(self, key: str, value: str) -> None:
+    def update_metadata(self, key: str, value: any) -> None:
         """
         Update file JSON metadata with key value pair
         :param key: metadata key
@@ -231,7 +231,7 @@ class FileParent:
         else:
             print("Deletion of experiment {} cancelled.".format(experiment_name))
 
-    def query_experiments_with_metadata(self, key: str, value: str, regex: bool = False) -> list['Experiment']:
+    def query_experiments_with_metadata(self, key: str, value: any, regex: bool = False) -> list['Experiment']:
         """
         Get all experiments in the file with specific metadata.
         :param key: the key of the metadata you are searching
@@ -295,7 +295,7 @@ class Experiment:
                     with open(f"{self.fileFormatParent.path}\\metadataHolder.json", 'w') as json_file:
                         json.dump(self.fileFormatParent.json_data, json_file, indent=4)
 
-    def update_metadata(self, key: str, value: str) -> None:
+    def update_metadata(self, key: str, value: any) -> None:
         key = sanitize_input(key)
         self.metadata[key] = value
         self.fileFormatParent.json_data["experiments"][self.experimentIndex]["metadata"][key] = value
@@ -383,7 +383,7 @@ class Experiment:
         else:
             print("Deletion of experiment {} cancelled.".format(dataset_name))
 
-    def query_datasets_with_metadata(self, key: str, value: str, regex: bool = False) -> list['Dataset']:
+    def query_datasets_with_metadata(self, key: str, value: any, regex: bool = False) -> list['Dataset']:
         """
         Queries datasets with using the associated metadata.
         :param key: The key of the metadata you are querying
@@ -603,7 +603,7 @@ class Dataset:
         data_to_add = np.array(data_to_add, dtype=datatype)
         np.save(self.fileFormatParent.path + self.experimentParent.path + self.path, data_to_add)
 
-    def update_metadata(self, key: str, value: str) -> None:
+    def update_metadata(self, key: str, value: any) -> None:
         key = sanitize_input(key)
         self.metadata[key] = value
         self.fileFormatParent.update_json()
