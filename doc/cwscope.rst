@@ -77,7 +77,9 @@ higher-level API calls
 
     .. method:: cw_to_file_framework(self, num_traces: int,  file_parent: FileParent, experiment_name: str, keys: np.ndarray = None, texts: np.ndarray = None, fixed_key: bool = True, fixed_pt: bool = False) -> None:
 
-        Captures traces on a ChipWhisperer device and saves them directly to the custom file framework.
+        Captures traces on a ChipWhisperer device and saves them directly to the custom file framework. The collected
+        traces, keys, plaintexts, and ciphertexts are saved as dataset to the specified experiment. If the experiment
+        specified does not exist in the file, then a new one is created.
 
         :param num_traces: The number of traces to capture
         :type num_traces: int
@@ -94,3 +96,5 @@ higher-level API calls
         :param fixed_pt: Whether the plaintext should be fixed (assuming the keys and texts parameters are None)
         :type fixed_pt: bool
         :return: None
+        :Authors: Samuel Karkache (swkarkache@wpi.edu)
+
