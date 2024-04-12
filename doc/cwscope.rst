@@ -8,9 +8,7 @@ higher-level API calls
 
 .. class:: CWScope
 
-    Initializes the scope object...
-
-    .. method:: __init__
+    .. method:: __init__(self, firmware_path: str, gain: int = 25, num_samples: int = 5000, offset: int = 0, target_type: any = cw.targets.SimpleSerial, target_programmer: any = cw.programmers.STM32FProgrammer) -> None:
 
         Initializes a CW scope object
 
@@ -29,13 +27,29 @@ higher-level API calls
         :return: None
         :Authors: Samuel Karkache (swkarkache@wpi.edu)
 
-
-
     .. method:: disconnect(self)
 
         Disconnect CW Scope and Target
 
-    .. method::
+    .. method:: standard_capture_traces(self, num_traces: int, experiment_keys: np.ndarray = None, experiment_texts: np.ndarray = None, fixed_key: bool = True, fixed_pt: bool = False) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
 
-        Capture procedure for ChipWhisperer devices. Will return a specified number
-        of traces and the data associated with the collection.
+        Capture procedure for ChipWhisperer devices. Will return a specified number of traces and the data associated
+        with the collection.
+
+        :param num_traces: The number of traces to capture
+        :type num_traces: int
+        :param experiment_keys: A collection of keys to use for the capture of each trace. If not specified, the procedure
+                                will use the cw basic key generation `key = cw.ktp.Basic()[0]`
+        :type experiment_keys: np.ndarray
+        :param experiment_texts: A collection of texts to use for the capture of each trace. If not specified, the procedure
+                                will use the cw basic plaintext generation `text = cw.ktp.Basic()[1]`
+        :type experiment_texts: np.ndarray
+        :param fixed_key: Whether to use a fixed key for cw.ktp key generation. Ignored if a collection of keys are supplied.
+        :type fixed_key: bool
+        :param fixed_pt: Whether to use a fixed plaintext for cw.ktp text generation. Ignored if a collection of texts are supplied.
+        :type fixed_pt: bool
+        :return: a tuple containing the power traces, keys, plaintexts, and ciphertexts for the experiment
+        :rtype: tuple(np.ndarray, np.ndarray, np.ndarray, np.ndarray)
+        :raises TypeError: if the length of the specified experiment keys and experiment texts are not equal to each other or the number of traces
+                            to be collected.
+        :Authors: Samuel Karkache (swkarkache@wpi.edu)

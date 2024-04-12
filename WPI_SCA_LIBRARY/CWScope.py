@@ -50,22 +50,21 @@ class CWScope:
         self.target.dis()
 
     def standard_capture_traces(self, num_traces: int,
-                                experiment_keys: list | np.ndarray = None,
-                                experiment_texts: list | np.ndarray = None,
+                                experiment_keys: np.ndarray = None,
+                                experiment_texts: np.ndarray = None,
                                 fixed_key: bool = True,
                                 fixed_pt: bool = False) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
         """
         Capture procedure for ChipWhisperer devices. Will return a specified number of traces and the data associated
         with the collection.
-
         :param num_traces: The number of traces to capture
         :type num_traces: int
         :param experiment_keys: A collection of keys to use for the capture of each trace. If not specified, the procedure
                                 will use the cw basic key generation `key = cw.ktp.Basic()[0]`
-        :type experiment_keys: list or np.ndarray
+        :type experiment_keys: np.ndarray
         :param experiment_texts: A collection of texts to use for the capture of each trace. If not specified, the procedure
                                 will use the cw basic plaintext generation `text = cw.ktp.Basic()[1]`
-        :type experiment_texts: list or np.ndarray
+        :type experiment_texts: np.ndarray
         :param fixed_key: Whether to use a fixed key for cw.ktp key generation. Ignored if a collection of keys are supplied.
         :type fixed_key: bool
         :param fixed_pt: Whether to use a fixed plaintext for cw.ktp text generation. Ignored if a collection of texts are supplied.
