@@ -21,4 +21,3 @@ Library Features
    cwscope.rst
    metrics.rst
    leakagemodels.rst
-   about_project.rst
