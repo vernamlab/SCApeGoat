@@ -164,32 +164,3 @@ class CWScope:
                 rand_traces[i] = trace.wave
 
         return fixed_traces, rand_traces
-
-    def cw_to_file_format(self, num_traces: int, file_name: str = "", experiment_name: str = "", file_existing: bool = False, experiment_existing: bool = False, experiment_keys: list | np.ndarray = None, experiment_texts: list | np.ndarray = None, fixed_key: bool = True, fixed_pt: bool = False):
-
-        traces, keys, plaintexts, ciphertexts = self.standard_capture_traces(num_traces, experiment_keys, experiment_texts, fixed_key, fixed_pt)
-
-        # create parent folder
-        file_parent = FileParent(file_name, existing=file_existing)
-
-        # add experiment
-        file_parent.addExperiment(experiment_name, experiment_name, existing=experiment_existing) # TODO: NEED TO FIX THE INTEGRATION WITH THE FILE FORMAT AFTER CHANGES
-        exp = file_parent.getExperiment(experiment_name)
-
-        # create data sets for associated information
-        exp.createDataset(experiment_name + "Traces", experiment_name + "Traces", size=(num_traces, len(traces[0])), type='float32')
-        trace_data = exp.getDataset(experiment_name + "Traces")
-
-        exp.createDataset(experiment_name + "Plaintexts", experiment_name + "Plaintexts", size=(num_traces, len(plaintexts[0])), type='uint8')
-        plaintext_data = exp.getDataset(experiment_name + "Plaintexts")
-
-        exp.createDataset(experiment_name + "Keys", experiment_name + "Keys", size=(num_traces, len(keys[0])), type='uint8')
-        key_data = exp.getDataset(experiment_name + "Keys")
-
-        exp.createDataset(experiment_name + "Ciphertexts", experiment_name + "Ciphertexts", size=(num_traces, len(ciphertexts[0])), type='uint8')
-        ciphertext_data = exp.getDataset(experiment_name + "Ciphertexts")
-
-        trace_data.addData(index=range(num_traces), dataToAdd=traces)
-        plaintext_data.addData(index=range(num_traces), dataToAdd=plaintexts)
-        key_data.addData(index=range(num_traces), dataToAdd=keys)
-        ciphertext_data.addData(index=range(num_traces), dataToAdd=ciphertexts)
