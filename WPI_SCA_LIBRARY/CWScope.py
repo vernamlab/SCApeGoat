@@ -163,3 +163,32 @@ class CWScope:
                 rand_traces[i] = trace.wave
 
         return fixed_traces, rand_traces
+
+    def cw_to_file_framework(self, num_traces: int,  file_parent: FileParent, experiment_name: str,
+                             keys: np.ndarray = None, texts: np.ndarray = None,
+                             fixed_key: bool = True, fixed_pt: bool = False) -> None:
+        """
+        Captures traces on a ChipWhisperer device and saves them directly to the custom file framework.
+        :param num_traces: The number of traces to capture
+        :param file_parent: The FileParent object to save the file to
+        :param experiment_name: The name of the experiment
+        :param keys: The keys for the experiment
+        :param texts: The plaintexts for the experiment
+        :param fixed_key: Whether the key should be fixed (assuming the keys and texts parameters are None)
+        :param fixed_pt: Whether the plaintext should be fixed (assuming the keys and texts parameters are None)
+        :return: None
+        """
+
+        traces, keys, plaintexts, ciphertexts = self.standard_capture_traces(num_traces, keys, texts, fixed_key, fixed_pt)
+
+        experiment_name = sanitize_input(experiment_name)
+
+        if experiment_name not in file_parent.experiments:
+            exp = file_parent.add_experiment(experiment_name)
+        else:
+            exp = file_parent.experiments[experiment_name]
+
+        exp.add_dataset("CW_Capture_Traces", traces, datatype="float32")
+        exp.add_dataset("CW_Capture_Keys", keys, datatype="int8")
+        exp.add_dataset("CW_Capture_Plaintexts", plaintexts, datatype="int8")
+        exp.add_dataset("CW_Capture_Ciphertexts", ciphertexts, datatype="int8")
