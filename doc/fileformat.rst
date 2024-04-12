@@ -87,6 +87,29 @@ The file framework is split into three separate classes.
 
         Integrated correlation metric.
 
+.. class:: Dataset
+
+    .. method:: __init__(self, name: str, path: str, file_format_parent: FileParent, experiment_parent: Experiment, index: int, existing: bool = False, dataset: dict = None):
+
+        Creates an Dataset object. Do not call this constructor. Please use `Experiment.add_dataset()` to
+        create a new Dataset object.
+
+    .. method:: read_data(self, start: int, end: int) -> np.ndarray:
+
+        Read data from the dataset a specific start and end index.
+
+    .. method:: read_all(self) -> np.ndarray:
+
+        Read all data from the dataset
+
+    .. method:: add_data(self, data_to_add: np.ndarray, datatype: any) -> None:
+
+        Add data to an existing dataset
+
+    .. method:: update_metadata(self, key: str, value: str) -> None:
+
+        Update the dataset metadata using a new key value pair.
+
 
 
 

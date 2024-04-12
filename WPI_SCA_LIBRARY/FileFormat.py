@@ -608,10 +608,6 @@ class Dataset:
         self.metadata[key] = value
         self.fileFormatParent.update_json()
 
-    def delete_metadata(self, key: str) -> None:
-        self.metadata.pop(key)
-        self.fileFormatParent.update_json()
-
 
 def sanitize_input(input_string: str) -> str:
     if type(input_string) is not str:
