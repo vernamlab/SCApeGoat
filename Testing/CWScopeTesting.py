@@ -10,20 +10,20 @@ def benchmark_capture_procedures():
                     target_programmer=cw.programmers.STM32FProgrammer)
 
     num_traces = [100, 1000, 2000, 3000, 4000, 5000, 10000, 20000, 30000, 50000, 75000, 100000]
-    times = []
-
-    for num_trace in num_traces:
-        start = time.time()
-        scope.standard_capture_traces(num_trace)
-        end = time.time()
-        times.append(end - start)
-
-    plt.plot(num_traces, times)
-    plt.title("Standard Capture Procedure Benchmark")
-    plt.xlabel("Number of Traces")
-    plt.grid()
-    plt.ylabel("Time (s)")
-    plt.show()
+    # times = []
+    #
+    # for num_trace in num_traces:
+    #     start = time.time()
+    #     scope.standard_capture_traces(num_trace)
+    #     end = time.time()
+    #     times.append(end - start)
+    #
+    # plt.plot(num_traces, times)
+    # plt.title("Standard Capture Procedure Benchmark")
+    # plt.xlabel("Number of Traces")
+    # plt.grid()
+    # plt.ylabel("Time (s)")
+    # plt.show()
 
     times = []
 
@@ -39,6 +39,8 @@ def benchmark_capture_procedures():
     plt.grid()
     plt.ylabel("Time (s)")
     plt.show()
+
+benchmark_capture_procedures()
 
 
 def test_cw_to_file_format():
