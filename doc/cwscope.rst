@@ -56,7 +56,7 @@ higher-level API calls
 
     .. method:: capture_traces_tvla(self, num_traces: int, group_a_keys: np.ndarray = None, group_a_texts: np.ndarray = None, group_b_keys: np.ndarray = None, group_b_texts: np.ndarray = None, ktp: any = cwtvla.ktp.FixedVRandomText()) -> (np.ndarray, np.ndarray):
 
-        Captures fixed and random trace set needed for TVLA.
+        Captures fixed and random trace set needed for TVLA. Group A is the fixed set and group B is the random set.
 
         :param num_traces: The number of traces to capture for each set
         :type num_traces: int
@@ -68,10 +68,8 @@ higher-level API calls
         :type group_b_keys: np.ndarray
         :param group_b_texts: An array of texts for group B
         :type group_b_texts: np.ndarray
-        :param ktp: the key text pair algorithm, defaults to cwtvla.ktp.FixedVRandomText(). To use a custom ktp, you would
-                    need to provide a class that has methods named `next_group_A()` that specifies the fixed text/key and
-                    a method named `next_group_B()` that specifies
-        :return: A tuple containing the fixed and random traces
+        :param ktp: the key text pair algorithm, defaults to cwtvla.ktp.FixedVRandomText(). This is ignored if keys or texts
+                    for group A and group B are provided.
         :rtype: (np.ndarray, np.ndarray)
         :Authors: Samuel Karkache (swkarkache@wpi.edu)
 
