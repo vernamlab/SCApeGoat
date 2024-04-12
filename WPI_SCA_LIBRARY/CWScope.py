@@ -12,13 +12,24 @@ import tqdm as tqdm
 
 class CWScope:
 
-    def __init__(self, firmware_path, gain=25, num_samples=5000, offset=0, target_type=cw.targets.SimpleSerial, target_programmer=cw.programmers.STM32FProgrammer):
+    def __init__(self, firmware_path: str, gain: int = 25, num_samples: int = 5000, offset: int = 0,
+                 target_type: any = cw.targets.SimpleSerial, target_programmer: any = cw.programmers.STM32FProgrammer) -> None:
         """
         Initializes a CW scope object
-        :param firmware_path: The name of the compiled firmware that will be loaded on the CW device.
+        :param firmware_path: The name of the compiled firmware that will be loaded on the CW target board
+        :type firmware_path: str
         :param gain: The gain of the CW scope
+        :type gain: int
         :param num_samples: The number of samples to collect for each trace on the CW scope
-        :param offset: The offset of the trace collection
+        :type num_samples: int
+        :param offset: The tine offset for CW scope trace collection
+        :type offset: int
+        :param target_type: The target type of the CW scope. This depends on the specific ChipWhisperer device that you are using.
+        :type target_type: any
+        :param target_programmer: The target programmer of the CW scope. This depends on the specific ChipWhisperer device that you are using.
+        :type target_programmer: any
+        :return: None
+        :Authors: Samuel Karkache (swkarkache@wpi.edu)
         """
         # setup scope
         self.scope = cw.scope()
