@@ -107,9 +107,6 @@ class FileParent:
                         json.dump(self.json_data, json_file, indent=4)
 
     def update_json(self) -> None:
-        """
-        Dump new json data. Do not call this, call update metadata instead.
-        """
         with open(f"{self.path}\\metadataHolder.json", 'w') as json_file:
             json.dump(self.json_data, json_file, indent=4)
 
@@ -304,7 +301,7 @@ class Experiment:
         self.fileFormatParent.json_data["experiments"][self.experimentIndex]["metadata"][key] = value
         self.fileFormatParent.update_json()
 
-    def read_metadata(self) -> None:
+    def read_metadata(self) -> dict:
         return self.metadata
 
     def add_dataset(self, name: str, data_to_add: np.ndarray | list, datatype: any) -> 'Dataset':
@@ -409,7 +406,7 @@ class Experiment:
                 continue
         return datasets
 
-    def get_visualization_path(self):
+    def get_visualization_path(self) -> str:
         return self.fileFormatParent.path + self.path + "\\" + "visualization" + "\\"
 
     def calculate_snr(self, traces_dataset: str, intermediate_fcn: Callable, *args: any,  visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> np.ndarray:
