@@ -121,10 +121,16 @@ class CWScope:
 
         return traces, keys, texts, ciphertexts
 
-    def capture_traces_tvla(self, num_traces: int, ktp: any = cwtvla.ktp.FixedVRandomText()) -> (np.ndarray, np.ndarray):
+    def capture_traces_tvla(self, num_traces: int, group_a_keys: np.ndarray = None, group_a_texts: np.ndarray = None,
+                            group_b_keys: np.ndarray = None, group_b_texts: np.ndarray = None,
+                            ktp: any = cwtvla.ktp.FixedVRandomText()) -> (np.ndarray, np.ndarray):
         """
         Captures fixed and random trace set needed for TVLA
-        :param num_traces: the number of traces to capture for each set
+        :param group_a_keys: An array of keys for group A
+        :param group_a_texts: An array of texts for group A
+        :param group_b_keys: An array of keys for group B
+        :param group_b_texts: An array of texts for group B
+        :param num_traces: The number of traces to capture for each set
         :param ktp: the key text pair algorithm, defaults to cwtvla.ktp.FixedVRandomText(). To use a custom ktp, you would
                     need to provide a class that has methods named `next_group_A()` that specifies the fixed text/key and
                     a method named `next_group_B()` that specifies
@@ -135,12 +141,23 @@ class CWScope:
 
         for i in tqdm.tqdm(range(num_traces), desc='Capturing Fixed and Random Trace Sets'):
             # capture trace from fixed group
-            key, pt = ktp.next_group_A()
+            if group_a_keys is None or group_a_texts is None:
+                key, pt = ktp.next_group_A()
+            else:
+                key = group_a_keys[i]
+                pt = group_a_texts[i]
+
             trace = cw.capture_trace(self.scope, self.target, pt, key)
             if trace is not None:
                 fixed_traces[i] = trace.wave
 
             # capture trace from random group
+            if group_b_keys is None or group_b_texts is None:
+                key, pt = ktp.next_group_B()
+            else:
+                key = group_b_keys[i]
+                pt = group_b_texts[i]
+
             key, pt = ktp.next_group_B()
             trace = cw.capture_trace(self.scope, self.target, pt, key)
             if trace is not None:
