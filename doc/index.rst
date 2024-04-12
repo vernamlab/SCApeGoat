@@ -19,5 +19,7 @@ Library Features
 
    fileformat.rst
    cwscope.rst
+   lecroy.rst
    metrics.rst
    leakagemodels.rst
+   dpa.rst
