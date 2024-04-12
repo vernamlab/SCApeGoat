@@ -4,8 +4,6 @@ The file framework is split into three separate classes.
 
 .. class:: FileParent
 
-    The base directory for
-
     .. method:: __init__(self, name: str, path: str, existing: bool = False):
 
         Initialize FileFormatParent class. Creates the basic file structure including JSON metadata holder. If the file
@@ -89,11 +87,14 @@ The file framework is split into three separate classes.
     .. method:: __init__(self, name: str, path: str, file_format_parent: FileParent, existing: bool = False, index: int = 0, experiment: dict = None):
 
         Creates an Experiment object. Do not call this constructor. Please use `FileParent.add_experiment()` to
-        create a new Experiment object.
+        create a new Experiment object. DO NOT USE.
 
-    .. method:: update_metadata(self, key: str, value: str) -> None:
 
-        Update experiment metadata with a new key value pair
+    .. method:: update_metadata(self, key: str, value: any) -> None:
+
+        Update experiment metadata with a new key value
+
+
 
     .. method:: read_metadata(self) -> dict:
 
@@ -111,7 +112,7 @@ The file framework is split into three separate classes.
 
         Deletes a dataset and all its contents. Confirmation required.
 
-    .. method:: query_datasets_with_metadata(self, key: str, value: str, regex: bool = False) -> list['Dataset']:
+    .. method:: query_datasets_with_metadata(self, key: str, value: any, regex: bool = False) -> list['Dataset']:
 
         Query all experiments in the Experiment object based on exact metadata key-value pair or using regular expressions.
 
@@ -136,23 +137,45 @@ The file framework is split into three separate classes.
     .. method:: __init__(self, name: str, path: str, file_format_parent: FileParent, experiment_parent: Experiment, index: int, existing: bool = False, dataset: dict = None):
 
         Creates an Dataset object. Do not call this constructor. Please use `Experiment.add_dataset()` to
-        create a new Dataset object.
+        create a new Dataset object. DO NOT USE.
 
     .. method:: read_data(self, start: int, end: int) -> np.ndarray:
 
         Read data from the dataset a specific start and end index.
 
+        :param start: the start index of the data
+        :type start: int
+        :param end: the end index of the data
+        :type end: int
+        :returns: An NumPy array containing the requested data over the specified interval
+        :rtype: np.ndarray
+
     .. method:: read_all(self) -> np.ndarray:
 
         Read all data from the dataset
+
+        :returns: All data contained in the dataset
+        :rtype: np.ndarray
 
     .. method:: add_data(self, data_to_add: np.ndarray, datatype: any) -> None:
 
         Add data to an existing dataset
 
-    .. method:: update_metadata(self, key: str, value: str) -> None:
+        :param data_to_add: The data to be added to the dataset as a NumPy array
+        :type data_to_add: np.ndarray
+        :param datatype: The datatype of the data being added
+        :type datatype: any
+        :returns: None
+
+    .. method:: update_metadata(self, key: str, value: any) -> None:
 
         Update the dataset metadata using a new key value pair.
+
+        :param key: The key of the metadata
+        :type key: str
+        :param value: The value of the metadata. Can be any datatype supported by JSON.
+        :type value: any
+        :returns: None
 
 
 
