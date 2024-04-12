@@ -54,7 +54,7 @@ higher-level API calls
                             to be collected.
         :Authors: Samuel Karkache (swkarkache@wpi.edu)
 
-    .. method::(self, num_traces: int, group_a_keys: np.ndarray = None, group_a_texts: np.ndarray = None, group_b_keys: np.ndarray = None, group_b_texts: np.ndarray = None, ktp: any = cwtvla.ktp.FixedVRandomText()) -> (np.ndarray, np.ndarray):
+    .. method:: capture_traces_tvla(self, num_traces: int, group_a_keys: np.ndarray = None, group_a_texts: np.ndarray = None, group_b_keys: np.ndarray = None, group_b_texts: np.ndarray = None, ktp: any = cwtvla.ktp.FixedVRandomText()) -> (np.ndarray, np.ndarray):
 
         Captures fixed and random trace set needed for TVLA.
 
@@ -75,7 +75,7 @@ higher-level API calls
         :rtype: (np.ndarray, np.ndarray)
         :Authors: Samuel Karkache (swkarkache@wpi.edu)
 
-    .. method::cw_to_file_framework(self, num_traces: int,  file_parent: FileParent, experiment_name: str, keys: np.ndarray = None, texts: np.ndarray = None, fixed_key: bool = True, fixed_pt: bool = False) -> None:
+    .. method:: cw_to_file_framework(self, num_traces: int,  file_parent: FileParent, experiment_name: str, keys: np.ndarray = None, texts: np.ndarray = None, fixed_key: bool = True, fixed_pt: bool = False) -> None:
 
         Captures traces on a ChipWhisperer device and saves them directly to the custom file framework.
 
