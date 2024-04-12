@@ -3,38 +3,26 @@ from matplotlib import pyplot as plt
 import time
 
 from WPI_SCA_LIBRARY.CWScope import *
+firmware_path = "C:\\Users\\samka\\PycharmProjects\\MQP\\SCLA_API_MQP\\WPI_SCA_LIBRARY\\firmware\\simpleserial-aes-CWLITEARM-SS_2_1.hex"
 
 
-class CWScopeTesting:
-    def __init__(self):
-        self.cw_scope = CWScope("firmware\\simpleserial-aes-CWLITEARM-SS_2_1.hex", 25, 5000, 0,
-                                simple_serial_version="2")
+def benchmark_standard_capture_procedure():
+    scope = CWScope(firmware_path, gain=25, num_samples=3000, offset=0, target_type=cw.targets.SimpleSerial2, target_programmer=cw.programmers.STM32FProgrammer)
 
-    def capture_one_trace(self):
-        traces = self.cw_scope.standard_capture_traces(1, True, False)
-        plt.plot(traces[0].wave)
-        plt.title("Power Trace Collected From Chip Whisperer")
-        plt.xlabel("Sample")
-        plt.ylabel("Power")
-        plt.show()
+    num_traces = [100, 1000, 2000, 3000, 4000, 5000, 10000, 20000, 30000, 50000, 75000, 100000]
+    times = []
 
-    def standard_trace_collection_timing(self, num_traces):
-        start_time = time.time()
-        self.cw_scope.standard_capture_traces(num_traces, True, True)
-        end_time = time.time()
-        return end_time - start_time
+    for num_trace in num_traces:
+        start = time.time()
+        scope.standard_capture_traces(num_trace)
+        end = time.time()
+        times.append(end - start)
 
-    def plot_collection_timings(self):
-        timings = [self.standard_trace_collection_timing(1), self.standard_trace_collection_timing(10),
-                   self.standard_trace_collection_timing(50), self.standard_trace_collection_timing(100),
-                   self.standard_trace_collection_timing(1000), self.standard_trace_collection_timing(10000)]
-        num_traces = [1, 10, 50, 100, 1000, 10000]
+    plt.plot(num_traces, times)
+    plt.title("Standard Capture Procedure Benchmark")
+    plt.xlabel("Number of Traces")
+    plt.grid()
+    plt.ylabel("Time (s)")
+    plt.show()
 
-        plt.plot(num_traces, timings)
-        plt.title("Trace Collection C-Term Optimizations")
-        plt.xlabel("Num Traces")
-        plt.ylabel("Time (seconds)")
-        plt.show()
-
-
-# CWScopeTesting().plot_collection_timings()
+benchmark_standard_capture_procedure()
