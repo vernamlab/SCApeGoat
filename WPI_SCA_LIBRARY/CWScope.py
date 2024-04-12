@@ -158,7 +158,6 @@ class CWScope:
                 key = group_b_keys[i]
                 pt = group_b_texts[i]
 
-            key, pt = ktp.next_group_B()
             trace = cw.capture_trace(self.scope, self.target, pt, key)
             if trace is not None:
                 rand_traces[i] = trace.wave
