@@ -45,7 +45,7 @@ import matplotlib.pyplot as plt
 
 def benchmark_file_format():
 
-    num_traces = [1000, 5000, 10000, 15000, 20000, 25000, 30000, 40000, 50000, 75000, 80000, 100000]
+    num_traces = [1000, 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000, 80000, 85000, 90000, 95000, 100000]
     times_save = []
     time_load = []
     h5_times_save = []
@@ -54,34 +54,34 @@ def benchmark_file_format():
     for num_trace in num_traces:
         data = np.array(np.random.random(size=(num_trace, 3000)), dtype="float32")
 
-        start_save = time.time()
         file = FileParent(name="AnotherFile", path="C:\\Users\\samka\\OneDrive\\Desktop\\", existing=True)
         exp = file.get_experiment("Experiment1")
+        start_save = time.time()
         exp.add_dataset("dataset_{}".format(num_trace), data, datatype="float32")
         end_save = time.time()
 
         times_save.append(end_save - start_save)
 
         # load the data, measure the time
-        start_load = time.time()
         file = FileParent(name="AnotherFile", path="C:\\Users\\samka\\OneDrive\\Desktop\\", existing=True)
         exp = file.get_experiment("Experiment1")
+        start_load = time.time()
         loaded = exp.get_dataset("dataset_{}".format(num_trace)).read_all()
         end_load = time.time()
         time_load.append(end_load - start_load)
 
         # hdf5, save the data
-        start_save_h5 = time.time()
         with h5py.File("data.h5", "w") as file:
+            start_save_h5 = time.time()
             file.create_dataset("dataset_{}".format(num_trace), data=data)
-        end_save_h5 = time.time()
+            end_save_h5 = time.time()
 
         h5_times_save.append(end_save_h5 - start_save_h5)
 
-        start_load_h5 = time.time()
         with h5py.File('data.h5', 'r') as hf:
+            start_load_h5 = time.time()
             loaded1 = hf["dataset_{}".format(num_trace)][:]
-        end_load_h5 = time.time()
+            end_load_h5 = time.time()
 
         h5_time_load.append(end_load_h5 - start_load_h5)
 
@@ -92,6 +92,7 @@ def benchmark_file_format():
     plt.legend()
     plt.ylabel("Time (s)")
     plt.xlabel("Number of traces")
+    plt.ylim(0, 25)
     plt.title("File Framework Saving Benchmark: Varying Traces")
     plt.grid()
     plt.show()
@@ -101,9 +102,12 @@ def benchmark_file_format():
     plt.legend()
     plt.ylabel("Time (s)")
     plt.xlabel("Number of traces")
+    plt.ylim(0, 1)
     plt.title("File Framework Loading Benchmark: Varying Traces")
     plt.grid()
     plt.show()
 
 
-file = FileParent(name="AnotherFile", path="C:\\Users\\samka\\OneDrive\\Desktop\\", existing=True)
+benchmark_file_format()
+
+
