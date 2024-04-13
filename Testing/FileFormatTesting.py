@@ -56,15 +56,12 @@ def benchmark_file_format():
 
         file = FileParent(name="AnotherFile", path="C:\\Users\\samka\\OneDrive\\Desktop\\", existing=True)
         exp = file.get_experiment("Experiment1")
+
         start_save = time.time()
         exp.add_dataset("dataset_{}".format(num_trace), data, datatype="float32")
         end_save = time.time()
-
         times_save.append(end_save - start_save)
 
-        # load the data, measure the time
-        file = FileParent(name="AnotherFile", path="C:\\Users\\samka\\OneDrive\\Desktop\\", existing=True)
-        exp = file.get_experiment("Experiment1")
         start_load = time.time()
         loaded = exp.get_dataset("dataset_{}".format(num_trace)).read_all()
         end_load = time.time()
