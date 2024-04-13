@@ -308,7 +308,10 @@ class Experiment:
 
                             for _dataset in experiment_json["datasets"]:
                                 if dataset["name"] == _dataset["name"]:
-                                    experiment_json["datasets"].remove(dataset)
+                                    try:
+                                        experiment_json["datasets"].remove(dataset)
+                                    except ValueError:
+                                        continue
 
                     with open(f"{self.fileFormatParent.path}\\metadataHolder.json", 'w') as json_file:
                         json.dump(self.fileFormatParent.json_data, json_file, indent=4)

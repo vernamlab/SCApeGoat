@@ -44,39 +44,66 @@ import matplotlib.pyplot as plt
 
 
 def benchmark_file_format():
-    # fixed = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_fixed_positive_uint8_t.bin")
-    # random = read_bin_file_traces("unprotected_sbox\\single\\traces\\oscilloscope_traces\\oscilloscope_traces_50k_3000_samples_random_positive_uint8_t.bin")
-    # traces_100k = np.concatenate((fixed, random))
 
     num_traces = [1000, 5000, 10000, 15000, 20000, 25000, 30000, 40000, 50000, 75000, 80000, 100000]
-    times = []
-    h5_times = []
+    times_save = []
+    time_load = []
+    h5_times_save = []
+    h5_time_load = []
 
     for num_trace in num_traces:
-        data = np.random.random(size=(num_trace, 3000))
-        # file framework
-        start = time.time()
+        data = np.array(np.random.random(size=(num_trace, 3000)), dtype="float32")
+
+        start_save = time.time()
         file = FileParent(name="AnotherFile", path="C:\\Users\\samka\\OneDrive\\Desktop\\", existing=True)
         exp = file.get_experiment("Experiment1")
-        exp.add_dataset("dataset", data, datatype="float64")
-        end = time.time()
-        times.append(end - start)
+        exp.add_dataset("dataset_{}".format(num_trace), data, datatype="float32")
+        end_save = time.time()
 
-        # hdf5
-        start = time.time()
+        times_save.append(end_save - start_save)
+
+        # load the data, measure the time
+        start_load = time.time()
+        file = FileParent(name="AnotherFile", path="C:\\Users\\samka\\OneDrive\\Desktop\\", existing=True)
+        exp = file.get_experiment("Experiment1")
+        loaded = exp.get_dataset("dataset_{}".format(num_trace)).read_all()
+        end_load = time.time()
+        time_load.append(end_load - start_load)
+
+        # hdf5, save the data
+        start_save_h5 = time.time()
         with h5py.File("data.h5", "w") as file:
-            file.create_dataset("dataset", data=data)
-        end = time.time()
-        h5_times.append(end - start)
-        print("Done {}".format(num_trace))
+            file.create_dataset("dataset_{}".format(num_trace), data=data)
+        end_save_h5 = time.time()
 
-    plt.plot(num_traces, times, label="Custom File Framework")
-    plt.plot(num_traces, h5_times, label="HDF5")
+        h5_times_save.append(end_save_h5 - start_save_h5)
+
+        start_load_h5 = time.time()
+        with h5py.File('data.h5', 'r') as hf:
+            loaded1 = hf["dataset_{}".format(num_trace)][:]
+        end_load_h5 = time.time()
+
+        h5_time_load.append(end_load_h5 - start_load_h5)
+
+        print("Done with {} traces".format(num_trace))
+
+    plt.plot(num_traces, times_save, label="Custom File Framework")
+    plt.plot(num_traces, h5_times_save, label="HDF5")
     plt.legend()
     plt.ylabel("Time (s)")
     plt.xlabel("Number of traces")
-    plt.title("File Framework Benchmark: Varying Traces")
+    plt.title("File Framework Saving Benchmark: Varying Traces")
     plt.grid()
     plt.show()
 
-benchmark_file_format()
+    plt.plot(num_traces, time_load, label="Custom File Framework")
+    plt.plot(num_traces, h5_time_load, label="HDF5")
+    plt.legend()
+    plt.ylabel("Time (s)")
+    plt.xlabel("Number of traces")
+    plt.title("File Framework Loading Benchmark: Varying Traces")
+    plt.grid()
+    plt.show()
+
+
+file = FileParent(name="AnotherFile", path="C:\\Users\\samka\\OneDrive\\Desktop\\", existing=True)
