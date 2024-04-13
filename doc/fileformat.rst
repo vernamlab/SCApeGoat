@@ -35,7 +35,7 @@ The file framework is split into three separate classes.
         Read JSON metadata from file
 
         :returns: The metadata dictionary for the FileParent object
-        :rtype: dict0
+        :rtype: dict
 
     .. methood:: add_experiment(self, name: str) -> 'Experiment':
 
@@ -89,48 +89,126 @@ The file framework is split into three separate classes.
         Creates an Experiment object. Do not call this constructor. Please use `FileParent.add_experiment()` to
         create a new Experiment object. DO NOT USE.
 
-
     .. method:: update_metadata(self, key: str, value: any) -> None:
 
-        Update experiment metadata with a new key value
+        Update the experiment metadata using a new key value pair.
 
+        :param key: The key of the metadata
+        :type key: str
+        :param value: The value of the metadata. Can be any datatype supported by JSON.
+        :type value: any
+        :returns: None
 
 
     .. method:: read_metadata(self) -> dict:
 
         Reads experiment metadata
 
-    .. method:: add_dataset(self, name: str, data_to_add: np.ndarray | list, datatype: any) -> 'Dataset':
+        :returns: The experiment's metadata dictionary
+        :rtype: dict
+
+    .. method:: add_dataset(self, name: str, data_to_add: np.ndarray, datatype: any) -> 'Dataset':
 
         Adds a new Dataset to a given Experiment
+
+        :param name: The desired name of the new dataset
+        :type name: str
+        :param data_to_add: The NumPy array of data to be added to the new dataset
+        :type data_to_add: np.ndarray
+        :returns: The newly created dataset
+        :rtype: Dataset
 
     .. method:: get_dataset(self, dataset_name: str) -> 'Dataset':
 
         Get a dataset from a given experiment.
 
+        :param dataset_name: The name of the requested dataset
+        :type dataset_name: str
+        :returns: The requested dataset. None if it is not found.
+        :rtype: Dataset. None if not found.
+
+
     .. method:: delete_dataset(self, dataset_name: str) -> None:
 
         Deletes a dataset and all its contents. Confirmation required.
 
+        :param dataset_name: The name of the dataset to be deleted
+        :type dataset_name: str
+        :returns: None
+
     .. method:: query_datasets_with_metadata(self, key: str, value: any, regex: bool = False) -> list['Dataset']:
 
-        Query all experiments in the Experiment object based on exact metadata key-value pair or using regular expressions.
+        Query all datasets in the Experiment object based on exact metadata key-value pair or using regular expressions.
+
+        :param key: The key to be queried
+        :type key: str
+        :param value: The value to be queried. Supply a regular expression if the `regex` parameter is set to true. Supplying
+                        a value of "*" will return all experiments with the `key` specified in the key parameter.
+        :type value: any
+        :returns: A list of queried datasets
+        :rtype: list['Dataset']
 
     .. method:: get_visualization_path(self) -> str:
 
         Get the path to the visualization directory for the Experiment object.
 
+        :returns: The visualization path of the experiment
+        :rtype: str
+
     .. method:: calculate_snr(self, traces_dataset: str, intermediate_fcn: Callable, *args: any,  visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> np.ndarray:
 
         Integrated signal-to-noise ratio metric.
+
+        :param traces_dataset: The name of the traces dataset
+        :type traces_dataset: str
+        :param intermediate_fcn: A callback function that determines how the intermediate values for SNR labels are calculated.
+        :type intermediate_fcn: Callable
+        :param *args: Additonal datasets needed for the parameters of the intermediate_fnc.
+        :type *args: any
+        :param visualize: Whether to visualize the result or not
+        :type visualize: bool
+        :param save_data: Whether to save the metric result as a new dataset or not
+        :type save_data: bool
+        :param save_graph: Whether to save the visualization to the experiments visualization folder or not
+        :type save_graph: bool
+        :returns: The SNR metric result
+        :rtype: np.ndarray
 
     .. method:: calculate_t_test(self, fixed_dataset: str, random_dataset: str, visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> (np.ndarray, np.ndarray):
 
         Integrated t-test metric.
 
+        :param fixed_dataset: The name of the dataset containing the fixed trace set
+        :type fixed_dataset: str
+        :param random_dataset: The name of the dataset containing the random trace set
+        :type random_dataset: str
+        :param visualize: Whether to visualize the result or not
+        :type visualize: bool
+        :param save_data: Whether to save the metric result as a new dataset or not
+        :type save_data: bool
+        :param save_graph: Whether to save the visualization to the experiments visualization folder or not
+        :type save_graph: bool
+        :returns: The t-test metric result
+        :rtype: np.ndarray
+
     .. method:: calculate_correlation(self, predicted_dataset_name: str, observed_dataset_name: str, visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> np.ndarray:
 
         Integrated correlation metric.
+
+        :param predicted_dataset_name: The name of the dataset containing the predicted leakage
+        :type predicted_dataset_name: str
+        :param observed_dataset_name: The name of the dataset containing the observed leakage
+        :type observed_dataset_name: str
+        :param visualize: Whether to visualize the result or not
+        :type visualize: bool
+        :param save_data: Whether to save the metric result as a new dataset or not
+        :type save_data: bool
+        :param save_graph: Whether to save the visualization to the experiments visualization folder or not
+        :type save_graph: bool
+        :returns: The correlation metric result
+        :rtype: np.ndarray
+
+
 
 .. class:: Dataset
 

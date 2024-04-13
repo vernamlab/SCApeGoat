@@ -22,14 +22,16 @@ class FileParent:
     def __init__(self, name: str, path: str, existing: bool = False):
         """
         Initialize FileFormatParent class. Creates the basic file structure including JSON metadata holder. If the file
-        already exists it simply returns a reference to that file.
-        :param name: Name of file
+        already exists it simply returns a reference to that file. To create a file named "ExampleFile" in your downloads
+        directory set the name parameter to `name="ExampleFile` and the path to `path="C:\\users\\username\\\desktop`. The
+        path needs to be structured as shown with double backslashes.
+        :param name: The name of the file parent directory
         :type name: str
-        :param path: Absolute path to where you want to save the file. Leaving black will put it into current directory.
+        :param path: The path to the file parent.
         :type path: str
-        :param existing: Whether the file exists
+        :param existing: whether the file already exists
         :type existing: bool
-        :return: FileParent object corresponding to the specified file.
+        :returns: None
         """
         if not existing:
             self.name = name
@@ -112,9 +114,12 @@ class FileParent:
 
     def update_metadata(self, key: str, value: any) -> None:
         """
-        Update file JSON metadata with key value pair
-        :param key: metadata key
-        :param value: metadata value
+        Update file JSON metadata with key-value pair
+        :param key: The key of the metadata
+        :type key: str
+        :param value: The value of the metadata. Can be any datatype supported by JSON
+        :type value: any
+        :returns: None
         """
         key = sanitize_input(key)
         self.metadata[key] = value
@@ -123,15 +128,17 @@ class FileParent:
     def read_metadata(self) -> dict:
         """
         Read JSON metadata from file
-        :return: The JSON metadata
+        :returns: The metadata dictionary for the FileParent object
+        :rtype: dict
         """
         return self.metadata
 
     def add_experiment(self, name: str) -> 'Experiment':
         """
-        Adds a new experiment to the file
-        :param name: The experiment name
-        :return: The newly added experiment class.
+        Adds a new experiment to the FileParent object
+        :param name: The desired name of the new experiment
+        :type name: str
+        :returns: The newly created Experiment object
         :rtype: Experiment
         """
         return self.add_experiment_internal(name, existing=False, index=0, experiment=None)
@@ -187,9 +194,11 @@ class FileParent:
 
     def get_experiment(self, experiment_name: str) -> 'Experiment':
         """
-        Get an experiment from the file
-        :param experiment_name: The name of the experiment
-        :return: The requested experiment
+        Get an existing experiment from the FileParent.
+        :param experiment_name: The name of the requested experiment
+        :type experiment_name: str
+        :returns: The requested experiment. None if it does not exist.
+        :rtype: Experiment. None if not found.
         """
         experiment_name = sanitize_input(experiment_name)
         return self.experiments[experiment_name]
@@ -197,6 +206,7 @@ class FileParent:
     def delete_file(self) -> None:
         """
         Deletes the entire file. Confirmation required.
+        :returns: None
         """
         res = sanitize_input(
             input("You are about to delete file {}. Do you want to proceed? [Y/N]: ".format(self.name)))
@@ -209,8 +219,10 @@ class FileParent:
 
     def delete_experiment(self, experiment_name: str) -> None:
         """
-        Deletes an experiment and all of its contents
-        :param experiment_name: The name of the experiment to be deleted
+        Deletes an experiment and all of its datasets from a FileParent. Confirmation Required.
+        :param experiment_name: The name of the experiment
+        :type experiment_name: str
+        :returns: None
         """
         experiment_name = sanitize_input(experiment_name)
         res = sanitize_input(input(
@@ -233,12 +245,14 @@ class FileParent:
 
     def query_experiments_with_metadata(self, key: str, value: any, regex: bool = False) -> list['Experiment']:
         """
-        Get all experiments in the file with specific metadata.
-        :param key: the key of the metadata you are searching
-        :param value: The value of the metadata you are searching for. Providing "*" will return all experiments that have
-                      metadata with the given key.
-        :param regex: Whether the value is a regular expression
-        :return: A list of experiments having the key value pair supplied
+        Query all experiments in the FileParent object based on exact metadata key-value pair or using regular expressions.
+        :param key: The key to be queried
+        :type key: str
+        :param value: The value to be queried. Supply a regular expression if the `regex` parameter is set to true. Supplying
+                        a value of "*" will return all experiments with the `key` specified in the key parameter.
+        :type value: any
+        :returns: A list of queried experiments
+        :rtype: list['Experiment']
         """
         experiments = []
 
@@ -259,6 +273,10 @@ class FileParent:
 class Experiment:
     def __init__(self, name: str, path: str, file_format_parent: FileParent, existing: bool = False, index: int = 0,
                  experiment: dict = None):
+        """
+        Creates an Experiment object. Do not call this constructor. Please use `FileParent.add_experiment()` to
+        create a new Experiment object. DO NOT USE.
+        """
 
         if experiment is None:
             experiment = {}
@@ -296,27 +314,46 @@ class Experiment:
                         json.dump(self.fileFormatParent.json_data, json_file, indent=4)
 
     def update_metadata(self, key: str, value: any) -> None:
+        """
+        Update the experiment metadata using a new key value pair.
+        :param key: The key of the metadata
+        :type key: str
+        :param value: The value of the metadata. Can be any datatype supported by JSON.
+        :type value: any
+        :returns: None
+        """
         key = sanitize_input(key)
         self.metadata[key] = value
         self.fileFormatParent.json_data["experiments"][self.experimentIndex]["metadata"][key] = value
         self.fileFormatParent.update_json()
 
     def read_metadata(self) -> dict:
+        """
+        Reads experiment metadata
+        :returns: The experiment's metadata dictionary
+        :rtype: dict
+        """
         return self.metadata
 
-    def add_dataset(self, name: str, data_to_add: np.ndarray | list, datatype: any) -> 'Dataset':
+    def add_dataset(self, name: str, data_to_add: np.ndarray, datatype: any) -> 'Dataset':
         """
-        Adds a dataset to an experiment.
-        :param datatype: Datatype of the dataset
-        :param data_to_add: The data to be added as a list or Numpy array.
-        :param name: The name of the dataset.
-        :return: The newly created dataset
+        Adds a new Dataset to a given Experiment
+        :param name: The desired name of the new dataset
+        :type name: str
+        :param data_to_add: The NumPy array of data to be added to the new dataset
+        :type data_to_add: np.ndarray
+        :returns: The newly created dataset
+        :rtype: Dataset
         """
         dataset = self.add_dataset_internal(name, existing=False, dataset=None)
         dataset.add_data(data_to_add, datatype)
         return dataset
 
     def add_dataset_internal(self, name: str, existing: bool = False, dataset: dict = None) -> 'Dataset':
+        """
+        Internal Function for adding experiments used when getting a reference to an existing file. Call add_experiment
+        to add a new experiment instead of this.
+        """
 
         if dataset is None:
             dataset = {}
@@ -354,13 +391,22 @@ class Experiment:
         return self.dataset[name]
 
     def get_dataset(self, dataset_name: str) -> 'Dataset':
+        """
+        Get a dataset from a given experiment.
+        :param dataset_name: The name of the requested dataset
+        :type dataset_name: str
+        :returns: The requested dataset. None if it is not found.
+        :rtype: Dataset. None if not found.
+        """
         dataset_name = sanitize_input(dataset_name)
         return self.dataset[dataset_name]
 
     def delete_dataset(self, dataset_name: str) -> None:
         """
-        Deletes a dataset and all of its contents
-        :param dataset_name: The name of the experiment to be deleted
+        Deletes a dataset and all its contents. Confirmation required.
+        :param dataset_name: The name of the dataset to be deleted
+        :type dataset_name: str
+        :returns: None
         """
         dataset_name = sanitize_input(dataset_name)
         res = sanitize_input(input(
@@ -385,12 +431,14 @@ class Experiment:
 
     def query_datasets_with_metadata(self, key: str, value: any, regex: bool = False) -> list['Dataset']:
         """
-        Queries datasets with using the associated metadata.
-        :param key: The key of the metadata you are querying
-        :param value: The value of the metadata you are querying. Providing "*" will return all with the specified key
-                      and any value.
-        :param regex: Whether the provided value is a regular expression.
-        :return: A list of datasets with the provided metadata.
+        Query all datasets in the Experiment object based on exact metadata key-value pair or using regular expressions.
+        :param key: The key to be queried
+        :type key: str
+        :param value: The value to be queried. Supply a regular expression if the `regex` parameter is set to true. Supplying
+                        a value of "*" will return all experiments with the `key` specified in the key parameter.
+        :type value: any
+        :returns: A list of queried datasets
+        :rtype: list['Dataset']
         """
         datasets = []
         for dset in self.dataset.values():
@@ -407,22 +455,29 @@ class Experiment:
         return datasets
 
     def get_visualization_path(self) -> str:
+        """
+        Get the path to the visualization directory for the Experiment object.
+        :returns: The visualization path of the experiment
+        :rtype: str
+        """
         return self.fileFormatParent.path + self.path + "\\" + "visualization" + "\\"
 
     def calculate_snr(self, traces_dataset: str, intermediate_fcn: Callable, *args: any,  visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> np.ndarray:
         """
-        Integrated SNR metric with file format
+        Integrated signal-to-noise ratio metric.
         :param traces_dataset: The name of the traces dataset
         :type traces_dataset: str
-        :param intermediate_fcn: The intermediate function used to calculate SNR labels
+        :param intermediate_fcn: A callback function that determines how the intermediate values for SNR labels are calculated.
         :type intermediate_fcn: Callable
-        :param visualize: Whether to visualize the SNR values
+        :param *args: Additonal datasets needed for the parameters of the intermediate_fnc.
+        :type *args: any
+        :param visualize: Whether to visualize the result or not
         :type visualize: bool
-        :param save_data: Whether to save the SNR values as a dataset
+        :param save_data: Whether to save the metric result as a new dataset or not
         :type save_data: bool
-        :param save_graph: Whether to save the SNR graph to the visualization directory
+        :param save_graph: Whether to save the visualization to the experiments visualization folder or not
         :type save_graph: bool
-        :return: The SNR trace
+        :returns: The SNR metric result
         :rtype: np.ndarray
         """
 
@@ -459,19 +514,19 @@ class Experiment:
 
     def calculate_t_test(self, fixed_dataset: str, random_dataset: str, visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> (np.ndarray, np.ndarray):
         """
-        Integrated t-test metric with file format.
-        :param fixed_dataset: The name of the fixed traces dataset
+        Integrated t-test metric.
+        :param fixed_dataset: The name of the dataset containing the fixed trace set
         :type fixed_dataset: str
-        :param random_dataset: The name of the random traces dataset
+        :param random_dataset: The name of the dataset containing the random trace set
         :type random_dataset: str
-        :param visualize: Whether to visualize the t-test values
+        :param visualize: Whether to visualize the result or not
         :type visualize: bool
-        :param save_data: Whether to save the t-test values as a dataset
+        :param save_data: Whether to save the metric result as a new dataset or not
         :type save_data: bool
-        :param save_graph: Whether to save the t-test graph to the visualization directory
+        :param save_graph: Whether to save the visualization to the experiments visualization folder or not
         :type save_graph: bool
-        :return: Tuple containing t-statistic and t-max NumPy arrays
-        :rtype: (np.ndarray, np.ndarray)
+        :returns: The t-test metric result
+        :rtype: np.ndarray
         """
 
         rand = self.dataset[sanitize_input(random_dataset)].read_all()
@@ -521,18 +576,18 @@ class Experiment:
 
     def calculate_correlation(self, predicted_dataset_name: str, observed_dataset_name: str, visualize: bool = False, save_data: bool = False, save_graph: bool = False) -> np.ndarray:
         """
-        Integrated correlation metric with file format.
-        :param predicted_dataset_name: The name of the dataset containing the predicted leakage generated via some leakage model
+        Integrated correlation metric.
+        :param predicted_dataset_name: The name of the dataset containing the predicted leakage
         :type predicted_dataset_name: str
         :param observed_dataset_name: The name of the dataset containing the observed leakage
         :type observed_dataset_name: str
-        :param visualize: Whether to visualize the correlation values
+        :param visualize: Whether to visualize the result or not
         :type visualize: bool
-        :param save_data: Whether to save the correlation values as a dataset
+        :param save_data: Whether to save the metric result as a new dataset or not
         :type save_data: bool
-        :param save_graph: Whether to save the correlation graph to the visualization directory
+        :param save_graph: Whether to save the visualization to the experiments visualization folder or not
         :type save_graph: bool
-        :return: The correlation trace
+        :returns: The correlation metric result
         :rtype: np.ndarray
         """
 
@@ -568,6 +623,10 @@ class Experiment:
 class Dataset:
     def __init__(self, name: str, path: str, file_format_parent: FileParent, experiment_parent: Experiment, index: int,
                  existing: bool = False, dataset: dict = None):
+        """
+        Creates a Dataset object. Do not call this constructor. Please use `Experiment.add_dataset()` to
+        create a new Dataset object. DO NOT USE.
+        """
         if dataset is None:
             dataset = {}
 
@@ -592,18 +651,49 @@ class Dataset:
             self.metadata = dataset["metadata"]
 
     def read_data(self, start: int, end: int) -> np.ndarray:
+        """
+        Read data from the dataset a specific start and end index.
+        :param start: the start index of the data
+        :type start: int
+        :param end: the end index of the data
+        :type end: int
+        :returns: An NumPy array containing the requested data over the specified interval
+        :rtype: np.ndarray
+        """
         data = np.load(self.fileFormatParent.path + self.experimentParent.path + self.path)
         return data[start:end]
 
     def read_all(self) -> np.ndarray:
+        """
+        Read all data from the dataset
+        :returns: All data contained in the dataset
+        :rtype: np.ndarray
+        """
+
         data = np.load(self.fileFormatParent.path + self.experimentParent.path + self.path)
         return data[:]
 
     def add_data(self, data_to_add: np.ndarray, datatype: any) -> None:
+        """
+        Add data to an existing dataset
+        :param data_to_add: The data to be added to the dataset as a NumPy array
+        :type data_to_add: np.ndarray
+        :param datatype: The datatype of the data being added
+        :type datatype: any
+        :returns: None
+        """
         data_to_add = np.array(data_to_add, dtype=datatype)
         np.save(self.fileFormatParent.path + self.experimentParent.path + self.path, data_to_add)
 
     def update_metadata(self, key: str, value: any) -> None:
+        """
+        Update the dataset metadata using a new key value pair.
+        :param key: The key of the metadata
+        :type key: str
+        :param value: The value of the metadata. Can be any datatype supported by JSON.
+        :type value: any
+        :returns: None
+        """
         key = sanitize_input(key)
         self.metadata[key] = value
         self.fileFormatParent.update_json()
