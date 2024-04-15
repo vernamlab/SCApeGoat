@@ -9,7 +9,7 @@ def snr3_intermediate(rout):
     return rout
 
 def snr_benchmarking():
-    num_of_samples = [1000, 5000, 10000, 15000, 20000]
+    num_of_samples = [1000, 5000, 10000, 15000, 20000, 50000]
     num_of_traces = [100, 1000, 10000, 20000, 30000, 50000, 100000]
     benchmarking_results = []
     for samples in num_of_samples:
