@@ -1,3 +1,5 @@
+import sys
+sys.path.append("../../../WPI_SCA_LIBRARY")
 from WPI_SCA_LIBRARY.FileFormat import *
 from WPI_SCA_LIBRARY.Metrics import *
 import numpy
