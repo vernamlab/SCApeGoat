@@ -31,4 +31,19 @@ def snr_benchmarking():
             benchmarking_results.append([traces, samples, end-start])
     print(benchmarking_results)
 
-
+def t_test_benchmarking():
+    num_of_samples = [1000, 5000, 10000, 15000, 20000, 50000]
+    num_of_traces = [100, 1000, 10000, 20000, 30000, 50000, 100000]
+    benchmarking_results = []
+    for samples in num_of_samples:
+        for traces in num_of_traces:
+            dataOne = np.random.random_sample((traces,samples))
+            dataTwo = np.random.random_sample((traces, samples))
+            start = time.time()
+            t_test_tvla(dataOne, dataTwo)
+            end = time.time()
+            print(end - start)
+            del dataOne
+            del dataTwo
+            benchmarking_results.append([traces, samples, end-start])
+    print(benchmarking_results)
