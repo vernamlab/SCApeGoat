@@ -1,3 +1,4 @@
 from metric_benchmarking import *
-snr_benchmarking()
-t_test_benchmarking()
+#snr_benchmarking()
+#t_test_benchmarking()
+correlation_metric()
