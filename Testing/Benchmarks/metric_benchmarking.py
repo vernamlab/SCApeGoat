@@ -112,3 +112,17 @@ def sucess_rate_guessing_entropy_benchmarking():
             print(end-start)
             benchmarking_results.append([traces, exp, end-start])
     print(benchmarking_results)
+
+def score_with_correlation_benchmarking():
+    num_of_samples = [1000, 5000, 10000, 15000, 20000, 50000]
+    num_of_traces = [100, 1000, 10000, 20000, 30000, 50000, 100000]
+    benchmarking_results = []
+    for sam in num_of_samples:
+        for trace in num_of_traces:
+            traces = np.random.random_sample((trace, sam))
+            texts = np.random.randint(16, size=(trace, 16))
+            start = time.time()
+            score_with_correlation(traces, 100, 0, texts, leakage_model_hamming_distance)
+            end = time.time()
+            print(end-start)
+            benchmarking_results.append([traces,sam,end-start])
