@@ -5,7 +5,7 @@ traces = np.load("TestFile//Experiments//CWCapture1//CWCapture1Traces.npy")
 ciphertext = np.load("TestFile//Experiments//CWCapture1//CWCapture1Ciphertexts.npy")
 plaintext = np.load("TestFile//Experiments//CWCapture1//CWCapture1Plaintexts.npy")
 
-cpaoutput, guess_corr, guess = calculate_dpa(traces, plaintext, order=2, window_size_dpa=20, num_of_traces=100)
+cpaoutput, guess_corr, guess = calculate_dpa(traces, plaintext, order=2, num_of_traces=100)
 print(traces.shape)
 print(cpaoutput.shape)
 
