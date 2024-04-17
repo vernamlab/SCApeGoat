@@ -26,3 +26,4 @@ Library Features
    cwscope.rst
    metrics.rst
    leakagemodels.rst
+   dpa.rst
