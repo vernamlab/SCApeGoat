@@ -1,8 +1,10 @@
 import time
 
+import numpy as np
+
 from WPI_SCA_LIBRARY.CWScope import *
 
-firmware_path = "C:\\Users\\samka\\PycharmProjects\\MQP\\SCLA_API_MQP\\WPI_SCA_LIBRARY\\firmware\\simpleserial-aes-CWLITEARM-SS_2_1.hex"
+firmware_path = "C:\\Users\\samka\\PycharmProjects\\SCLA_API_MQP\\WPI_SCA_LIBRARY\\firmware\\simpleserial-aes-CWLITEARM-SS_2_1.hex"
 
 
 def benchmark_capture_procedures():
@@ -40,11 +42,18 @@ def benchmark_capture_procedures():
     plt.ylabel("Time (s)")
     plt.show()
 
-benchmark_capture_procedures()
-
 
 def test_cw_to_file_format():
     scope = CWScope(firmware_path, gain=25, num_samples=3000, offset=0, target_type=cw.targets.SimpleSerial2,
                     target_programmer=cw.programmers.STM32FProgrammer)
-    file = FileParent("AnotherFile", "C:\\Users\\samka\\PycharmProjects\\MQP\\SCLA_API_MQP\\", existing=True)
+
+    file = FileParent("AnotherFile", "C:\\Users\\samka\\PycharmProjects\\SCLA_API_MQP\\", existing=True)
     scope.cw_to_file_framework(1000, file, "TestExperiment")
+
+
+scope = CWScope(firmware_path, gain=25, num_samples=3000, offset=0, target_type=cw.targets.SimpleSerial2, target_programmer=cw.programmers.STM32FProgrammer)
+ktp = cw.ktp.Basic()
+
+# keys = [ktp.next()[0]] * 1000
+# texts = [ktp.next()[1]] * 1000
+# scope.standard_capture_traces(1000, keys, texts)
