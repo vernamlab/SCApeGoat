@@ -50,8 +50,8 @@ class CWScope:
         self.target.dis()
 
     def standard_capture_traces(self, num_traces: int,
-                                experiment_keys: np.ndarray = None,
-                                experiment_texts: np.ndarray = None,
+                                experiment_keys: list = None,
+                                experiment_texts: list = None,
                                 fixed_key: bool = True,
                                 fixed_pt: bool = False) -> (np.ndarray, np.ndarray, np.ndarray, np.ndarray):
         """
@@ -131,8 +131,8 @@ class CWScope:
 
         return traces, keys, texts, ciphertexts
 
-    def capture_traces_tvla(self, num_traces: int, group_a_keys: np.ndarray = None, group_a_texts: np.ndarray = None,
-                            group_b_keys: np.ndarray = None, group_b_texts: np.ndarray = None,
+    def capture_traces_tvla(self, num_traces: int, group_a_keys: list = None, group_a_texts: list= None,
+                            group_b_keys: list = None, group_b_texts: list = None,
                             ktp: any = cwtvla.ktp.FixedVRandomText()) -> (np.ndarray, np.ndarray):
         """
         Captures fixed and random trace set needed for TVLA.
