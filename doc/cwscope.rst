@@ -40,10 +40,10 @@ higher-level API calls
         :type num_traces: int
         :param experiment_keys: A collection of keys to use for the capture of each trace. If not specified, the procedure
                                 will use the cw basic key generation `key = cw.ktp.Basic()[0]`
-        :type experiment_keys: np.ndarray
+        :type experiment_keys: list
         :param experiment_texts: A collection of texts to use for the capture of each trace. If not specified, the procedure
                                 will use the cw basic plaintext generation `text = cw.ktp.Basic()[1]`
-        :type experiment_texts: np.ndarray
+        :type experiment_texts: list
         :param fixed_key: Whether to use a fixed key for cw.ktp key generation. Ignored if a collection of keys are supplied.
         :type fixed_key: bool
         :param fixed_pt: Whether to use a fixed plaintext for cw.ktp text generation. Ignored if a collection of texts are supplied.
@@ -61,13 +61,13 @@ higher-level API calls
         :param num_traces: The number of traces to capture for each set
         :type num_traces: int
         :param group_a_keys: An array of keys for group A
-        :type group_a_keys: np.ndarray
+        :type group_a_keys: list
         :param group_a_texts: An array of texts for group A
-        :type group_a_texts: np.ndarray
+        :type group_a_texts: list
         :param group_b_keys: An array of keys for group B
-        :type group_b_keys: np.ndarray
+        :type group_b_keys: list
         :param group_b_texts: An array of texts for group B
-        :type group_b_texts: np.ndarray
+        :type group_b_texts: list
         :param ktp: the key text pair algorithm, defaults to cwtvla.ktp.FixedVRandomText(). This is ignored if keys or texts
                     for group A and group B are provided.
         :rtype: (np.ndarray, np.ndarray)
