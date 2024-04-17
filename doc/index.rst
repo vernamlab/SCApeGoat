@@ -27,3 +27,4 @@ Library Features
    metrics.rst
    leakagemodels.rst
    dpa.rst
+   lecroy.rst
