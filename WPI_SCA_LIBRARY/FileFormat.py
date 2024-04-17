@@ -345,7 +345,9 @@ class Experiment:
         :type name: str
         :param data_to_add: The NumPy array of data to be added to the new dataset
         :type data_to_add: np.ndarray
-        :returns: The newly created dataset
+        :param datatype: The datatype of the dataset
+        :type datatype: any
+        :returns: The newly created Dataset object
         :rtype: Dataset
         """
         dataset = self.add_dataset_internal(name, existing=False, dataset=None)

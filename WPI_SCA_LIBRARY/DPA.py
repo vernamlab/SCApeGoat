@@ -29,7 +29,7 @@ def calculate_window_averages(traces, window_size=5, traces_max=0):
     return fma
 
 
-def calculate_dpa(traces, iv, order=1, key_guess=0, window_size_fma=5, window_size_dpa=20, num_of_traces=0):
+def calculate_dpa(traces, iv, order=1, key_guess=0, window_size_fma=5, num_of_traces=0):
     if order == 1:
         max_cpa = [0] * 1
 
@@ -89,6 +89,7 @@ def calculate_dpa(traces, iv, order=1, key_guess=0, window_size_fma=5, window_si
 
         return cpa_output, guess_corr, guess
 
+
 def calculate_second_order_dpa_mem_efficient(traces, IV, window_width):
     num_of_samples = traces.shape[1]
     num_of_traces = traces.shape[0]
@@ -107,7 +108,8 @@ def calculate_second_order_dpa_mem_efficient(traces, IV, window_width):
 
         while current_num_in_P < window_width:
             if current_partition_index == 0:
-                sub_array = np.abs(np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
+                sub_array = np.abs(
+                    np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
                 length_sub_array = sub_array.shape[1]
 
                 if length_sub_array + current_num_in_P <= window_width:
@@ -120,25 +122,24 @@ def calculate_second_order_dpa_mem_efficient(traces, IV, window_width):
                     current_num_in_P = window_width
                     current_partition_index = number_to_add
             else:
-                sub_array = np.abs(np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
+                sub_array = np.abs(
+                    np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
                 length_sub_array = sub_array.shape[1]
                 num_left_to_add = length_sub_array - current_partition_index
 
                 if num_left_to_add <= window_width:
-                    P[:, current_num_in_P: num_left_to_add] = sub_array[:,current_partition_index:]
+                    P[:, current_num_in_P: num_left_to_add] = sub_array[:, current_partition_index:]
                     current_num_in_P = current_num_in_P + num_left_to_add
                     current_P_index = current_P_index + 1
                     current_partition_index = 0
 
                 else:
-                    P[:] = sub_array[:,current_partition_index:current_partition_index+window_width]
+                    P[:] = sub_array[:, current_partition_index:current_partition_index + window_width]
                     current_num_in_P = window_width
                     current_partition_index = current_partition_index + window_width
 
-
         #solve for cpa output
         dpa_trace = P
-
 
         t_bar = np.mean(dpa_trace)
         o_t = std_dev(dpa_trace, t_bar)
@@ -155,11 +156,12 @@ def calculate_second_order_dpa_mem_efficient(traces, IV, window_width):
     current_num_in_P = 0
     P = np.zeros((num_of_traces, num_to_add))
 
-    if(num_to_add > 0):
+    if num_to_add > 0:
         while current_num_in_P < num_to_add:
 
             if current_partition_index == 0:
-                sub_array = np.abs(np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
+                sub_array = np.abs(
+                    np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
                 length_sub_array = sub_array.shape[1]
 
                 if length_sub_array + current_num_in_P <= num_to_add:
@@ -172,18 +174,19 @@ def calculate_second_order_dpa_mem_efficient(traces, IV, window_width):
                     current_num_in_P = num_to_add
                     current_partition_index = number_to_add
             else:
-                sub_array = np.abs(np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
+                sub_array = np.abs(
+                    np.subtract(traces[:, current_P_index + 1:], traces[:, current_P_index].reshape(-1, 1)))
                 length_sub_array = sub_array.shape[1]
                 num_left_to_add = length_sub_array - current_partition_index
 
                 if num_left_to_add <= num_to_add:
-                    P[:, current_num_in_P: num_left_to_add] = sub_array[:,current_partition_index:]
+                    P[:, current_num_in_P: num_left_to_add] = sub_array[:, current_partition_index:]
                     current_num_in_P = current_num_in_P + num_left_to_add
                     current_P_index = current_P_index + 1
                     current_partition_index = 0
 
                 else:
-                    P[:] = sub_array[:,current_partition_index:current_partition_index+num_to_add]
+                    P[:] = sub_array[:, current_partition_index:current_partition_index + num_to_add]
                     current_num_in_P = num_to_add
                     current_partition_index = current_partition_index + num_to_add
 
@@ -196,8 +199,6 @@ def calculate_second_order_dpa_mem_efficient(traces, IV, window_width):
         # hws_bar = mean(out[:,5])
         o_hws = std_dev(hws, hws_bar)
         correlation = cov(dpa_trace, t_bar, hws, hws_bar)
-        cpaoutput[start_index :] = correlation / (o_t * o_hws)
-
-
+        cpaoutput[start_index:] = correlation / (o_t * o_hws)
 
     return cpaoutput
