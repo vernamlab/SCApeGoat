@@ -16,7 +16,7 @@ class LecroyScope(object):
     def __init__(self, scope_ip='TCPIP0::192.168.1.79::inst0::INSTR'):
         """
         Initialize LecroyScope object.
-        :param scope_ip: The scope IP of the Lecroy scope
+        :param scope_ip: The IP of the scope that you want to connect to
         """
         self.scope = None
         self.rm = None
@@ -25,6 +25,10 @@ class LecroyScope(object):
         self.valid_trigger_states = ['AUTO', 'NORM', 'SINGLE', 'STOP']
 
     def __del__(self):
+        """
+        Close the scope on object deletion.
+        :return: None
+        """
         self.close()
 
     def open(self, scope_ip, scope_timeout=5000):
@@ -32,6 +36,7 @@ class LecroyScope(object):
         Opens a Lecroy scope using the PyVisa library
         :param scope_ip: The ip of the Lecroy scope
         :param scope_timeout: The amount of time to wait for the Lecroy until timeout
+        :return: None
         """
         self.rm = visa.ResourceManager()
         try:
@@ -47,7 +52,7 @@ class LecroyScope(object):
     def close(self):
         """
         Closes the Lecroy scope using the PyVisa library
-        :return:
+        :return: None
         """
         try:
             if self.scope is not None:
@@ -66,6 +71,7 @@ class LecroyScope(object):
         :param duration: the duration of capture
         :param v_offset: the voltage offset for the measurement
         :param channel: the channel to capture the traces on
+        :return: None
         """
         if self.scope:
             self.scope.write("{}:TRA ON".format(channel))
@@ -84,6 +90,7 @@ class LecroyScope(object):
         :param delay: the trigger delay
         :param level: the trigger level
         :param channel: the trigger channel
+        :return: None
         """
         if self.scope is None:
             self.open(self.scope_ip)
@@ -289,14 +296,6 @@ def capture_cw305(scope, target, num_of_samples=600, short=False, channel='C3', 
 
 
 def capture_nopt(scope, num_of_samples=600, short=False, channel='C3'):
-    """
-    Captures traces with no input
-    :param scope: the configured LecroyScope object
-    :param num_of_samples: The number of samples to capture
-    :param short:
-    :param channel: The channel to collect traces on
-    :return: The resulting trace
-    """
     if scope.start_trigger() is not False:
         if scope.wait_for_trigger() is False:
             return

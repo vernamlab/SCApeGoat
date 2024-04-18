@@ -53,7 +53,6 @@ def calculate_dpa(traces, iv, order=1, key_guess=0, window_size_fma=5, num_of_tr
         return cpa_output, guess_corr, guess
 
     if order == 2:
-        traces = traces[:, 0:4000]
         if num_of_traces != 0:
             fma = calculate_window_averages(traces, window_size=window_size_fma)
             traces = np.array(fma[0:num_of_traces])
