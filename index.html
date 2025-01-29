@@ -1,0 +1,202 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCApe Goat - Side Channel Analysis Library &mdash; SCApe Goat 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Custom File Framework" href="fileformat.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            SCApe Goat
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="fileformat.html">Custom File Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cwscope.html">ChipWhisperer Scope Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">Metric Solver API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="leakagemodels.html">Leakage Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpa.html">Differential Power Analysis (DPA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lecroy.html">Lecroy Oscilloscope Interface</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">SCApe Goat</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SCApe Goat - Side Channel Analysis Library</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scape-goat-side-channel-analysis-library">
+<h1>SCApe Goat - Side Channel Analysis Library<a class="headerlink" href="#scape-goat-side-channel-analysis-library" title="Link to this heading"></a></h1>
+<section id="purpose">
+<h2>Purpose<a class="headerlink" href="#purpose" title="Link to this heading"></a></h2>
+<p>Many years of cryptographic research have focused on the software security of different encryption algorithms.
+One of the most well-known encryption algorithms, AES-128, would require billions of years to guess its 128-bit encryption key.
+However, there exist hardware attacks that could extract this cryptography key in mere hours. A side-channel attack can use the
+information received from device power consumption and electromagnetic emanation to guess a cryptographic key with immense accuracy.
+Therefore, the field of side-channel analysis is of utmost importance if engineers want to design cryptographic devices that can withstand
+even the most intense side-channel attacks. One of the research topics at Worcester Polytechnic Institute’s Vernam Lab involves side-channel
+analysis attacks and defense. In attacking encryption algorithms with different side-channel techniques, researchers can draw conclusions
+about the security of different cryptographic implementations and develop better defenses against such attacks. However, Vernam Lab and
+Worcester Polytechnic Institute as a whole, lack a unified repository of information and tools to help with side-channel analysis research
+and education. The lab has access to the specialized equipment needed to conduct SCA research, however, there does not exist a
+standardized interface for side-channel data collection, analysis, and data storage that the lab uses to conduct research.
+Therefore, this necessitates an accessible set of tools that allow researchers and students alike to learn and contribute
+to the ever-growing field of security analysis of side-channel attacks.</p>
+</section>
+<section id="library-features">
+<h2>Library Features<a class="headerlink" href="#library-features" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="fileformat.html">Custom File Framework</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fileformat.html#FileParent"><code class="docutils literal notranslate"><span class="pre">FileParent</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#FileParent.update_metadata"><code class="docutils literal notranslate"><span class="pre">FileParent.update_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#FileParent.read_metadata"><code class="docutils literal notranslate"><span class="pre">FileParent.read_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#FileParent.get_experiment"><code class="docutils literal notranslate"><span class="pre">FileParent.get_experiment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#FileParent.delete_file"><code class="docutils literal notranslate"><span class="pre">FileParent.delete_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#FileParent.delete_experiment"><code class="docutils literal notranslate"><span class="pre">FileParent.delete_experiment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#FileParent.query_experiments_with_metadata"><code class="docutils literal notranslate"><span class="pre">FileParent.query_experiments_with_metadata()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="fileformat.html#Experiment"><code class="docutils literal notranslate"><span class="pre">Experiment</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.update_metadata"><code class="docutils literal notranslate"><span class="pre">Experiment.update_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.read_metadata"><code class="docutils literal notranslate"><span class="pre">Experiment.read_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.add_dataset"><code class="docutils literal notranslate"><span class="pre">Experiment.add_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.get_dataset"><code class="docutils literal notranslate"><span class="pre">Experiment.get_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.delete_dataset"><code class="docutils literal notranslate"><span class="pre">Experiment.delete_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.query_datasets_with_metadata"><code class="docutils literal notranslate"><span class="pre">Experiment.query_datasets_with_metadata()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.get_visualization_path"><code class="docutils literal notranslate"><span class="pre">Experiment.get_visualization_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.calculate_snr"><code class="docutils literal notranslate"><span class="pre">Experiment.calculate_snr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.calculate_t_test"><code class="docutils literal notranslate"><span class="pre">Experiment.calculate_t_test()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Experiment.calculate_correlation"><code class="docutils literal notranslate"><span class="pre">Experiment.calculate_correlation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="fileformat.html#Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Dataset.read_data"><code class="docutils literal notranslate"><span class="pre">Dataset.read_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Dataset.read_all"><code class="docutils literal notranslate"><span class="pre">Dataset.read_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Dataset.add_data"><code class="docutils literal notranslate"><span class="pre">Dataset.add_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileformat.html#Dataset.update_metadata"><code class="docutils literal notranslate"><span class="pre">Dataset.update_metadata()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cwscope.html">ChipWhisperer Scope Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cwscope.html#CWScope"><code class="docutils literal notranslate"><span class="pre">CWScope</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cwscope.html#CWScope.__init__"><code class="docutils literal notranslate"><span class="pre">CWScope.__init__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cwscope.html#CWScope.disconnect"><code class="docutils literal notranslate"><span class="pre">CWScope.disconnect()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cwscope.html#CWScope.standard_capture_traces"><code class="docutils literal notranslate"><span class="pre">CWScope.standard_capture_traces()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cwscope.html#CWScope.capture_traces_tvla"><code class="docutils literal notranslate"><span class="pre">CWScope.capture_traces_tvla()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="cwscope.html#CWScope.cw_to_file_framework"><code class="docutils literal notranslate"><span class="pre">CWScope.cw_to_file_framework()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="metrics.html">Metric Solver API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#signal_to_noise_ratio"><code class="docutils literal notranslate"><span class="pre">signal_to_noise_ratio()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#organize_snr_label"><code class="docutils literal notranslate"><span class="pre">organize_snr_label()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#unmasked_sbox_output_intermediate"><code class="docutils literal notranslate"><span class="pre">unmasked_sbox_output_intermediate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#t_test_tvla"><code class="docutils literal notranslate"><span class="pre">t_test_tvla()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#pearson_correlation"><code class="docutils literal notranslate"><span class="pre">pearson_correlation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#score_and_rank"><code class="docutils literal notranslate"><span class="pre">score_and_rank()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#score_with_correlation"><code class="docutils literal notranslate"><span class="pre">score_with_correlation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html#success_rate_guessing_entropy"><code class="docutils literal notranslate"><span class="pre">success_rate_guessing_entropy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="leakagemodels.html">Leakage Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="leakagemodels.html#leakage_model_hamming_weight"><code class="docutils literal notranslate"><span class="pre">leakage_model_hamming_weight()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="leakagemodels.html#leakage_model_hamming_distance"><code class="docutils literal notranslate"><span class="pre">leakage_model_hamming_distance()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dpa.html">Differential Power Analysis (DPA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lecroy.html">Lecroy Oscilloscope Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lecroy.html#LecroyScope"><code class="docutils literal notranslate"><span class="pre">LecroyScope</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="lecroy.html#LecroyScope.start_trigger"><code class="docutils literal notranslate"><span class="pre">LecroyScope.start_trigger()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="lecroy.html#LecroyScope.dut_setup"><code class="docutils literal notranslate"><span class="pre">LecroyScope.dut_setup()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="fileformat.html" class="btn btn-neutral float-right" title="Custom File Framework" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Worcester Polytechnic Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

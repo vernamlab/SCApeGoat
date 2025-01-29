@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metric Solver API &mdash; SCApe Goat 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Leakage Models" href="leakagemodels.html" />
+    <link rel="prev" title="ChipWhisperer Scope Interface" href="cwscope.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SCApe Goat
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="fileformat.html">Custom File Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cwscope.html">ChipWhisperer Scope Interface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Metric Solver API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#signal_to_noise_ratio"><code class="docutils literal notranslate"><span class="pre">signal_to_noise_ratio()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#organize_snr_label"><code class="docutils literal notranslate"><span class="pre">organize_snr_label()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unmasked_sbox_output_intermediate"><code class="docutils literal notranslate"><span class="pre">unmasked_sbox_output_intermediate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#t_test_tvla"><code class="docutils literal notranslate"><span class="pre">t_test_tvla()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pearson_correlation"><code class="docutils literal notranslate"><span class="pre">pearson_correlation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#score_and_rank"><code class="docutils literal notranslate"><span class="pre">score_and_rank()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#score_with_correlation"><code class="docutils literal notranslate"><span class="pre">score_with_correlation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#success_rate_guessing_entropy"><code class="docutils literal notranslate"><span class="pre">success_rate_guessing_entropy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="leakagemodels.html">Leakage Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dpa.html">Differential Power Analysis (DPA)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lecroy.html">Lecroy Oscilloscope Interface</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SCApe Goat</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Metric Solver API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/metrics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="metric-solver-api">
+<h1>Metric Solver API<a class="headerlink" href="#metric-solver-api" title="Link to this heading"></a></h1>
+<p>This API can be used to compute various different metrics relating to side-channel analysis. These
+metrics will aid with assessing a systems security and identifying areas of interest in large trace sets.
+Each metric is a standalone function and requires minimal setup to utilize.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="signal_to_noise_ratio">
+<span class="sig-name descname"><span class="pre">signal_to_noise_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualization_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">np.ndarray:</span></span></span><a class="headerlink" href="#signal_to_noise_ratio" title="Link to this definition"></a></dt>
+<dd><blockquote>
+<div><p>Computes the signal-to-noise ratio of a trace set and associated labels. High magnitudes of the resulting SNR traces
+indicate cryptographic leakage at that sample.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>labels</strong> (<em>dict</em>) – A Python dictionary where the keys are labels and the values are the associated power traces. The value of
+labels[L] is a list of power traces, list[trace_0, trace_1, …, trace_N], associated with label L.
+For example, the label can be the output of the AES Sbox such that L = Sbox[key ^ text].</p></li>
+<li><p><strong>visualize</strong> (<em>bool</em>) – Whether to visualize the result</p></li>
+<li><p><strong>visualization_path</strong> (<em>any</em>) – The path of where to save the visualization result, does not save if set to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The SNR of the provided trace set</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – if any value in labels.items() is not a np.ndarray or list type</p>
+</dd>
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Samuel Karkache (<a class="reference external" href="mailto:swkarkache&#37;&#52;&#48;wpi&#46;edu">swkarkache<span>&#64;</span>wpi<span>&#46;</span>edu</a>), Trey Marcantonio (<a class="reference external" href="mailto:tmmarcantonio&#37;&#52;&#48;wpi&#46;edu">tmmarcantonio<span>&#64;</span>wpi<span>&#46;</span>edu</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="organize_snr_label">
+<span class="sig-name descname"><span class="pre">organize_snr_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intermediate_fcn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict:</span></span></span><a class="headerlink" href="#organize_snr_label" title="Link to this definition"></a></dt>
+<dd><p>Organizes label dictionary for SNR metric using a specified intermediate function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traces</strong> (<em>np.ndarray</em>) – The trace set to be used in label organization</p></li>
+<li><p><strong>intermediate_fcn</strong> (<em>Callable</em>) – A callback function used to generate np array of possible labels. Custom functions can be defined
+by the user as long as they return an np.ndarray</p></li>
+<li><p><strong>*args</strong> – <p>Additional arguments needed for intermediate_func</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The labels dictionary organized</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+<dt class="field-even">Authors<span class="colon">:</span></dt>
+<dd class="field-even"><p>Samuel Karkache (<a class="reference external" href="mailto:swkarkache&#37;&#52;&#48;wpi&#46;edu">swkarkache<span>&#64;</span>wpi<span>&#46;</span>edu</a>), Trey Marcantonio (<a class="reference external" href="mailto:tmmarcantonio&#37;&#52;&#48;wpi&#46;edu">tmmarcantonio<span>&#64;</span>wpi<span>&#46;</span>edu</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="unmasked_sbox_output_intermediate">
+<span class="sig-name descname"><span class="pre">unmasked_sbox_output_intermediate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plaintexts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">np.ndarray:</span></span></span><a class="headerlink" href="#unmasked_sbox_output_intermediate" title="Link to this definition"></a></dt>
+<dd><p>Unmasked sbox intermediate output for AES. Can be used with the <cite>organize_snr_label</cite> as the intermediate_fcn</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keys</strong> (<em>np.ndarray</em>) – The set of keys used to calculate sbox output</p></li>
+<li><p><strong>plaintexts</strong> (<em>np.ndarray</em>) – The plaintexts used to calculate sbox output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list containing all intermediate values</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="t_test_tvla">
+<span class="sig-name descname"><span class="pre">t_test_tvla</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fixed_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualization_paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">(np.ndarray,</span> <span class="pre">np.ndarray):</span></span></span><a class="headerlink" href="#t_test_tvla" title="Link to this definition"></a></dt>
+<dd><p>Computes the t-statistic and t-max between fixed and random trace sets. T-statistic magnitudes above or below
+|th| = 4.5 indicate cryptographic vulnerabilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>random_t</strong> (<em>np.ndarray</em>) – The random trace set</p></li>
+<li><p><strong>fixed_t</strong> (<em>np.ndarray</em>) – The fixed trace set</p></li>
+<li><p><strong>visualize</strong> (<em>bool</em>) – Whether to visualize the result</p></li>
+<li><p><strong>visualization_paths</strong> (<em>tuple</em>) – The paths to be used to save the t-statistic (first idx) and t-max visualizations (second idx)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The t-statistic at each time sample and t-max at each trace as a tuple of numpy arrays</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(np.ndarray, np.ndarray)</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if fixed_t and random_t do not have the same length</p>
+</dd>
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dev Mehta (<a class="reference external" href="mailto:dmmehta2&#37;&#52;&#48;wpi&#46;edu">dmmehta2<span>&#64;</span>wpi<span>&#46;</span>edu</a>), Samuel Karkache (<a class="reference external" href="mailto:swkarkache&#37;&#52;&#48;wpi&#46;edu">swkarkache<span>&#64;</span>wpi<span>&#46;</span>edu</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pearson_correlation">
+<span class="sig-name descname"><span class="pre">pearson_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicted_leakage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observed_leakage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visualization_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">np.ndarray:</span></span></span><a class="headerlink" href="#pearson_correlation" title="Link to this definition"></a></dt>
+<dd><p>Computes the correlation between observed power traces and predicted power leakage corresponding to a
+key guess. The correlation when the predicted power leakage is modeled using the correct key guess has
+a relatively high magnitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>predicted_leakage</strong> (<em>np.ndarray</em>) – predicted power consumption generated by a leakage model</p></li>
+<li><p><strong>observed_leakage</strong> (<em>np.ndarray</em>) – actual power traces collected from the cryptographic target</p></li>
+<li><p><strong>visualize</strong> (<em>bool</em>) – Whether to visualize the result</p></li>
+<li><p><strong>visualization_path</strong> (<em>any</em>) – The path of where to save the visualization result, does not save if set to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The correlation trace corresponding to the predicted leakage</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the predicted power leakage and the observed power leakage do not have the same length</p>
+</dd>
+<dt class="field-odd">Authors<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Samuel Karkache (<a class="reference external" href="mailto:swkarkache&#37;&#52;&#48;wpi&#46;edu">swkarkache<span>&#64;</span>wpi<span>&#46;</span>edu</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="score_and_rank">
+<span class="sig-name descname"><span class="pre">score_and_rank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_candidates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_byte</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_fcn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">np.ndarray:</span></span></span><a class="headerlink" href="#score_and_rank" title="Link to this definition"></a></dt>
+<dd><p>Scores and ranks a set of key candidates based on how likely they are to be the actual key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_candidates</strong> (<em>np.ndarray</em>) – List of key possible key candidates. For a one-byte subkey it would be [0, 1, …, 255].</p></li>
+<li><p><strong>target_byte</strong> (<em>int</em>) – The byte of the full key that you are targeting. Ignore and set to 0 if your scoring function does not need it.</p></li>
+<li><p><strong>traces</strong> (<em>numpy.ndarray</em>) – The set of power traces that will be used for scoring</p></li>
+<li><p><strong>multi_threaded</strong> (<em>bool</em>) – Whether to multithread the operator or not</p></li>
+<li><p><strong>score_fcn</strong> (<em>Callable</em>) – Callback to the scoring function used to score each key candidate. The score with correlation scoring
+function is pre-defined and can be used. NOTE: User defined scoring functions must be in the form
+score_fcn(traces, key_guess, target_byte, …) to work with this metric. Your scoring function does not
+need to use all the required arguments, but they must be present as shown.</p></li>
+<li><p><strong>args</strong> (<em>Any</em>) – Additional arguments for the scoring function supplied in score_fcn. For example, the predefined score with
+correlation function requires plaintexts and a leakage model callback as additional arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An numpy array of sorted tuples containing the key candidates and corresponding scores. For example, assuming that
+numpy array <cite>ranks</cite> was returned from the metric, ranks[0][0] is the highest ranked key candidate and
+ranks[0][1] is the score of the highest ranked key candidate.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-even">Authors<span class="colon">:</span></dt>
+<dd class="field-even"><p>Samuel Karkache (<a class="reference external" href="mailto:swkarkache&#37;&#52;&#48;wpi&#46;edu">swkarkache<span>&#64;</span>wpi<span>&#46;</span>edu</a>), Amit Virchandbhai Prajapati (<a class="reference external" href="mailto:aprajapati&#37;&#52;&#48;wpi&#46;edu">aprajapati<span>&#64;</span>wpi<span>&#46;</span>edu</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="score_with_correlation">
+<span class="sig-name descname"><span class="pre">score_with_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_guess</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_byte</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plaintexts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leakage_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Number:</span></span></span><a class="headerlink" href="#score_with_correlation" title="Link to this definition"></a></dt>
+<dd><p>Scoring function that assigns a key guess a score based on the max value of the pearson correlation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traces</strong> (<em>list</em><em> | </em><em>np.ndarray</em>) – The collected power traces</p></li>
+<li><p><strong>key_guess</strong> (<em>any</em>) – The key guess</p></li>
+<li><p><strong>target_byte</strong> (<em>int</em>) – The target byte of the key</p></li>
+<li><p><strong>plaintexts</strong> (<em>list</em><em> | </em><em>np.ndarray</em>) – The plaintexts used during trace capture</p></li>
+<li><p><strong>leakage_model</strong> (<em>Callable</em>) – The leakage model function. The hamming weight and hamming distance leakage model function are
+pre-defined in this library.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The score of the key guess</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number</p>
+</dd>
+<dt class="field-even">Authors<span class="colon">:</span></dt>
+<dd class="field-even"><p>Samuel Karkache (<a class="reference external" href="mailto:swkarkache&#37;&#52;&#48;wpi&#46;edu">swkarkache<span>&#64;</span>wpi<span>&#46;</span>edu</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="success_rate_guessing_entropy">
+<span class="sig-name descname"><span class="pre">success_rate_guessing_entropy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">correct_keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_ranks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">np.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_experiments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">(Number,</span> <span class="pre">Number):</span></span></span><a class="headerlink" href="#success_rate_guessing_entropy" title="Link to this definition"></a></dt>
+<dd><p>Computes the success rate and guessing entropy based on computed key ranks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>correct_keys</strong> (<em>list</em><em> | </em><em>np.ndarray</em>) – an array of the correct keys of the given experiment</p></li>
+<li><p><strong>experiment_ranks</strong> (<em>list</em><em> | </em><em>np.ndarray</em>) – The ranks of a given key guess for all experiments conducted</p></li>
+<li><p><strong>order</strong> (<em>int</em>) – If a key is within the number specified by the order ranks, then it will count towards the success rate</p></li>
+<li><p><strong>num_experiments</strong> (<em>int</em>) – The number of experiments conducted</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The values of success_rate and guessing_entropy for the given number of experiments</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(Number, Number)</p>
+</dd>
+<dt class="field-even">Authors<span class="colon">:</span></dt>
+<dd class="field-even"><p>Samuel Karkache (<a class="reference external" href="mailto:swkarkache&#37;&#52;&#48;wpi">swkarkache<span>&#64;</span>wpi</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cwscope.html" class="btn btn-neutral float-left" title="ChipWhisperer Scope Interface" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="leakagemodels.html" class="btn btn-neutral float-right" title="Leakage Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Worcester Polytechnic Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
