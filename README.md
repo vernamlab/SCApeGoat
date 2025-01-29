@@ -1,6 +1,8 @@
 # SCAPEgoat
 Documentation: https://vernamlab.org/SCApeGoat
 
-#Available project using SCAPEgoat
-[Bake it till you make it](https://github.com/vernamlab/Bake-it-till-you-make-it)
-[EM for good](https://github.com/vernamlab/EM-for-good)
+#Available github projects using SCAPEgoat
+
+[Bake it till you make it](https://github.com/vernamlab/Bake-it-till-you-make-it) - This is a dataset where a binary neural network is put under stress by increasing the temperature. Details can be found in the paper [Bake it till you make it: Heat-induced Power Leakage from Masked Neural Networks](https://ojs.ub.ruhr-uni-bochum.de/index.php/TCHES/article/view/11803)
+
+[EM for good](https://github.com/vernamlab/EM-for-good) - This is a dataset for the EM traces collected from unmasked AES implementation on CW-lite. 
