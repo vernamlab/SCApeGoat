@@ -337,8 +337,8 @@ class Experiment:
         :rtype: dict
         """
         return self.metadata
-    
-    def add_dataset(self, name: str, data_to_add: np.ndarray, datatype: any,partition:bool,trace_per_partition:int) -> 'Dataset':
+
+    def add_dataset(self, name: str, data_to_add: np.ndarray, datatype: any) -> 'Dataset':
         """
         Adds a new Dataset to a given Experiment
         :param name: The desired name of the new dataset
@@ -347,25 +347,12 @@ class Experiment:
         :type data_to_add: np.ndarray
         :param datatype: The datatype of the dataset
         :type datatype: any
-        :param partition: Flag indicating whether to partition the dataset
-        :type partition: bool
-        :param trace_per_partition: Number of traces per partition
-        :type trace_per_partition: int
         :returns: The newly created Dataset object
         :rtype: Dataset
         """
-        if partition:
-            num_partitions = len(data_to_add) // trace_per_partition
-            for i in range(num_partitions):
-                partition_data = data_to_add[i * trace_per_partition:(i + 1) * trace_per_partition]
-                partition_name = f"{name}_p{i}"
-                dataset = self.add_dataset_internal(partition_name, existing=False, dataset=None)
-                dataset.add_data(partition_data, datatype)
-            return dataset #return the last dataset
-        else:
-            dataset = self.add_dataset_internal(name, existing=False, dataset=None)
-            dataset.add_data(data_to_add, datatype)
-            return dataset
+        dataset = self.add_dataset_internal(name, existing=False, dataset=None)
+        dataset.add_data(data_to_add, datatype)
+        return dataset
 
     def add_dataset_internal(self, name: str, existing: bool = False, dataset: dict = None) -> 'Dataset':
         """
@@ -408,59 +395,16 @@ class Experiment:
 
         return self.dataset[name]
 
-    # def get_dataset(self, dataset_name: str) -> 'Dataset':
-    #     """
-    #     Get a dataset from a given experiment.
-    #     :param dataset_name: The name of the requested dataset
-    #     :type dataset_name: str
-    #     :returns: The requested dataset. None if it is not found.
-    #     :rtype: Dataset. None if not found.
-    #     """
-    #     dataset_name = sanitize_input(dataset_name)
-    #     return self.dataset[dataset_name]
-    
-    
-    def get_dataset(self, dataset_name: str, partition:bool, index:int, start_index:int, end_index:int) -> 'Dataset':    
+    def get_dataset(self, dataset_name: str) -> 'Dataset':
         """
         Get a dataset from a given experiment.
         :param dataset_name: The name of the requested dataset
         :type dataset_name: str
-        :param partition: Flag indicating whether to retrieve a partitioned dataset
-        :type partition: bool
-        :param index: The index of the specific partition to retrieve
-        :type index: int
-        :param start_index: The starting index for concatenating partitions
-        :type start_index: int
-        :param end_index: The ending index for concatenating partitions
-        :type end_index: int
-        :raises ValueError: If a specified partition does not exist.
         :returns: The requested dataset. None if it is not found.
         :rtype: Dataset. None if not found.
         """
-        if start_index is None:
-            start_index = 0
-        if end_index is None:
-            end_index = -1
-        
-        if partition:
-            if index is None:
-                dataset_name = sanitize_input(dataset_name)
-                # partition_name = f"{dataset_name}_p{start_index}"
-                concatenated_data = []
-                for i in range(start_index, end_index + 1):
-                    partition_name = f"{dataset_name}_p{i}"
-                    if partition_name in self.dataset:
-                        concatenated_data.append(self.dataset[partition_name].read_all())
-                    else:
-                        raise ValueError(f"Partition {partition_name} does not exist.")
-                return np.concatenate(concatenated_data)
-            if index:
-                dataset_name = sanitize_input(dataset_name)
-                partition_name = f"{dataset_name}_p{index}"
-                return self.dataset[partition_name]         
-        else:
-            dataset_name = sanitize_input(dataset_name)
-            return self.dataset[dataset_name]    
+        dataset_name = sanitize_input(dataset_name)
+        return self.dataset[dataset_name]
 
     def delete_dataset(self, dataset_name: str) -> None:
         """
